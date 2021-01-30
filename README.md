@@ -10,3 +10,7 @@ Source: https://github.com/BretFisher/jekyll-serve
 
 5. docker-compose up (don't daemon it so that you can watch the logs)
 
+6. docker run -it --rm -v $(pwd):/site ruby:2.7-alpine sh
+   run the commands from the dockerfile to set up bundler
+   replace the lockfile with `bundle install`
+
