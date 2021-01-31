@@ -1,0 +1,40 @@
+name: Update pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  gh-pages-deploy:
+    name: Deploying to gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Configure git
+        run: |
+          git config --local user.email "$(git log --format='%ae' HEAD^!)"
+          git config --local user.name "$(git log --format='%an' HEAD^!)"
+
+      - name: Build toolkit
+        run: docker build -t jekyll-toolkit .
+
+      - name: Get in the right branch
+        run: git checkout gh-pages || git checkout --orphan gh-pages
+
+      - name: Build site
+        run: docker run --rm -v $(pwd):/site jekyll-toolkit bundle exec jekyll build
+
+      - name: Add compiled files
+        run: git --work-tree _site add --all
+
+      - name: Commit compiled files
+        run: |
+          git --work-tree _site commit -m "Deploy to GitHub Pages: ${GITHUB_SHA}"
+
+      - name: Now push
+        run: git push origin gh-pages

@@ -33,3 +33,12 @@ List of posts in tags/categories (https://kylewbanks.com/blog/creating-category-
 Link from navigation to lists of posts (see linking in liquid tags...)
 
 Refer to https://github.com/ronv/sidey
+
+## Deploying
+
+Unfortunately github pages isn't compatible with custom sources (the content folder) so I'm using a github action to build and commit the gh-pages branch.
+
+References:
+https://www.drinkingcaffeine.com/deploying-jekyll-to-github-pages-without-using-githubs-jekyll/
+https://dev.to/rolanddoda/deploy-to-github-pages-like-a-pro-with-github-actions-4hdg
+https://github.community/t/how-does-one-commit-from-an-action/16127/10
