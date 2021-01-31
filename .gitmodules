@@ -1,0 +1,3 @@
+[submodule "content/assets/template"]
+	path = content/assets/template
+	url = https://github.com/willpower232/template

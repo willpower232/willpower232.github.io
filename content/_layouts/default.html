@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+{%- include head.html -%}
+
+<body>
+	{%- include header.html -%}
+
+    {% assign to_nav = "" | split: ',' %}
+    {% if page.category %}
+        {% for otherpage in site.categories[page.category] %}
+            {% for tag in otherpage.tags %}
+                {% assign to_nav = to_nav | push: tag %}
+            {% endfor %}
+        {% endfor %}
+
+        {% assign to_nav = to_nav | uniq %}
+        {% assign navtype = "Tags in " | append: page.category %}
+    {% else %}
+        {% for category in site.categories %}
+            {% assign to_nav = to_nav | push: category[0] %}
+        {% endfor %}
+        {% assign navtype = "Categories" %}
+    {% endif %}
+
+    {% assign to_nav = to_nav | sort %}
+
+    {% if to_nav.size > 0 %}
+        <nav>
+            <h3>{{ navtype }}</h3>
+            <ul>
+                {% for naventry in to_nav %}
+                    <li><a href="/{{ naventry|slugize }}/">{{ naventry|slugize }}</a></li>
+                {% endfor %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <main>
+        {{ content }}
+    </main>
+
+    {%- include footer.html -%}
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

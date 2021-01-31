@@ -1,0 +1,22 @@
+---
+layout: default
+---
+
+<section>
+	<h1>Filed under {{ page.list_category }}</h1>
+
+	<ul class="post-list">
+		{%- for post in site.categories[page.list_category] -%}
+			<li>
+				<h3>
+					<a class="post-link" href="{{ post.url | relative_url }}">
+						{{ post.title | escape }}
+					</a>
+				</h3>
+				{%- if site.show_excerpts -%}
+				{{ post.excerpt }}
+				{%- endif -%}
+			</li>
+		{%- endfor -%}
+	</ul>
+</section>
