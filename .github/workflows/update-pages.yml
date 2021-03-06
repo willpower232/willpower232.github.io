@@ -13,7 +13,6 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
           submodules: 'true'
 
       - name: Configure git
@@ -25,7 +24,7 @@ jobs:
         run: docker build -t jekyll-toolkit .
 
       - name: Get in the right branch
-        run: git checkout gh-pages || git checkout --orphan gh-pages
+        run: git checkout --orphan gh-pages
 
       - name: Build site
         run: docker run --rm -v $(pwd):/site jekyll-toolkit bundle exec jekyll build
@@ -38,4 +37,4 @@ jobs:
           git --work-tree _site commit -m "Deploy to GitHub Pages: ${GITHUB_SHA}"
 
       - name: Now push
-        run: git push origin gh-pages
+        run: git push origin gh-pages --force
