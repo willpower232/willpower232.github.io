@@ -20,6 +20,11 @@ header hgroup {
 		float:right;
 	}
 }
+@media (max-width:77.7rem) {
+	header nav {
+		margin-top:1.33em;
+	}
+}
 header h2,header p {
 	margin:0;
 }
