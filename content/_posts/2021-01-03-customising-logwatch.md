@@ -1,18 +1,17 @@
 ---
 layout: post
 title: Customising Logwatch
+description: getting the most out of Logwatch
 category: computing
 tags: linux server-config
 ---
-
-# Customising Logwatch
 
 Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.
 
 Here are some better written posts on this topic.
 
-https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial
-https://bitfieldconsulting.com/blog/looking-for-trouble
+[https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial](https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial)
+[https://bitfieldconsulting.com/blog/looking-for-trouble](https://bitfieldconsulting.com/blog/looking-for-trouble)
 
 For the casual tinkerer, there are a few ways of keeping half an eye on your server to make sure it is still there an answering requests. One of my favourites is Logwatch, it emails you daily with events from important log files of things installed on the server.
 

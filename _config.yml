@@ -44,8 +44,14 @@ defaults:
 
 # Build settings
 theme: minima
+
+minima:
+  # https://shopify.github.io/liquid/filters/date/
+  date_format: "%F"
+
 plugins:
   - jekyll-feed
+  - jekyll-target-blank
 
 # Exclude from processing.
 # The following items will not be processed, by default.

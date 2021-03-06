@@ -47,9 +47,19 @@ nav a {
 	margin-top:0; /* cancel title margin top */
 }
 
+.post-meta {
+	margin-top:0;
+}
+.post-content {
+	border:solid var(--link-color, #00e);
+	border-width:.2em 0;
+	padding:0.9em 0;
+}
+
 code {
 	background:black;
 	color:#eee;
+	overflow-x:scroll;
 }
 p code {
 	padding:0 0.3rem;

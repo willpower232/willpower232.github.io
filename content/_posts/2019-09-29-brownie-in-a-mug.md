@@ -1,11 +1,10 @@
 ---
 layout: post
 title: Brownie in a mug
+description: quick treat you can make yourself
 category: recipes
 tags: dessert
 ---
-
-# Brownie in a mug
 
 First mix together the dry ingredients in your mug of choice
 - 50grams sugar
@@ -19,7 +18,7 @@ Mix to a paste consistency, might need more water, but don't add too much.
 
 Microwave for 2 or 3 minutes at full power.
 
-## Experimentation
+### Experimentation
 
 Depending on the size of your mug, you might prefer to multiply the ingredients by 1.5 or even 2 (if you're a sports direct customer).
 

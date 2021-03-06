@@ -1,24 +1,27 @@
 ---
 layout: post
 title: Linux Desktop Environment
+description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
+modified_date: 2021-03-06
 ---
-
-# Linux Desktop Environment
 
 Linux for first party terminal/docker/server like experience
 
-Zorin for debian based, easy theming. FerenOS similar but for kde instead of gnome
+Zorin for debian based, easy theming. It looks like FerenOS is similar but for kde instead of gnome, might give that a go at some point.
 
 Set dark theme and highlight, clear pinned apps from whatever taskbar you have now
 
 install bashrc files (don't forget to uncomment generic bits in /etc/bash.bashrc)
-- https://github.com/cykerway/complete-alias
+- [https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f](https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f)
+- [https://github.com/cykerway/complete-alias](https://github.com/cykerway/complete-alias)
 
-also add these files without `.bash` to the completions folder `pkg-config --variable=completionsdir bash-completion`
-- https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash
-- https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash
+also add these files without `.bash` to the completions folder
+(which you can find with `pkg-config --variable=completionsdir bash-completion`)
+
+- [https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash](https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash)
+- [https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash](https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash)
 
 make sure flatpak is installed and then `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`
 
@@ -50,11 +53,12 @@ Configure chrome for maximum privacy, dark theme, and extensions (password manag
 Configure opera for some privacy
 
 `sudo add-apt-repository ppa:ondrej/php`
+
 `sudo add-apt-repository ppa:git-core/ppa`
 
-`sudo apt update && sudo apt upgrade -y && sudo apt install -y vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer php-cli dconf-editor icedtea-netx`
+`sudo apt update && sudo apt upgrade -y && sudo apt install -y vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer dconf-editor icedtea-netx`
 
-(make sure php 7.4 was installed)
+Install your php versions of choice, i.e. `sudo apt install -y php7.4-cli` or `sudo apt install -y php8.0-cli`
 
 `sudo usermod -aG docker wp`
 
@@ -77,6 +81,8 @@ clear all printscreen keyboard shortcuts with backspace and set keyboard shortcu
 - passmenu --no-username - ctrl + alt + p
 - passmenu --type - ctrl + alt + shift + p
 
+(You might have to set those last two in dconf-editor if the UI won't let you)
+
 install winehq.org
 ```
 wget -nc https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/Release.key
@@ -95,3 +101,6 @@ install docker for ubuntu following website instructions
 do `sudo apt-get install python3-distutils` and get pip3 officially and with sudo and then `sudo -H pip install awscli`
 
 install and configure vs code
+
+don't forget about your vim preferences
+- [https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc](https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc)
