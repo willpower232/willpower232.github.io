@@ -20,14 +20,11 @@ jobs:
           git config --local user.email "$(git log --format='%ae' HEAD^!)"
           git config --local user.name "$(git log --format='%an' HEAD^!)"
 
-      - name: Build toolkit
-        run: docker build -t jekyll-toolkit .
-
       - name: Get in the right branch
         run: git checkout --orphan gh-pages
 
       - name: Build site
-        run: docker run --rm -v $(pwd):/site jekyll-toolkit bundle exec jekyll build
+        run: docker run --rm -v $(pwd):/site ghcr.io/willpower232/jekyll-toolkit bundle exec jekyll build
 
       - name: Add compiled files
         run: git --work-tree _site add --all

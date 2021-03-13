@@ -1,7 +1,7 @@
 version: '3'
 services:
   app:
-    image: jekyll-toolkit
+    image: ghcr.io/willpower232/jekyll-toolkit
     ports:
       - "81:80"
     volumes:

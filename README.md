@@ -1,8 +1,6 @@
-Source: https://github.com/BretFisher/jekyll-serve
+1. docker pull ghcr.io/willpower232/jekyll-toolkit
 
-1. docker build -t jekyll-toolkit .
-
-2. docker run -it --rm -v $(pwd):/site jekyll-toolkit jekyll new . --force
+2. docker run -it --rm -v $(pwd):/site ghcr.io/willpower232/jekyll-toolkit jekyll new . --force
 
 3. chown -R wh ./ && mkdir -p content && mv *.markdown *.html _posts content
 
