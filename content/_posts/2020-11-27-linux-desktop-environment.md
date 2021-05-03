@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2021-03-06
+modified_date: 2021-04-14
 ---
 
 Linux for first party terminal/docker/server like experience
@@ -16,6 +16,7 @@ Set dark theme and highlight, clear pinned apps from whatever taskbar you have n
 install bashrc files (don't forget to uncomment generic bits in /etc/bash.bashrc)
 - [https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f](https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f)
 - [https://github.com/cykerway/complete-alias](https://github.com/cykerway/complete-alias)
+(copy the file as ~/.bash_completion)
 
 also add these files without `.bash` to the completions folder
 (which you can find with `pkg-config --variable=completionsdir bash-completion`)
@@ -35,9 +36,12 @@ now software centre can install flatpak apps
 - remmina
 - slack
 - hardware indicator sensors
+- postman
 
 if you have a microphone or fancy speakers
 - PulseAudio Volume Control
+
+(Don't forget to turn off auto gain in Slack if you're adjusting it with PulseAudio)
 
 also snap apps
 - chromium
@@ -49,6 +53,7 @@ and regular apps
 Configure firefox for maximum privacy, nice theme, and extensions
 
 Configure chrome for maximum privacy, dark theme, and extensions (password managers and don't close with last tab)
+- right-click the address bar and choose 'Always show full URLs'. If you don't see that option, go to chrome://flags/#omnibox-context-menu-show-full-urls and set the highlighted flag to 'Enabled'.
 
 Configure opera for some privacy
 
@@ -63,6 +68,8 @@ Install your php versions of choice, i.e. `sudo apt install -y php7.4-cli` or `s
 `sudo usermod -aG docker wp`
 
 probably reboot and apt autoremove
+
+If you're dual booting with Windows, you'll need to set the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal` as a DWORD to 1 and disable the Windows Time Service ([Windows just really likes local time](https://help.ubuntu.com/community/UbuntuTime#Make_Windows_use_UTC))
 
 Install pass password manager and other local `bin`s
 
@@ -101,6 +108,7 @@ install docker for ubuntu following website instructions
 do `sudo apt-get install python3-distutils` and get pip3 officially and with sudo and then `sudo -H pip install awscli`
 
 install and configure vs code
+- manually install https://github.com/IronLu233/vscode-color-exchange
 
 don't forget about your vim preferences
 - [https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc](https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc)
