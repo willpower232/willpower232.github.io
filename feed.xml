@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://willpower232.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://willpower232.github.io/" rel="alternate" type="text/html" /><updated>2021-05-14T16:42:26+00:00</updated><id>https://willpower232.github.io/feed.xml</id><title type="html">Blogumentation | willpower232</title><subtitle>I'm writing stuff down so I remember it.</subtitle><entry><title type="html">Minecraft with a controller</title><link href="https://willpower232.github.io/computing/minecraft-with-controller.html" rel="alternate" type="text/html" title="Minecraft with a controller" /><published>2021-05-03T00:00:00+00:00</published><updated>2021-05-03T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/minecraft-with-controller</id><content type="html" xml:base="https://willpower232.github.io/computing/minecraft-with-controller.html">&lt;p&gt;Initially I attempted to follow &lt;a href=&quot;https://www.youtube.com/watch?v=Ze7MyUrDNKs&quot;&gt;this YouTube video&lt;/a&gt; but my minecraft crashed in this configuration so I had to do something less well integrated. Fortunately I stumbled into &lt;a href=&quot;https://github.com/AntiMicro/antimicro&quot;&gt;antimicro&lt;/a&gt; which seems to fit the job perfectly.&lt;/p&gt;
+
+&lt;p&gt;I am using the following configuration with my Xbox One controller&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Left stick - WASD for movement&lt;/li&gt;
+  &lt;li&gt;Right stick - mouse up/down/left/right for looking&lt;/li&gt;
+  &lt;li&gt;Left trigger - right click for placing blocks&lt;/li&gt;
+  &lt;li&gt;Right trigger - left click for breaking blocks&lt;/li&gt;
+  &lt;li&gt;Left bumper - mouse 4 (wheel up) for scrolling left through hotbar&lt;/li&gt;
+  &lt;li&gt;Right bumper - mouse 5 (wheel down) for scrolling right through hotbar&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I also needed to lower the vertical notch count for the bumpers so that the scrolling through items was more controllable, it was 20 by default but 5-10 should suffice.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;D pad up - F3 for debug (to see current coordinates)&lt;/li&gt;
+  &lt;li&gt;D pad left - F to swap item to left hand&lt;/li&gt;
+  &lt;li&gt;D pad down - left shift for sneaking&lt;/li&gt;
+  &lt;li&gt;D pad right - &lt;em&gt;unused&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Right stick click - &lt;em&gt;unused&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Left stick click - &lt;em&gt;unused&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I don’t need to sneak really but that is uncomfortable to hold so might change that in the future. I had it on a stick press as a toggle at one point however the controls glitched out and I drowned trying to get into a boat.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Guide - ESC for menu&lt;/li&gt;
+  &lt;li&gt;Start - ESC for menu&lt;/li&gt;
+  &lt;li&gt;Back - ESC for menu&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These are all the same but I don’t have a need for them all to be different.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A - space to jump&lt;/li&gt;
+  &lt;li&gt;B - Q for drop item&lt;/li&gt;
+  &lt;li&gt;X - E for inventory&lt;/li&gt;
+  &lt;li&gt;Y - left ctrl for sprinting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I also still have a keyboard and mouse available so that I can do chat, commands, or search for things to craft but having a controller (and auto jump) means I can navigate the world more comfortably. I also inverted the mouse because that is how I roll.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="gaming" /><summary type="html">Initially I attempted to follow this YouTube video but my minecraft crashed in this configuration so I had to do something less well integrated. Fortunately I stumbled into antimicro which seems to fit the job perfectly.</summary></entry><entry><title type="html">Customising Logwatch</title><link href="https://willpower232.github.io/computing/customising-logwatch.html" rel="alternate" type="text/html" title="Customising Logwatch" /><published>2021-01-03T00:00:00+00:00</published><updated>2021-01-03T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/customising-logwatch</id><content type="html" xml:base="https://willpower232.github.io/computing/customising-logwatch.html">&lt;p&gt;Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.&lt;/p&gt;
+
+&lt;p&gt;Here are some better written posts on this topic.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial&quot;&gt;https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial&lt;/a&gt;
+&lt;a href=&quot;https://bitfieldconsulting.com/blog/looking-for-trouble&quot;&gt;https://bitfieldconsulting.com/blog/looking-for-trouble&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;For the casual tinkerer, there are a few ways of keeping half an eye on your server to make sure it is still there an answering requests. One of my favourites is Logwatch, it emails you daily with events from important log files of things installed on the server.&lt;/p&gt;
+
+&lt;p&gt;Whilst this information can be very useful, the built in levels of definition are a little too verbose in some areas (depending on your threat model/paranoia) and also good at being detected as spam by google (thanks to the resolved hostnames of malicious servers).&lt;/p&gt;
+
+&lt;p&gt;My solution is to set the detail to high and then update the scripts to make the output more relevant to what I can actually care about and not spam-worthy.&lt;/p&gt;
+
+&lt;p&gt;The perl scripts are all kept in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/share/logwatch/scripts/services&lt;/code&gt;, I make the following changes:&lt;/p&gt;
+
+&lt;h3 id=&quot;fail2ban&quot;&gt;fail2ban&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;comment out &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;my $totalSort&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;if ($Detail &amp;gt;= 5) {&lt;/code&gt; to closing if&lt;/li&gt;
+  &lt;li&gt;comment out &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fail2ban hosts found&lt;/code&gt; section&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The individual banned IP addresses are unlikely to be of much relevance to you and are likely to upset spam filters. This change shows the totals banned/unbanned for each jail.&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%ServicesBans&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Banned services with Fail2Ban:                             Bans:Unbans&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;my&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$service&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sort&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;cmp&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%ServicesBans&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;   %-55s [%3d:%-3d]&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;$service&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;,&lt;/span&gt;
+               &lt;span class=&quot;nv&quot;&gt;$ServicesBans&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}{'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;(all)&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;'}{'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;Ban&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;'},&lt;/span&gt;
+               &lt;span class=&quot;nv&quot;&gt;$ServicesBans&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}{'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;(all)&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;'}{'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;Unban&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;'});&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;delete&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$ServicesBans&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$service&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}{'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;(all)&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;'};&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#my $totalSort = TotalCountOrder(%{$ServicesBans{$service}}, \&amp;amp;SortIP);&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#if ($Detail &amp;gt;= 5) {&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#    foreach my $ip (sort $totalSort keys %{$ServicesBans{$service}}) {&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#        my $name = LookupIP($ip);&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#        printf(&quot;      %-53s %3d:%-3d\n&quot;,&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#               $name,&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#               $ServicesBans{$service}{$ip}{'Ban'},&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#               $ServicesBans{$service}{$ip}{'Unban'});&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#        if (($Detail &amp;gt;= 10) and ($ServicesBans{$service}{$ip}{'Failures'}&amp;gt;0)) {&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            print &quot;      Failed &quot;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            foreach my $fails (@{$ServicesBans{$service}{$ip}{'Failures'}}) {&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#                print &quot; $fails&quot;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            }&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            print &quot; times&quot;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            printf(&quot;\n     %d Duplicate Ban attempts&quot;, $ServicesBans{$service}{$ip}{'AlreadyInTheList'}) ;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            printf(&quot;\n     %d ReBans due to rules reinitilizations&quot;, $ServicesBans{$service}{$ip}{'ReBan'}) ;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#            print &quot;\n&quot;;&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#        }&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#    }&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;#}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;#if (keys %ServicesFound and $Detail&amp;gt;5) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    printf(&quot;\nFail2Ban hosts found:\n&quot;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    foreach my $service (sort {$a cmp $b} keys %ServicesFound) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        print(&quot;    $service:\n&quot;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        foreach my $ip (sort {$a cmp $b} keys %{$ServicesFound{$service}}) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#            printf(&quot;       %-15s (%3d Times)\n&quot;, &quot;$ip&quot;,&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#                   $ServicesFound{$service}{$ip});&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#    }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;http&quot;&gt;http&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;comment out ROBOT listing, leave just the total&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Robots can have random URLs which upset spam filters.&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%robots&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$detail&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;A total of &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;scalar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%robots&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; ROBOTS were logged &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   foreach my $i (keys %robots) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      if ($detail &amp;gt; 9) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         print &quot;   $i $robots{$i} Time(s) \n&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   }&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;pam_unix&quot;&gt;pam_unix&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;change the Authentication Failures regex to exclude IPs&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For the lines that mention &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;authentication failure&lt;/code&gt;, remove the final &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;($1)&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;($2)&lt;/code&gt; which represents the IP address. This allows the rows to be grouped nicer as you don’t necessarily care about the IP addresses.&lt;/p&gt;
+
+&lt;h3 id=&quot;sshd&quot;&gt;sshd&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;comment out the NoIdent bit&lt;/li&gt;
+  &lt;li&gt;and BadLogins&lt;/li&gt;
+  &lt;li&gt;and IllegalUsers&lt;/li&gt;
+  &lt;li&gt;and DisconnectReceived (cen edit to show count instead)&lt;/li&gt;
+  &lt;li&gt;and UnmatchedEntries&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;More random IP addresses that can upset spam filters.&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;   &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%NoIdent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+   &lt;span class=&quot;c1&quot;&gt;#   print &quot;\nDidn't receive an ident from these IPs:\n&quot;;&lt;/span&gt;
+   &lt;span class=&quot;c1&quot;&gt;#   foreach my $ThisOne (sort {$a cmp $b} keys %NoIdent) {&lt;/span&gt;
+   &lt;span class=&quot;c1&quot;&gt;#      print &quot;   $ThisOne: &quot; . timesplural($NoIdent{$ThisOne});&lt;/span&gt;
+   &lt;span class=&quot;c1&quot;&gt;#   }&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If your SSH is open to the world, you’re going to have bad logins, no need to obsess over it if fail2ban has you covered.&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%BadLogins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   print &quot;\nFailed logins from:\n&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   foreach my $ip (sort SortIP keys %BadLogins) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#     my $name = LookupIP($ip);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#     my $totcount = 0;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#     foreach my $user (keys %{$BadLogins{$ip}}) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         $totcount += $BadLogins{$ip}{$user};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      print &quot;   $name: &quot;. timesplural($totcount);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      if ($Detail &amp;gt;= 5) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         my $sort = CountOrder(%{$BadLogins{$ip}});&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         foreach my $user (sort $sort keys %{$BadLogins{$ip}}) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#            my $val = $BadLogins{$ip}{$user};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#            print &quot;      $user: &quot; . timesplural($val);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   }&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%IllegalUsers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   print &quot;\nIllegal users from:\n&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   foreach my $ip (sort SortIP keys %IllegalUsers) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      my $name = LookupIP($ip);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      my $totcount = 0;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      foreach my $user (keys %{$IllegalUsers{$ip}}) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         $totcount += $IllegalUsers{$ip}{$user};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      print &quot;   $name: &quot; . timesplural($totcount);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      if ($Detail &amp;gt;= 5) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         my $sort = CountOrder(%{$IllegalUsers{$ip}});&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         foreach my $user (sort $sort keys %{$IllegalUsers{$ip}}) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#            my $val = $IllegalUsers{$ip}{$user};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#            print &quot;      $user: &quot; . timesplural($val);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      }&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   }&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Disconnects are useful but the detail not that much&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%DisconnectReceived&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Received disconnect:&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;;&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;my&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$Reason&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sort&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;cmp&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%DisconnectReceived&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;my&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$Total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;   &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;$Reason&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;;&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;my&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$Host&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sort&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;cmp&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$DisconnectReceived&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$Reason&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}})&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+         &lt;span class=&quot;nv&quot;&gt;$Total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$DisconnectReceived&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$Reason&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$Host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        if( $Detail &amp;gt; 0 ) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#            print &quot;\n      $Host : $DisconnectReceived{$Reason}{$Host} Time(s)&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#        }&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      if( $Detail &amp;gt; 0 ) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#         print &quot;\n&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      } else {&lt;/span&gt;
+         &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; : &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;timesplural&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$Total&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#      }&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If Logwatch doesn’t know how to process them, why are we bothered?&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#if (keys %OtherList) {&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   print &quot;\n**Unmatched Entries**\n&quot;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#   print &quot;$_ : &quot; . timesplural($OtherList{$_}) foreach sort keys %OtherList;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;zz-disk_space&quot;&gt;zz-disk_space&lt;/h3&gt;
+
+&lt;p&gt;On servers with smaller disks, it is possible for your partitions to run out of inodes so that is definitely worth keeping an eye on by adding this extra call to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;df&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-perl highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#Only show disk space &quot;df&quot; by default -mgt&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;DiskSpace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PRINTING&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;eq&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;')&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$Detail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;df -il -x tmpfs -x devtmpfs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&quot;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$show_disk_usage&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;DiskUsage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#Turn on in zz-disk_space.conf&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can also make other changes in this area if your use of mountable disks is a bit more exciting.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><category term="server-config" /><summary type="html">Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.</summary></entry><entry><title type="html">Linux Desktop Environment</title><link href="https://willpower232.github.io/computing/linux-desktop-environment.html" rel="alternate" type="text/html" title="Linux Desktop Environment" /><published>2020-11-27T00:00:00+00:00</published><updated>2020-11-27T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/linux-desktop-environment</id><content type="html" xml:base="https://willpower232.github.io/computing/linux-desktop-environment.html">&lt;p&gt;Linux for first party terminal/docker/server like experience&lt;/p&gt;
+
+&lt;p&gt;Zorin for debian based, easy theming. It looks like FerenOS is similar but for kde instead of gnome, might give that a go at some point.&lt;/p&gt;
+
+&lt;p&gt;Set dark theme and highlight, clear pinned apps from whatever taskbar you have now&lt;/p&gt;
+
+&lt;p&gt;install bashrc files (don’t forget to uncomment generic bits in /etc/bash.bashrc)&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f&quot;&gt;https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/cykerway/complete-alias&quot;&gt;https://github.com/cykerway/complete-alias&lt;/a&gt;
+(copy the file as ~/.bash_completion)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;also add these files without &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.bash&lt;/code&gt; to the completions folder
+(which you can find with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pkg-config --variable=completionsdir bash-completion&lt;/code&gt;)&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash&quot;&gt;https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash&quot;&gt;https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;make sure flatpak is installed and then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;remove unwanted apps from software centre (including ancient remmina)&lt;/p&gt;
+
+&lt;p&gt;now software centre can install flatpak apps&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;flameshot&lt;/li&gt;
+  &lt;li&gt;peek&lt;/li&gt;
+  &lt;li&gt;vlc&lt;/li&gt;
+  &lt;li&gt;filezilla&lt;/li&gt;
+  &lt;li&gt;remmina&lt;/li&gt;
+  &lt;li&gt;slack&lt;/li&gt;
+  &lt;li&gt;hardware indicator sensors&lt;/li&gt;
+  &lt;li&gt;postman&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;if you have a microphone or fancy speakers&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;PulseAudio Volume Control&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;(Don’t forget to turn off auto gain in Slack if you’re adjusting it with PulseAudio)&lt;/p&gt;
+
+&lt;p&gt;also snap apps&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;chromium&lt;/li&gt;
+  &lt;li&gt;opera&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;and regular apps&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;gimp (don’t forget to set color icons in preferences)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Configure firefox for maximum privacy, nice theme, and extensions&lt;/p&gt;
+
+&lt;p&gt;Configure chrome for maximum privacy, dark theme, and extensions (password managers and don’t close with last tab)&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;right-click the address bar and choose ‘Always show full URLs’. If you don’t see that option, go to chrome://flags/#omnibox-context-menu-show-full-urls and set the highlighted flag to ‘Enabled’.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Configure opera for some privacy&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo add-apt-repository ppa:ondrej/php&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo add-apt-repository ppa:git-core/ppa&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt update &amp;amp;&amp;amp; sudo apt upgrade -y &amp;amp;&amp;amp; sudo apt install -y vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer dconf-editor icedtea-netx&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Install your php versions of choice, i.e. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt install -y php7.4-cli&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt install -y php8.0-cli&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo usermod -aG docker wp&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;probably reboot and apt autoremove&lt;/p&gt;
+
+&lt;p&gt;If you’re dual booting with Windows, you’ll need to set the registry key &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal&lt;/code&gt; as a DWORD to 1 and disable the Windows Time Service (&lt;a href=&quot;https://help.ubuntu.com/community/UbuntuTime#Make_Windows_use_UTC&quot;&gt;Windows just really likes local time&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;Install pass password manager and other local &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bin&lt;/code&gt;s&lt;/p&gt;
+
+&lt;p&gt;run dconf-editor and blank out workspace shortcuts to release ctrl alt shift p, if the keyboard shortcut settings won’t let you add that shortcut, you can add it directly in dconf
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;org.gnome.desktop.wm.keybindings&lt;/code&gt;
+also disable &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;switch-input-source&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;switch-input-source-backwards&lt;/code&gt;
+also whilst you’re in there
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;org.gnome.desktop.wm.preferences.num-workspaces&lt;/code&gt; to 1
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;org.gnome.mutter.dynamic-workspaces&lt;/code&gt; to off&lt;/p&gt;
+
+&lt;p&gt;need to reboot to apply&lt;/p&gt;
+
+&lt;p&gt;clear all printscreen keyboard shortcuts with backspace and set keyboard shortcuts&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Home folder - super + e&lt;/li&gt;
+  &lt;li&gt;Flameshot (flatpak run org.flameshot.Flameshot gui) - print&lt;/li&gt;
+  &lt;li&gt;passmenu –no-username - ctrl + alt + p&lt;/li&gt;
+  &lt;li&gt;passmenu –type - ctrl + alt + shift + p&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;(You might have to set those last two in dconf-editor if the UI won’t let you)&lt;/p&gt;
+
+&lt;p&gt;install winehq.org&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wget -nc https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/Release.key
+sudo apt-key add Release.key
+echo &quot;deb http://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbu
+ntu_18.04 ./&quot; | sudo tee /etc/apt/sources.list.d/wine-obs.list
+wget -nc https://dl.winehq.org/wine-builds/winehq.key
+sudo apt-key add winehq.key
+sudo apt-add-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ bionic main'
+plz apt update &amp;amp;&amp;amp; plz apt upgrade -y
+plz apt install winehq-stable
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;install docker for ubuntu following website instructions&lt;/p&gt;
+
+&lt;p&gt;do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt-get install python3-distutils&lt;/code&gt; and get pip3 officially and with sudo and then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo -H pip install awscli&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;install and configure vs code&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;manually install https://github.com/IronLu233/vscode-color-exchange&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;don’t forget about your vim preferences&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc&quot;&gt;https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><category term="software-choices" /><summary type="html">Linux for first party terminal/docker/server like experience</summary></entry><entry><title type="html">Stew</title><link href="https://willpower232.github.io/recipes/stew.html" rel="alternate" type="text/html" title="Stew" /><published>2019-09-29T00:00:00+00:00</published><updated>2019-09-29T00:00:00+00:00</updated><id>https://willpower232.github.io/recipes/stew</id><content type="html" xml:base="https://willpower232.github.io/recipes/stew.html">&lt;p&gt;salt and pepper beef shin, cover in flour, brown in batches&lt;/p&gt;
+
+&lt;p&gt;saute onion, fry mushrooms, same pan&lt;/p&gt;
+
+&lt;p&gt;put meat back in, cover with stock, herbs, sauces etc&lt;/p&gt;
+
+&lt;p&gt;2 hours, add carrots and potatoes and leek&lt;/p&gt;
+
+&lt;p&gt;one hour, gravy powder to reduce the water and serve&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.goodhousekeeping.com/uk/food/recipes/a535434/rich-beef-casserole/&quot;&gt;https://www.goodhousekeeping.com/uk/food/recipes/a535434/rich-beef-casserole/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.goodhousekeeping.com/uk/food/recipes/a535842/beef-stew-scarborough-fair-dumplings/&quot;&gt;https://www.goodhousekeeping.com/uk/food/recipes/a535842/beef-stew-scarborough-fair-dumplings/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.onceuponachef.com/recipes/beef-stew-with-carrots-potatoes.html&quot;&gt;https://www.onceuponachef.com/recipes/beef-stew-with-carrots-potatoes.html&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="recipes" /><category term="savoury" /><category term="main" /><summary type="html">salt and pepper beef shin, cover in flour, brown in batches</summary></entry><entry><title type="html">Roast</title><link href="https://willpower232.github.io/recipes/roast.html" rel="alternate" type="text/html" title="Roast" /><published>2019-09-29T00:00:00+00:00</published><updated>2019-09-29T00:00:00+00:00</updated><id>https://willpower232.github.io/recipes/roast</id><content type="html" xml:base="https://willpower232.github.io/recipes/roast.html">&lt;p&gt;Using the broke ass gourmet endorsed method of cooking the chicken at full blast for 50 minutes, start the chicken.&lt;/p&gt;
+
+&lt;p&gt;Put butter under the skin and some herbs inside and outside.&lt;/p&gt;
+
+&lt;p&gt;Then start boiling water whilst you peel some potatoes. Bigger potatoes the better.&lt;/p&gt;
+
+&lt;p&gt;Boil the potatoes for 10 minutes and put the veg tray in the oven with some oil whilst you prepare carrots, sweet potatoes, onion whatever.&lt;/p&gt;
+
+&lt;p&gt;Prepare some stuffing (leave for 5 minutes if you can)&lt;/p&gt;
+
+&lt;p&gt;Put the stuffing with the chicken and all the veg in.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://brokeassgourmet.com/articles/best-ever-roast-chicken-legs&quot;&gt;http://brokeassgourmet.com/articles/best-ever-roast-chicken-legs&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://brokeassgourmet.com/articles/roasted-roots&quot;&gt;http://brokeassgourmet.com/articles/roasted-roots&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="recipes" /><category term="savoury" /><category term="main" /><summary type="html">Using the broke ass gourmet endorsed method of cooking the chicken at full blast for 50 minutes, start the chicken.</summary></entry><entry><title type="html">Brownie in a mug</title><link href="https://willpower232.github.io/recipes/brownie-in-a-mug.html" rel="alternate" type="text/html" title="Brownie in a mug" /><published>2019-09-29T00:00:00+00:00</published><updated>2019-09-29T00:00:00+00:00</updated><id>https://willpower232.github.io/recipes/brownie-in-a-mug</id><content type="html" xml:base="https://willpower232.github.io/recipes/brownie-in-a-mug.html">&lt;p&gt;First mix together the dry ingredients in your mug of choice&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;50grams sugar&lt;/li&gt;
+  &lt;li&gt;30grams flour&lt;/li&gt;
+  &lt;li&gt;pinch of salt&lt;/li&gt;
+  &lt;li&gt;2tablespoons cocoa &lt;em&gt;(not hot chocolate, which is just more sugar)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Make a well in the middle and add 2 tablespoons of oil and 2 tablespoons of water.&lt;/p&gt;
+
+&lt;p&gt;Mix to a paste consistency, might need more water, but don’t add too much.&lt;/p&gt;
+
+&lt;p&gt;Microwave for 2 or 3 minutes at full power.&lt;/p&gt;
+
+&lt;h3 id=&quot;experimentation&quot;&gt;Experimentation&lt;/h3&gt;
+
+&lt;p&gt;Depending on the size of your mug, you might prefer to multiply the ingredients by 1.5 or even 2 (if you’re a sports direct customer).&lt;/p&gt;
+
+&lt;p&gt;If you want something a bit gooier, you could try using 80% or 60% power on your microwave.&lt;/p&gt;</content><author><name></name></author><category term="recipes" /><category term="dessert" /><summary type="html">First mix together the dry ingredients in your mug of choice 50grams sugar 30grams flour pinch of salt 2tablespoons cocoa (not hot chocolate, which is just more sugar)</summary></entry></feed>
