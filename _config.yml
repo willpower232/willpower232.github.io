@@ -49,6 +49,9 @@ minima:
   # https://shopify.github.io/liquid/filters/date/
   date_format: "%F"
 
+sass:
+  style: compressed
+
 plugins:
   - jekyll-feed
   - jekyll-target-blank
