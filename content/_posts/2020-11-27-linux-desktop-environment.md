@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2021-04-14
+modified_date: 2021-08-15
 ---
 
 Linux for first party terminal/docker/server like experience
@@ -63,7 +63,7 @@ Configure opera for some privacy
 
 `sudo apt update && sudo apt upgrade -y && sudo apt install -y vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer dconf-editor icedtea-netx`
 
-Install your php versions of choice, i.e. `sudo apt install -y php7.4-cli` or `sudo apt install -y php8.0-cli`
+Install your php versions of choice, i.e. `sudo apt install -y php7.4-cli` or `sudo apt install -y php8.0-cli`. Actually you probably want to install both to validate everything you do and then choose the one you want to use with `sudo update-alternatives --display php`.
 
 `sudo usermod -aG docker wp`
 
