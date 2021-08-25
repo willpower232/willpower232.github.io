@@ -4,28 +4,42 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2021-08-22
+modified_date: 2021-08-25
 ---
 
-Linux for first party terminal/docker/server like experience
+Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
 
 I've always used Ubuntu/Debian based so I am more comfortable there. Zorin OS is based on Ubuntu with simpler theming than most other distributions and very polished.
 
-Set dark theme and highlight, clear pinned apps from whatever taskbar you have now
+### Cosmetics
+
+Set dark theme, layout, and highlight colour and clear pinned apps from whatever taskbar you have now.
+
+### Terminal
 
 install bashrc files (don't forget to uncomment generic bits in /etc/bash.bashrc)
 - [https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f](https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f)
 - [https://github.com/cykerway/complete-alias](https://github.com/cykerway/complete-alias)
 (copy the file as ~/.bash_completion)
 
-also add these files without `.bash` to the completions folder
+Add the git-aware-prompt bash plugin
+
+```
+mkdir ~/.bash
+cd ~/.bash
+git clone git://github.com/jimeh/git-aware-prompt.git
+```
+
+Finally, add the following files without `.bash` to the completions folder
 (which you can find with `pkg-config --variable=completionsdir bash-completion`)
 
 - [https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash](https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash)
 - [https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash](https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash)
 
-If you want a windows-like hostname then you can do something like this and reboot
+If you want a windows-like hostname then you can do something like this and reboot. Don't forget to update the hosts file though.
 `sudo hostnamectl set-hostname DESKTOP-\$(head /dev/urandom | tr -dc A-Z0-9 | head -c 7)`
+
+### Software
 
 Zorin OS 16 should have flatpak installed and set up, can check with `sudo flatpak remote-list` then if you can't see flathub `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`
 
@@ -63,6 +77,8 @@ Configure opera for some privacy
 
 Open Hardware Indicator Sensors and set it up to open automatically.
 
+#### Development Stuff
+
 `sudo add-apt-repository ppa:ondrej/php`
 
 `sudo add-apt-repository ppa:git-core/ppa`
@@ -74,6 +90,8 @@ Install your php versions of choice, i.e. `sudo apt install -y php7.4-cli` or `s
 probably reboot and apt autoremove
 
 If you're dual booting with Windows, you'll need to set the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal` as a DWORD to 1 and disable the Windows Time Service ([Windows just really likes local time](https://help.ubuntu.com/community/UbuntuTime#Make_Windows_use_UTC))
+
+#### Password Manager
 
 Install pass password manager with terminal, do ctrl x + e to do a lot of commands then this
 
@@ -94,6 +112,8 @@ rm -rf pass-extension-tail-1.2.0/ password-store-1.7.4* v1.2.0.zip;
 
 These may install to `/usr/lib/password-store/extensions` so make sure the completions are in the folder you found earlier.
 
+### Final bits
+
 If you're having trouble generating passwords after crudely importing your `.gnupg`, make sure there isn't a hidden character in the .gpg-id file.
 
 Install other local `bin`s
@@ -109,11 +129,12 @@ need to reboot to apply
 
 clear all printscreen keyboard shortcuts with backspace and set keyboard shortcuts
 - Home folder - super + e
+- Hide window - ctrl + alt + zero
 - Flameshot (flatpak run org.flameshot.Flameshot gui) - print
 - passmenu --no-username - ctrl + alt + p
 - passmenu --type - ctrl + alt + shift + p
 
-(You might have to set those last two in dconf-editor if the UI won't let you)
+You will need to specify the full path to passmenu if it isn't in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won't let you.
 
 install zorin-windows-app-support (with apt) or winehq.org
 ```
@@ -132,10 +153,34 @@ install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#insta
 
 `sudo usermod -aG docker wp`
 
-do `sudo apt-get install python3-distutils` and get pip3 officially and with sudo and then `sudo -H pip install awscli`
+do `sudo apt-get install python3-distutils` and get pip3 officially and with sudo and then `sudo -H pip install awscli` (or just follow the official instructions?)
 
 install and configure vs code
 - manually install https://github.com/IronLu233/vscode-color-exchange
 
 don't forget about your vim preferences and gitconfig
 - [https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc](https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc)
+
+```
+[core]
+	autocrlf = input
+	fileMode = false
+	editor = vim
+	untrackedCache = true
+[user]
+	name = Your Name
+	signingkey = YOURCHOSENGPGKEY
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg
+[init]
+	defaultBranch = main
+[push]
+	default = simple
+[pull]
+	rebase = false
+[alias]
+	# https://egghead.io/lessons/git-make-my-git-log-look-pretty-and-readable
+	kraken = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
+```
