@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2021-08-25
+modified_date: 2021-09-20
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -55,6 +55,7 @@ now software centre can install flatpak apps
 - hardware indicator sensors
 - postman
 - geary
+- gnome web (for safari-related debugging)
 
 if you have a microphone or fancy speakers
 - PulseAudio Volume Control
@@ -66,7 +67,7 @@ also snap apps
 - opera
 
 and regular apps
-- gimp (don't forget to set color icons in preferences)
+- gimp (don't forget to set color icons in preferences and also turn off toolbox grouping)
 
 Configure firefox for maximum privacy, nice theme, and extensions
 
