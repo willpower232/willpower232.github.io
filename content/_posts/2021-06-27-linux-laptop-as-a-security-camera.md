@@ -4,6 +4,7 @@ title: Linux laptop as a security camera
 description: Repurpose an old laptop as a basic motion detecting camera
 category: computing
 tags: linux software-choices
+modified_date: 2021-09-28
 ---
 
 Here I'm installing debian without a desktop environment but with the SSH server for later use. You'll need to be root but haven't got `sudo` so `su` will do for now.
@@ -43,6 +44,16 @@ Now you can install the basics `sudo apt install -y vim curl net-tools dnsutils 
 
 If you have a laptop that you want to keep turned on, `sudo vim /etc/systemd/logind.conf` and set `HandleLidSwitch=ignore`
 
+## Camera Identification
+
+Verify you have something video connected `ls -l /dev/video*`
+
+Find the device `lsusb`
+
+Identify available resolutions using the appropriate bus and device numbers from above `lsusb -s <bus>:<device> -v | egrep "Width|Height"`
+
+[Reference](http://www.netinstructions.com/automating-picture-capture-using-webcams-on-linuxubuntu/)
+
 ## Motion
 
 https://motion-project.github.io
@@ -55,7 +66,7 @@ https://motion-project.github.io
 
 `daemon on`
 
-`width` and `height` to something within the cameras ability and then increase `threshold` at least proportionally
+`width` and `height` to something within the cameras ability (identified above) and then increase `threshold` at least proportionally, motion will adapt to match the resolutions listed above
 
 `framerate 4` because that might be nicer if the device deals with it
 
