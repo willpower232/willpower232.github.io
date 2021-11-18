@@ -4,13 +4,12 @@ title: Arch for a VM
 description: Sometimes you can't escape Windows
 category: computing
 tags: linux software-choices
+modified_date: 2021-11-18
 ---
-
-**work in progress**
 
 I want a lightweight VM so that my laptop can stay Windows and I can still develop as I am used to.
 
-## Installation
+## Manual Installation
 
 Start by making the VM in Virtualbox and boot an arch iso.
 
@@ -161,7 +160,7 @@ localectl set-x11-keymap gb
 reference:
 - https://nullcodelinux.wordpress.com/2018/01/21/installing-a-desktop-environment-on-arch-linux/
 
-## Final Setup
+### Final Setup
 
 In terminal Go to Edit > Preferences > General tab and uncheck "Show unsafe paste dialog".
 
@@ -190,28 +189,7 @@ sudo rcvboxadd setup
 for ssh client and server but you don't need to enable server
 pacman -S openssh
 
-podman ain't good sorry, just pacman -S docker
-
-~pacman -S podman podman-docker~
-~systemctl enable podman.socket~
-~systemctl start podman.socket~
-~to /etc/subuid and /etc/subgid add with your username `username:100000:65536`~
-~then `podman system migrate` and reboot probably~
-~also add docker.io to unqualified-search-registries in /etc/containers/registries.conf~
-~apparently you can docker-compose too https://podman.io/new/2021/05/26/new.html~
-
-~systemctl --user enable podman~
-~systemctl --user start podman~
-~export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"~
-~sysctl net.ipv4.ip_unprivileged_port_start=80~
-~https://blog.christophersmart.com/2021/02/20/rootless-podman-containers-under-system-accounts-managed-and-enabled-at-boot-with-systemd/~
-
-~podman unshare ls -hal ~/gitrepos~
-~(shows root owning everything so you'd never be able to write to volumes in containers)~
-~podman unshare chown -R 1000:1000 ~/gitrepos~
-~https://www.tutorialworks.com/podman-rootless-volumes/~
-
-// todo nginx localhost not working
+I wanted to use podman but I just couldn't figure out how to make it work so I'm giving up on it for now.
 
 vscode full version from yay, can't install base-devel without overwriting doas pretending to be sudo
 ```
@@ -305,3 +283,36 @@ echo "<?xml version="1.0"?>
 ```
 
 https://dev.to/darksmile92/get-emojis-working-on-arch-linux-with-noto-fonts-emoji-2a9
+
+## Automatic Installation
+
+The manual installation was okay but the virtualbox integration never fully worked, I was probably missing a implicit dependency somewhere but I don't know.
+
+I randomly found that there was an effort to create an installer which reduces a lot of the above into some easy choices https://itsfoss.com/install-arch-linux-virtualbox/
+
+It does not currently support disk encryption with grub so you have to enable the EFI setting before starting the VM for the first time.
+
+Boot and enter `archinstall`. Answer all the prompts, allow systemd-boot, don't allow your user to be sudo since we'll do that differently later. Select "desktop" and your environment of choice (LXQT for lightweightness). Choose virtualbox graphics and probably all the other defaults. additional packages: `vim opendoas which net-tools xclip openssh bash-completion sakura`. select the network interface rather than networkmanager to save some time and effort, allow DHCP and enter your timezone.
+
+You don't need to chroot so exit back to installer and `shutdown now` so you can remove the iso.
+
+Install vbox additions from cd, uninstall sudo, configure doas for group named after user you made earlier, also add user you made earlier to group vboxsf.
+
+`sudo mount -t vboxsf -o gid=vboxsf shared_folder_name mount_point_on_guest_system`
+
+### LXQT
+- remove quick launcher and desktop switcher widgets
+- lxqt preferences - appearance (icons to adwaita, theme to clearlooks)
+- openbox settings (theme to bear2, desktops down to 1)
+
+### OTHER DEs
+
+If you want to use lxde or something not on the list then add it to the packages you install `lightdm lightdm-gtk-greeter lxde` and when prompted, you should chroot so that you can `systemctl enable lightdm`
+
+## Thrilling Conclusion(?)
+
+The automatic install meant that installing the virtualbox tools from the CD worked perfectly so I was able to get further with docker and vscode as above however I needed to install PHP for validating code as I write it.
+
+I was able to install literally everything else apart from PHP 7.4. That is only available from yay and that means it needs compiling and the VM didn't quite have enough resources for that so it froze and I had to kill the VM.
+
+At this point, I don't know if I will persist or give up and install Zorin Lite 16 when that comes out. We'll see.
