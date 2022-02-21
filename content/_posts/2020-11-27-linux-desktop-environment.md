@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2022-02-13
+modified_date: 2022-02-21
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -79,6 +79,8 @@ Configure chrome for maximum privacy, dark theme, and extensions (password manag
 Configure opera for some privacy, I usually use opera for background media and email so its definitely worth checking widevine/netflix if thats what you want ([this is useful](https://www.reddit.com/r/operabrowser/wiki/opera/linux_widevine_config)). I did experience initial loading problems with snap opera but regular opera did not have working widevine initially.
 
 Instead of Hardware Indicator Sensors I started using [this particular system monitor](https://extensions.gnome.org/extension/120/system-monitor/) which is a bit more interesting and less buggy in my experience.
+
+If you're really into gnome extensions, this [extension manager](https://flathub.org/apps/details/com.mattjakeman.ExtensionManager) would be a good install.
 
 #### Development Stuff
 
