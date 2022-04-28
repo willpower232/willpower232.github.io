@@ -4,7 +4,7 @@ title: Linux laptop as a security camera
 description: Repurpose an old laptop as a basic motion detecting camera
 category: computing
 tags: linux software-choices
-modified_date: 2021-09-28
+modified_date: 2022-04-28
 ---
 
 Here I'm installing debian without a desktop environment but with the SSH server for later use. You'll need to be root but haven't got `sudo` so `su` will do for now.
@@ -37,6 +37,8 @@ iface wlp2s0 inet dhcp
 Finally you can make the connection with `ifup wlp2s0` and verify the connection with `iw wlp2s0 link` and `ip a`.
 
 You may also need to `systemctl enable wpa_supplicant` or reboot if you're having a bad time.
+
+If you see the error message "option with an empty value" its likely there is a typo in the lines you added so double check and make sure you haven't written `dchp` or left an equals sign in `wpa-ssid=whatever`.
 
 [Reference](https://wiki.debian.org/WiFi/HowToUse)
 
