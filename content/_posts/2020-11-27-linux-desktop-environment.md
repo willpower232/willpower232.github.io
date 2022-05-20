@@ -162,7 +162,7 @@ do `sudo apt-get install python3-distutils` and get pip3 officially and with sud
 
 install and configure vs code
 - manually install https://github.com/IronLu233/vscode-color-exchange
-- add globalStorage to `.config/Code/User/syncLocalSettings.json` under  `ignoreUploadFolders`
+- add globalStorage and History to `.config/Code/User/syncLocalSettings.json` under  `ignoreUploadFolders`
 
 don't forget about your vim preferences and gitconfig
 - [https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc](https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc)
