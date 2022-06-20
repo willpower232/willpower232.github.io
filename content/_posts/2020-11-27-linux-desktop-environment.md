@@ -117,6 +117,50 @@ rm -rf pass-extension-tail-1.2.0/ password-store-1.7.4* v1.2.0.zip;
 
 These may install to `/usr/lib/password-store/extensions` so make sure the completions are in the folder you found earlier.
 
+#### HeidiSQL (and Windows support)
+
+install zorin-windows-app-support (with apt) or via the software store.
+
+Here it is manually if you want it from winehq.org
+
+```
+wget -nc https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/Release.key
+sudo apt-key add Release.key
+echo "deb http://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbu
+ntu_18.04 ./" | sudo tee /etc/apt/sources.list.d/wine-obs.list
+wget -nc https://dl.winehq.org/wine-builds/winehq.key
+sudo apt-key add winehq.key
+sudo apt-add-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ bionic main'
+plz apt update && plz apt upgrade -y
+plz apt install winehq-stable
+```
+
+I'd normally just download the portable version of HeidiSQL and create a shortcut in `~/.local/share/applications/heidisql.desktop` then bung an image in `~/.local/share/icons`.
+
+```
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=HeidiSQL
+Exec=sh -c "cd ~/Downloads/heidisqlportable/; wine start heidisql.exe"
+StartupWMClass=heidisql.exe
+Icon=heidisql
+StartupNotify=true
+```
+
+If you haven't salvaged an old portable install of it, you should definitely open the preferences and
+
+1. make sure `Allow multiple application instances` is **checked**
+2. make sure `Automatically reconnect to previously opened sessions on startup` is cleared
+3. make sure `Restore last used database on startup` is cleared
+4. don't change the Style Theme from Windows (unless it is less crashy these days)
+5. don't change the Icon pack from Icons8 (unless blah blah)
+6. set the Editor font to Cousine if the letter spacing is way off
+7. make sure `Remember filters, sorting and column selection across sessions` is cleared
+8. make sure `Reopen previously used SQL files and unsaved content in tabs` is cleared
+
+Clearing those checkboxes means that if you have a bad time, Heidi won't repeat the chaos when it gets reopened.
+
 ### Final bits
 
 If you're having trouble generating passwords after crudely importing your `.gnupg`, make sure there isn't a hidden character in the .gpg-id file.
@@ -140,19 +184,6 @@ clear all printscreen keyboard shortcuts with backspace and set keyboard shortcu
 - passmenu --type - ctrl + alt + shift + p
 
 You will need to specify the full path to passmenu if it isn't in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won't let you.
-
-install zorin-windows-app-support (with apt) or winehq.org
-```
-wget -nc https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/Release.key
-sudo apt-key add Release.key
-echo "deb http://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbu
-ntu_18.04 ./" | sudo tee /etc/apt/sources.list.d/wine-obs.list
-wget -nc https://dl.winehq.org/wine-builds/winehq.key
-sudo apt-key add winehq.key
-sudo apt-add-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ bionic main'
-plz apt update && plz apt upgrade -y
-plz apt install winehq-stable
-```
 
 install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 
