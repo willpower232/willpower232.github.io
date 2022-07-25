@@ -64,7 +64,7 @@ if you have a microphone or fancy speakers
 
 (Don't forget to turn off auto gain in Slack if you're adjusting it with PulseAudio)
 
-also snap apps
+also snap apps (I'd prefer flatpaks for everything but I think you get better widevine support with snap browsers which is handy for netflix etc)
 - chromium
 - opera
 
