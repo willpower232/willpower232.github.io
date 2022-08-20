@@ -215,6 +215,7 @@ don't forget about your vim preferences and gitconfig
 	defaultBranch = main
 [push]
 	default = simple
+	autoSetupRemote = true
 [pull]
 	rebase = false
 [alias]
