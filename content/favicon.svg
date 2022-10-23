@@ -1,0 +1,13 @@
+<svg viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
+<style>
+.a{fill:hsl(174, 41%, 46%)}
+.b{fill:hsl(174, 41%, 19%)}
+.c{fill:white}
+@media (prefers-color-scheme: dark) {
+	.c{fill:#444}
+}
+</style>
+<rect class="a" x="0" y="0" width="60" height="190" />
+<rect class="b" x="60" y="0" width="35" height="190" />
+<rect class="c" x="95" y="0" width="95" height="190" />
+</svg>
