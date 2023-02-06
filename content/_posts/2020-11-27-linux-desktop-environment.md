@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2022-02-21
+modified_date: 2023-02-06
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -58,6 +58,7 @@ now software centre can install flatpak apps
 - postman
 - geary
 - gnome web (for safari-related debugging)
+- break timer
 
 if you have a microphone or fancy speakers
 - PulseAudio Volume Control
@@ -222,5 +223,7 @@ don't forget about your vim preferences and gitconfig
 	# https://egghead.io/lessons/git-make-my-git-log-look-pretty-and-readable
 	kraken = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
 ```
+
+The break timer application should be set up with "a mix of short breaks and long breaks" so you can do the 20 second break every 20 minutes (to relax your eyes by looking at something 20 feet away) and a 4 minute break every hour so you remember to get up and make a drink.
 
 Finally, Zorin comes with a service called touchegg installed and running by default. If you don't have a touchscreen or trackpad directly connected you can probably disable it to save some memory.
