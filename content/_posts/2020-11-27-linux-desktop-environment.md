@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2023-02-06
+modified_date: 2023-02-14
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -186,7 +186,7 @@ clear all printscreen keyboard shortcuts with backspace and set keyboard shortcu
 
 You will need to specify the full path to passmenu if it isn't in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won't let you.
 
-install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) and then make sure you have `apt remove docker-compose-plugin` if you like managing your own binary for that purpose.
 
 `sudo usermod -aG docker wp`
 
