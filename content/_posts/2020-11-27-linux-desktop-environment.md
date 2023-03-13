@@ -220,6 +220,7 @@ don't forget about your vim preferences and gitconfig
 [pull]
 	rebase = false
 [alias]
+	unpushed = log --branches --not --remotes --no-walk --decorate --oneline
 	# https://egghead.io/lessons/git-make-my-git-log-look-pretty-and-readable
 	kraken = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
 ```
