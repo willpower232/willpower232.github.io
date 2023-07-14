@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2023-02-14
+modified_date: 2023-07-14
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -54,7 +54,7 @@ now software centre can install flatpak apps
 - filezilla
 - remmina
 - slack
-- open office desktop editors
+- ONLYOFFICE desktop editors
 - postman
 - geary
 - gnome web (for safari-related debugging)
@@ -82,6 +82,8 @@ Configure opera for some privacy, I usually use opera for background media and e
 Instead of Hardware Indicator Sensors I started using [this particular system monitor](https://extensions.gnome.org/extension/120/system-monitor/) which is a bit more interesting and less buggy in my experience.
 
 If you're really into gnome extensions, this [extension manager](https://flathub.org/apps/details/com.mattjakeman.ExtensionManager) would be a good install.
+
+Finally there is [Modern CSV](https://www.moderncsv.com) which is ridiculously efficient at editing CSV files, much better than ONLYOFFICE at this.
 
 #### Development Stuff
 
