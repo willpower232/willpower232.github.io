@@ -51,6 +51,7 @@ minima:
 
 sass:
   style: compressed
+  sourcemap: never
 
 plugins:
   - jekyll-feed
