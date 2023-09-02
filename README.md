@@ -1,3 +1,9 @@
+# Firstly
+
+`git submodule update --init` when you inevitably forget the submodules
+
+# Initially
+
 1. docker pull ghcr.io/willpower232/jekyll-toolkit
 
 2. docker run -it --rm -v $(pwd):/site ghcr.io/willpower232/jekyll-toolkit jekyll new . --force
@@ -6,7 +12,9 @@
 
 4. append `source: content` to `_config.yml`
 
-5. docker-compose up (don't daemon it so that you can watch the logs)
+# Mostly
+
+docker-compose up (don't daemon it so that you can watch the logs)
 
 # More
 
