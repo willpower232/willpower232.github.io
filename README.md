@@ -2,6 +2,8 @@
 
 `git submodule update --init` when you inevitably forget the submodules
 
+`git submodule update --remote` to update the remote to the latest commit
+
 # Initially
 
 1. docker pull ghcr.io/willpower232/jekyll-toolkit

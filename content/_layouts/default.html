@@ -28,11 +28,11 @@
     {% if to_nav.size > 0 %}
         <nav>
             <h3>{{ navtype }}</h3>
-            <ul>
+            <menu>
                 {% for naventry in to_nav %}
                     <li><a href="/{{ naventry|slugize }}/">{{ naventry|slugize }}</a></li>
                 {% endfor %}
-            </ul>
+            </menu>
         </nav>
     {% endif %}
 
