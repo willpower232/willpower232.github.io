@@ -4,6 +4,7 @@ title: Setting up a linux MySQL server
 description:
 category: computing
 tags: linux
+modified_date: 2023-11-11
 ---
 
 Following on from [Setting up a linux server]({% post_url 2023-01-14-setting-up-a-linux-server %}), installing a MySQL server has some other steps to make sure the server you're setting up is secure.
@@ -31,7 +32,9 @@ I went with the following options
 - rm test database
 - reload privilege tables
 
-You can verify this has loosely worked by comparing `mysql` (which won't let you in) and `sudo mysql` (which will). Now you need to provide remote access to the root user (or a user with all the permissions) for your main server which comes in two parts.
+You can verify this has loosely worked by comparing `mysql` (which won't let you in) and `sudo mysql` (which will).
+
+Currently you would need to jump servers to pass through a port to localhost along the lines of `ssh -L 9999:localhost:3306 -J wh@yourserver.you.com -N wh@databaseserver.you.com` so you could provide remote access to the root user (or a user with all the permissions) for your main server which comes in two parts. You would also need to follow these steps if your websites are hosted on a different server.
 
 Firstly, now you're in the mysql cli you can do
 
@@ -39,7 +42,7 @@ Firstly, now you're in the mysql cli you can do
 FLUSH PRIVILEGES;
 </code></pre>
 
-Secondly, you need to get the database server using a public port to expose it to your web server. You can `sudo vim /etc/mysql/mariadb.conf.d/50-server.cnf` and change `127.0.0.1` to `0.0.0.0`.
+Secondly, you need to get the database server using a public port to expose it to your web server. You can `sudo vim /etc/mysql/mariadb.conf.d/50-server.cnf` and comment out the `bind-address = 127.0.0.1`.
 
 After restarting the database server, you should be able to tunnel your local computer `ssh -L 9999:databaseserver.you.com:3306 -N wh@yourserver.you.com` and then your client of choice can use host 127.0.0.1 and port 9999 with root and `[password]` from earlier.
 
