@@ -4,6 +4,7 @@ title: Self-hosted Git with Forgejo and Tailscale
 description:
 category: computing
 tags: linux
+modified_date: 2023-11-18
 ---
 
 Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I've been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.
@@ -151,6 +152,8 @@ sudo -u git forgejo dump --config /etc/forgejo/app.ini -f forgejo-dump.zip
 The default dump file includes a timestamp in the filename but as I was including this zip in another zip, I chose to give it a plainer name.
 
 I think the dump would have to be restored manually but it is not an encrypted zip file so this would be relatively trivial if I ever needed it.
+
+Finally, you may want to include `--quiet` so you don't ge emails from your cronjob unless they error.
 
 ### SSH
 
