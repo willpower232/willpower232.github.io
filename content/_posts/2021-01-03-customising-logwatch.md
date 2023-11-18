@@ -4,6 +4,7 @@ title: Customising Logwatch
 description: getting the most out of Logwatch
 category: computing
 tags: linux server-config
+modified_date: 2023-11-18
 ---
 
 Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.
@@ -13,7 +14,7 @@ Here are some better written posts on this topic.
 [https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial](https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial)
 [https://bitfieldconsulting.com/blog/looking-for-trouble](https://bitfieldconsulting.com/blog/looking-for-trouble)
 
-For the casual tinkerer, there are a few ways of keeping half an eye on your server to make sure it is still there an answering requests. One of my favourites is Logwatch, it emails you daily with events from important log files of things installed on the server.
+For the casual tinkerer, there are a few ways of keeping half an eye on your server to make sure it is still there an answering requests. One of my favourites is Logwatch, it emails you daily with events from important log files of things installed on the server. One little trap is that you may need to install `rsyslog` in order to make it possible for the Logwatch scripts to see everything.
 
 Whilst this information can be very useful, the built in levels of definition are a little too verbose in some areas (depending on your threat model/paranoia) and also good at being detected as spam by google (thanks to the resolved hostnames of malicious servers).
 
