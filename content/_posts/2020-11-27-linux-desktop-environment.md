@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2023-09-29
+modified_date: 2023-12-01
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -174,10 +174,13 @@ Install other local `bin`s
 
 run dconf-editor and blank out workspace shortcuts to release ctrl alt shift p, if the keyboard shortcut settings won't let you add that shortcut, you can add it directly in dconf
 `org.gnome.desktop.wm.keybindings`
+
 also disable `switch-input-source` and `switch-input-source-backwards`
+
 also whilst you're in there
 `org.gnome.desktop.wm.preferences.num-workspaces` to 1
 `org.gnome.mutter.dynamic-workspaces` to off
+`org.gnome.desktop.interface.gtk-enable-primary-paste` to off
 
 need to reboot to apply
 
