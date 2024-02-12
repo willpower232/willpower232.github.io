@@ -4,20 +4,22 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2023-12-01
+modified_date: 2024-02-10
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
 
 I've always used Ubuntu/Debian based so I am more comfortable there. Zorin OS is based on Ubuntu with simpler theming than most other distributions and very polished.
 
-The only thing that has irked me about Zorin OS so far is that somehow suspend on screen lock got enabled and neither of my computers recovered properly so definitely check that before progressing too far.
+The only thing that has irked me about Zorin OS so far is that somehow suspend on screen lock got enabled and neither of my computers recovered properly so definitely check that before progressing too far. I think I found it under Privacy and Screen in the settings
 
 ### Cosmetics
 
 Set dark theme, layout, and highlight colour and clear pinned apps from whatever taskbar you have now.
 
 ### Terminal
+
+You probably want to install the apt packages from below here.
 
 install bashrc files (don't forget to uncomment generic bits in /etc/bash.bashrc)
 - [https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f](https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f)
@@ -39,11 +41,11 @@ Finally, add the following files without `.bash` to the completions folder
 - [https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash](https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash)
 
 If you want a windows-like hostname then you can do something like this and reboot. Don't forget to update the hosts file though.
-`sudo hostnamectl set-hostname DESKTOP-\$(head /dev/urandom | tr -dc A-Z0-9 | head -c 7)`
+`sudo hostnamectl set-hostname DESKTOP-$(head /dev/urandom | tr -dc A-Z0-9 | head -c 7)`
 
 ### Software
 
-Zorin OS 16 should have flatpak installed and set up, can check with `sudo flatpak remote-list` then if you can't see flathub `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`
+Zorin OS should have flatpak installed and set up, can check with `sudo flatpak remote-list` then if you can't see flathub `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`
 
 remove unwanted apps from software centre (including ancient remmina). You should use the app list to check if any things you don't want are installed via apt, (i.e. libreoffice)
 
@@ -55,8 +57,8 @@ now software centre can install flatpak apps
 - remmina
 - slack
 - ONLYOFFICE desktop editors
-- postman
-- geary
+- ~postman~ bruno is better as it keeps your data on your computer
+- geary or thunderbird which looks slightly nicer currently
 - gnome web (for safari-related debugging)
 - break timer
 
@@ -197,7 +199,7 @@ install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#insta
 
 `sudo usermod -aG docker wp`
 
-do `sudo apt-get install python3-distutils` and get pip3 officially and with sudo and then `sudo -H pip install awscli` (or just follow the official instructions?)
+install aws cli from the [official instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
 install and configure vs code
 - manually install https://github.com/IronLu233/vscode-color-exchange
