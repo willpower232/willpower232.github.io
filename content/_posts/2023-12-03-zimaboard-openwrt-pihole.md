@@ -281,3 +281,15 @@ Now back in your pihole UI, Settings > DNS. Untick the upstream DNS servers and 
 Finally you can confirm you're fully secure with the output of `dig +short txt proto.on.quad9.net` should confirm you're using `dot`.
 
 If you want to do this on the zimaboard, you will need the dig command from `opkg install bind-dig`.
+
+In PowerShell parlance, this is `Resolve-DnsName -Name proto.on.quad9.net -Type txt`
+
+## PPPoE
+
+If you're lucky enough to have ethernet presenting broadband in your home, like FTTP, then you can remove the ISP router from your setup entirely.
+
+If you're lucky your ISP will provide PPPoE connection details https://www.plus.net/help/broadband/broadband-connection-settings/
+
+Looks like PPPoE is installed by default so you might not need this extra information https://openwrt.org/docs/guide-user/network/wan/wan_interface_protocols
+
+You can edit the WAN interface to change the type to PPPoE, you'll have to confirm the change before you can see the username and password fields but I didn't need to enter any other information other than the username and password as informed by my ISP.
