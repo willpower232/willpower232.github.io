@@ -184,6 +184,9 @@ You might think you need to disable the dnsmasq service however it handles both 
 
 You need to go to DHCP and DNS > Advanced Settings and set the DNS port to 0 but obviously don't unless you're done searching the internet for a little bit.
 
+It is however crucial to tell DHCP to still advertise the IPv4 DNS host so Network > Interfaces > LAN > DHCP Server > Advanced Settings and click on + for DHCP-Options and Use 6, DNS Servers
+i.e. 6,192.168.1.1. Without this, devices which struggle with IPv6 will fail to resolve DNS.
+
 We can reference the original script https://github.com/pi-hole/docker-pi-hole/blob/master/examples/docker_run.sh however I ran into several issues.
 
 - It could not resolve any DNS queries internally until it was running with host networking, I guess this makes sense because the OpenWRT DNS needed to be disabled in order to free up the port
