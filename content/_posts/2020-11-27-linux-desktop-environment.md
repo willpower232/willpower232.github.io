@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2024-02-10
+modified_date: 2024-02-19
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -61,27 +61,27 @@ now software centre can install flatpak apps
 - geary or thunderbird which looks slightly nicer currently
 - gnome web (for safari-related debugging)
 - break timer
+- chromium
+- opera
 
 if you have a microphone or fancy speakers
 - PulseAudio Volume Control
 
 (Don't forget to turn off auto gain in Slack if you're adjusting it with PulseAudio)
 
-also snap apps (I'd prefer flatpaks for everything but I think you get better widevine support with snap browsers which is handy for netflix etc)
-- chromium
-- opera
-
 and regular apps
 - gimp (don't forget to set color icons in preferences and also turn off toolbox grouping)
+
+It looks like I don't have any snap apps at the minute (apart from slack which refused to stay logged in). Opera struggles with widevine for some reason so I ended up using Chromium for netflix etc.
 
 Configure firefox for maximum privacy, nice theme, and extensions
 
 Configure chrome for maximum privacy, dark theme, and extensions (password managers and don't close with last tab)
 - right-click the address bar and choose 'Always show full URLs'. If you don't see that option, go to chrome://flags/#omnibox-context-menu-show-full-urls and set the highlighted flag to 'Enabled'.
 
-Configure opera for some privacy, I usually use opera for background media and email so its definitely worth checking widevine/netflix if thats what you want ([this is useful](https://www.reddit.com/r/operabrowser/wiki/opera/linux_widevine_config)). I did experience initial loading problems with snap opera but regular opera did not have working widevine initially.
+Configure opera for some privacy, I usually use opera for background media and email so its definitely worth checking widevine/netflix if thats what you want ([this is useful](https://www.reddit.com/r/operabrowser/wiki/opera/linux_widevine_config)). I did experience initial loading problems with snap opera but regular opera did not have working widevine initially. For whatever reason, "Show Full URL" is a setting and not on the right-click menu.
 
-Instead of Hardware Indicator Sensors I started using [this particular system monitor](https://extensions.gnome.org/extension/120/system-monitor/) which is a bit more interesting and less buggy in my experience.
+Instead of Hardware Indicator Sensors I started using [this particular system monitor](https://extensions.gnome.org/extension/120/system-monitor/) which is a bit more interesting and less buggy in my experience. Unfortunately it seems to not be updated any more however there is a [new fork](https://extensions.gnome.org/extension/3010/system-monitor-next/) which works nicely. Don't forget to `sudo apt install gir1.2-gtop-2.0 gir1.2-nm-1.0 gir1.2-clutter-1.0` and maybe `sudo apt-get install lm-sensors && sudo service kmod start && sudo sensors-detect` although it doesn't seem I have many sensors available to me which is odd. If the plugin isn't changing when you update the preferences, just lock and unlock and that should be enough to apply your latest preferences. Also don't forget `sudo apt install htop` for some backup in looking at your systems status.
 
 I have started using [Burn My Windows](https://extensions.gnome.org/extension/4679/burn-my-windows/) to make things a little more snazzy.
 
@@ -165,12 +165,15 @@ If you haven't salvaged an old portable install of it, you should definitely ope
 6. set the Editor font to Cousine if the letter spacing is way off
 7. make sure `Remember filters, sorting and column selection across sessions` is cleared
 8. make sure `Reopen previously used SQL files and unsaved content in tabs` is cleared
+9. reduce the query history days to say 1 or 2, it is handy after all
 
 Clearing those checkboxes means that if you have a bad time, Heidi won't repeat the chaos when it gets reopened.
 
 ### Final bits
 
 If you're having trouble generating passwords after crudely importing your `.gnupg`, make sure there isn't a hidden character in the .gpg-id file.
+
+If you'd like to set yourself a garbage password because this system isn't online much, you can do `sudo passwd <username>` to bypass the block on garbage passwords. Don't forget to change the keychain password to match though (good luck reading black text on a dark background).
 
 Install other local `bin`s
 
@@ -185,6 +188,8 @@ also whilst you're in there
 `org.gnome.desktop.interface.gtk-enable-primary-paste` to off
 
 need to reboot to apply
+
+In order for the workspaces setting to work I also ended up in Settings > Multitasking, switching it to "fixed number of workspaces" and "workspaces on all displays".
 
 clear all printscreen keyboard shortcuts with backspace and set keyboard shortcuts
 - Home folder - super + e
