@@ -198,6 +198,8 @@ clear all printscreen keyboard shortcuts with backspace and set keyboard shortcu
 - passmenu --no-username - ctrl + alt + p
 - passmenu --type - ctrl + alt + shift + p
 
+Don't forget that if you don't have a print key, you could borrow the windows print screen shortcut or just Ctrl Alt Shift S even.
+
 You will need to specify the full path to passmenu if it isn't in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won't let you.
 
 install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) and then make sure you have `apt remove docker-compose-plugin` if you like managing your own binary for that purpose.
