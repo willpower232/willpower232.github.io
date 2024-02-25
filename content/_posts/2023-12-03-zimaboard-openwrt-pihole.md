@@ -4,7 +4,7 @@ title: Zimaboard OpenWRT with Pihole
 description:
 category: computing
 tags: linux
-modified_date: 2024-02-17
+modified_date: 2024-02-25
 ---
 
 Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.
@@ -100,6 +100,15 @@ e.g.
 Obviously be careful about breaking your nginx IP addresses and you probably need to reboot when changing these.
 
 Don't forget there is a save button on the modal window and a save button on the interfaces page. If you find yourself in failsafe mode, you can edit `/etc/config/network` to undo whatever you just did.
+
+Finally, some of my devices struggled with IPv6 and also using pihole was trickier when you couldn't easily identify the devices getting blocked. The quick solution is to disable odhcpd but apparently you can also try this but I don't think I needed to.
+
+```
+uci set 'network.lan.ipv6=0'
+uci set 'network.wan.ipv6=0'
+uci set 'dhcp.lan.dhcpv6=disabled'
+uci commit
+```
 
 ## Tailscale
 
