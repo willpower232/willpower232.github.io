@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2024-02-19
+modified_date: 2024-03-04
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -47,7 +47,7 @@ If you want a windows-like hostname then you can do something like this and rebo
 
 Zorin OS should have flatpak installed and set up, can check with `sudo flatpak remote-list` then if you can't see flathub `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`
 
-remove unwanted apps from software centre (including ancient remmina). You should use the app list to check if any things you don't want are installed via apt, (i.e. libreoffice)
+Remove unwanted apps from software centre (worth checking the ones you leave which could be super old like Remmina which is much newer in flatpak form). You should use the app list to check if any things you don't want are installed via apt, (i.e. libreoffice). Unfortunately, you will also need to manually remove libreoffice-common via apt in your terminal.
 
 now software centre can install flatpak apps
 - flameshot
