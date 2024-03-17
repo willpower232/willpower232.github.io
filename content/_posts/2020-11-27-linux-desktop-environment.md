@@ -74,7 +74,7 @@ and regular apps
 
 It looks like I don't have any snap apps at the minute (apart from slack which refused to stay logged in). Opera struggles with widevine for some reason so I ended up using Chromium for netflix etc.
 
-Configure firefox for maximum privacy, nice theme, and extensions
+Configure firefox for maximum privacy, nice theme, and extensions. I do like to open local HTML files sometimes and I needed to install Flatseal to give flatpak Firefox permission to my home directory.
 
 Configure chrome for maximum privacy, dark theme, and extensions (password managers and don't close with last tab)
 - right-click the address bar and choose 'Always show full URLs'. If you don't see that option, go to chrome://flags/#omnibox-context-menu-show-full-urls and set the highlighted flag to 'Enabled'.
