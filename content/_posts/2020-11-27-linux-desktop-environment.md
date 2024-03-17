@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2024-03-04
+modified_date: 2024-03-17
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -223,11 +223,11 @@ don't forget about your vim preferences and gitconfig
 	untrackedCache = true
 [user]
 	name = Your Name
-	signingkey = YOURCHOSENGPGKEY
+	signingkey = ~/.ssh/id_ed25519.pub
 [commit]
 	gpgsign = true
 [gpg]
-	program = gpg
+	format = ssh
 [init]
 	defaultBranch = main
 [push]
@@ -239,6 +239,21 @@ don't forget about your vim preferences and gitconfig
 	unpushed = log --branches --not --remotes --no-walk --decorate --oneline
 	# https://egghead.io/lessons/git-make-my-git-log-look-pretty-and-readable
 	kraken = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
+
+[includeIf "hasconfig:remote.*.url:git@github.com:personalname/**"]
+	path = .gitconfig-personal
+
+[includeIf "hasconfig:remote.*.url:git@github.com:organisationname/**"]
+	path = .gitconfig-work
+[includeIf "hasconfig:remote.*.url:git@github.com:OrganisationName/**"]
+	path = .gitconfig-work
+```
+
+and then in .gitconfig-whatever you just have your email address
+
+```
+[user]
+	email = me@home.com
 ```
 
 The break timer application should be set up with "a mix of short breaks and long breaks" so you can do the 20 second break every 20 minutes (to relax your eyes by looking at something 20 feet away) and a 4 minute break every hour so you remember to get up and make a drink.
