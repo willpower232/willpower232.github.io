@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2024-03-17
+modified_date: 2024-03-18
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -73,6 +73,8 @@ and regular apps
 - gimp (don't forget to set color icons in preferences and also turn off toolbox grouping)
 
 It looks like I don't have any snap apps at the minute (apart from slack which refused to stay logged in). Opera struggles with widevine for some reason so I ended up using Chromium for netflix etc.
+
+In Thunderbird, you can hide the local folders with the Folder Pane Header which can be toggled under View > Folders > Folder Pane Header. The Folder Pane Header can hide itself once you've shown it and hidden the local folders.
 
 Configure firefox for maximum privacy, nice theme, and extensions. I do like to open local HTML files sometimes and I needed to install Flatseal to give flatpak Firefox permission to my home directory.
 
