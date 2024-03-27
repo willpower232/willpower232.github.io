@@ -4,7 +4,7 @@ title: Customising Logwatch
 description: getting the most out of Logwatch
 category: computing
 tags: linux server-config
-modified_date: 2023-11-18
+modified_date: 2024-03-27
 ---
 
 Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.
@@ -109,6 +109,40 @@ More random IP addresses that can upset spam filters.
    #      print "   $ThisOne: " . timesplural($NoIdent{$ThisOne});
    #   }
    }
+```
+
+Probably not interested in individual lines for the failed secure connection negotiations. Thankfully it wants to give us a summary with a few well placed comment characters.
+
+```perl
+if (keys %NegotiationFailed) {
+   print "\nNegotiation failed:\n";
+   foreach my $Reason (sort {$a cmp $b} keys %NegotiationFailed) {
+      my $Total = 0;
+      print "   $Reason";
+      #      if ( $Detail > 0 ) {
+      #         print "\n";
+      #      }
+      foreach my $Host (sort {$a cmp $b} keys %{$NegotiationFailed{$Reason}}) {
+        my $HostTotal = 0;
+        foreach my $Offer (sort {$a cmp $b} keys %{$NegotiationFailed{$Reason}{$Host}}) {
+           $HostTotal += $NegotiationFailed{$Reason}{$Host}{$Offer};
+        }
+        $Total += $HostTotal;
+        #        if ( $Detail > 0 ) {
+        #           print "      $Host: " . timesplural($HostTotal);
+        #        }
+        #        if ( $Detail > 5 ) {
+        #           foreach my $Offer (sort {$a cmp $b} keys %{$NegotiationFailed{$Reason}{$Host}}) {
+        #                 my $tot = $NegotiationFailed{$Reason}{$Host}{$Offer};
+        #                 print "        $Offer: " . timesplural($tot);
+        #           }
+        #        }
+      }
+      #      if ( $Detail == 0 ) {
+         print ": " . timesplural($Total);
+         #      }
+   }
+}
 ```
 
 If your SSH is open to the world, you're going to have bad logins, no need to obsess over it if fail2ban has you covered.
