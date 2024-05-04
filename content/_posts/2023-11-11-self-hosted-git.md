@@ -4,7 +4,7 @@ title: Self-hosted Git with Forgejo and Tailscale
 description:
 category: computing
 tags: linux
-modified_date: 2023-11-18
+modified_date: 2024-05-04
 ---
 
 Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I've been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.
@@ -190,3 +190,32 @@ Links I tried to follow
 - https://forum.tailscale.com/t/ubuntus-boot-order-for-tailscale-service/2341/7
 - https://www.2daygeek.com/linux-modifying-existing-systemd-unit-file/
 - https://stackoverflow.com/questions/49643551/systemd-service-b-to-start-after-another-service-a-only-if-service-a-exists
+
+### Fail2ban
+
+My standard server installation includes fail2ban mostly for SSH however with the port firewalled off and tailscale meaning only I can get at it anyway, it isn't really doing anything.
+
+You may be aware that there are lots of pages in a web-accessible git repo so sooner or later any amount of merges or force pushes will create an awful amount of 404s.
+
+Firstly you need a filter in `/etc/fail2ban/filter.d`, I went with `nginx-404-filter.conf`.
+
+```
+[Definition]
+failregex = ^<HOST>.*"(GET|POST).*" (404|444) .*$
+ignoreregex =
+```
+
+Finally you need to add to (or create) `/etc/fail2ban/jail.local`. This equates to 10 404s in 10 seconds means a 5 minute ban.
+
+```
+[nginx-404]
+enabled = true
+port = http,https
+filter = nginx-404-filter
+logpath = /var/log/nginx/access.log
+bantime = 300
+findtime = 10
+maxretry = 10
+```
+
+If you open a whole bunch of tabs to a page that doesn't exist, you should find yourself blocked for a few minutes if you fancy a cuppa. If you're still on SSH to your server, you can confirm you are blocked with `fail2ban-client status nginx-404`.
