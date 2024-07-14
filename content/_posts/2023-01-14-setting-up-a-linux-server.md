@@ -26,6 +26,8 @@ Some initial manual setup is required to create a new user and lock down SSH acc
 
 		<pre><code>mv /etc/bash.bashrc /etc/bash.bashrc.old && curl -LSs https://b.w232.co > /etc/bash.bashrc
 </code></pre>
+
+		no seriously, edit the file to change the commented out bits at the end
 	</li>
 	<li>
 	tweak SSH server config
@@ -44,8 +46,7 @@ Some initial manual setup is required to create a new user and lock down SSH acc
 	<li>
 		finally set the timezone and name and reboot
 
-		<pre><code>
-hostnamectl set-hostname yourserver.you.com && ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime && shutdown -r now
+		<pre><code>hostnamectl set-hostname yourserver.you.com && ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime && shutdown -r now
 </code></pre>
 	</li>
 	<li>also if you aren't using a script, you should definitely `sudo apt update && sudo apt upgrade -y` before getting too much more done. You probably also want to install and configure apticron and logwatch.</li>
@@ -61,6 +62,14 @@ The most important change is to the Logwatch config which [I've documented here 
 
 Finally there is the somewhat thorny issue of how to send emails from your server. I've previously installed Postfix, configured to listen locally only but now I am looking as msmtp and SendGrid. I'm mostly drawn to `~/.msmtprc` for easy per user configuration.
 
-If you're using DigitalOcean, you will need to manually install their Metrics Agent to get All The Graphs in the UI.
+If you're using DigitalOcean and didn't click the checkbox for monitoring when creating the droplet then you will need to manually install their Metrics Agent to get All The Graphs in the UI.
+
+Past me decided to install resolvconf and I've seen that this breaks DigitalOcean droplets, you can confirm that `ping duckduckgo.com` does not work. Fortunately you can still reference `/etc/netplan/50-cloud-init.yaml` to find out what the nameservers should be and then edit `/etc/resolvconf/resolv.conf.d/tail` to include both the default nameservers and something perhaps more reliable.
+
+<pre><code>nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver whatever.something.etc.etc
+nameserver whatever.something.etc.etc
+</code></pre>
 
 To be continued
