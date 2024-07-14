@@ -61,4 +61,6 @@ The most important change is to the Logwatch config which [I've documented here 
 
 Finally there is the somewhat thorny issue of how to send emails from your server. I've previously installed Postfix, configured to listen locally only but now I am looking as msmtp and SendGrid. I'm mostly drawn to `~/.msmtprc` for easy per user configuration.
 
+If you're using DigitalOcean, you will need to manually install their Metrics Agent to get All The Graphs in the UI.
+
 To be continued
