@@ -117,6 +117,8 @@ Disallow: /*/*/archive/
 
 You can also take this opportunity to ban the AI bots from accessing your content if you wish.
 
+Some of the information about forgejo suggests you can run `forgejo help` to see what is happening however as we customise the paths in the service file, the output will not be of much use to you.
+
 #### Customisation
 
 You may have changed the name in the initial setup but you can also change the landing page, description, and theme in the config file. I used the theme switcher in my user configuration to try them all out quickly
