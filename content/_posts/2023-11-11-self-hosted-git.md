@@ -83,6 +83,8 @@ Environment=USER=git HOME=/home/git GITEA_WORK_DIR=/var/lib/forgejo
 WantedBy=multi-user.target
 ```
 
+At some point you will need to repace `GITEA_WORK_DIR` with `FORGEJO_WORK_DIR` but you can probably reference the copy of the service from the git repo.
+
 I left it with the default sqlite database as I knew there would only be me accessing it and this is much simpler. Also I use snapshots of the server from the provider and MySQL can have consistency issues when it is backed up whilst running. Finally it is time to `systemctl enable forgejo && systemctl start forgejo`.
 
 Now you can visit the website and complete the initial setup. Once that is done, it is time to secure the config file
@@ -124,7 +126,7 @@ You may have changed the name in the initial setup but you can also change the l
 LANDING_PAGE = explore
 
 [ui]
-DEFAULT_THEME = arc-green
+DEFAULT_THEME = arc-green # replaced by gitea-dark in version 7 which isn't quite the same
 
 [ui.meta]
 DESCRIPTION = Software what I made
@@ -140,6 +142,8 @@ Referencing the original Gitea documentation, I saw that you can also replace th
 - `public/img/favicon.png` - Used as fallback for browsers that don't support SVG favicons
 
 This should leave the only Forgejo reference in the footer but thats fine by me, I was mostly doing this for the social media previews when sharing links.
+
+In version 7, the `img` folder got moved into an assets folder so the complete path is `public/assets/img` now.
 
 #### Backup
 
