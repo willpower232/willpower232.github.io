@@ -1,0 +1,1267 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://willpower232.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://willpower232.github.io/" rel="alternate" type="text/html" /><updated>2024-07-28T17:51:49+00:00</updated><id>https://willpower232.github.io/feed.xml</id><title type="html">Blogumentation | willpower232</title><subtitle>I'm writing stuff down so I remember it.</subtitle><entry><title type="html">Windows 11 with Virtualbox and Debian</title><link href="https://willpower232.github.io/computing/windows-11-virtualbox-debian.html" rel="alternate" type="text/html" title="Windows 11 with Virtualbox and Debian" /><published>2024-03-12T00:00:00+00:00</published><updated>2024-03-12T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/windows-11-virtualbox-debian</id><content type="html" xml:base="https://willpower232.github.io/computing/windows-11-virtualbox-debian.html">&lt;p&gt;I’m not a big fan of basing my windows account on my microsoft account so I used &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;oobe\bypassnro&lt;/code&gt; to make an admin account named after the friendly name for the laptop and then a regular account for my every day use.&lt;/p&gt;
+
+&lt;p&gt;After clearing out the pre installed garbage and installing tailscale, I found I needed to give the regular account write access to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Program Files\Tailscale&lt;/code&gt; in order to maintain the tailscale connection.&lt;/p&gt;
+
+&lt;p&gt;One of my favourite things to do is install sublime text, run it as administator and open the hosts file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Windows\System32\drivers\etc\hosts&lt;/code&gt; so there is quick access to it in the future. My VM didn’t seem to use the hosts hosts file but its even easier to edit the local hosts file.&lt;/p&gt;
+
+&lt;p&gt;Installing the latest virtualbox and preparing a VM with half the CPU and half the RAM, I grabbed the latest debian ISO and installed it to the VM with the MATE desktop environment but I’m sure there is probably a better choice.&lt;/p&gt;
+
+&lt;p&gt;If you install no desktop environment then you could do something like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install xserver-xorg lightdm gnome-tweaks gnome-core --no-install-recommends &amp;amp;&amp;amp; apt install vim sudo gnupg chromium&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you might think I’m roughly ready to follow my usual linux desktop setup however OG debian makes it a little harder to get going so you need to follow the steps in order.&lt;/p&gt;
+
+&lt;p&gt;Now you’re logged in as the user you created (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wh&lt;/code&gt; for me) but you don’t have sudo access which means the only way to get into the root user is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su&lt;/code&gt;. Unfortunately they don’t like you doing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su&lt;/code&gt; without a user so you have to remember to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su -&lt;/code&gt; instead otherwise the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PATH&lt;/code&gt; will be incomplete and it is slightly more annoying as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usermod&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reboot&lt;/code&gt; won’t be easily available.&lt;/p&gt;
+
+&lt;p&gt;If this annoys you then you can do  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;export PATH=&quot;$PATH:/usr/local/sbin:/usr/sbin:/sbin&quot;&lt;/code&gt; so you can easily call the missing commands but really you want to just do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su -&lt;/code&gt;. Have a read of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=918754 but if you are really confused and want to see which package is responsible for a specific command you can use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dpkg -S &amp;lt;command&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Anyway, you need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su -&lt;/code&gt; and then you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usermod -aG sudo wh&lt;/code&gt;. With a reboot or logout/login, you can now sudo and have a better time.&lt;/p&gt;
+
+&lt;p&gt;The next step is to install the virtualbox addons for clipboard sharing, mounted drives, and screen resolution fixes, but there are some pre requisites &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install linux-headers-amd64 gcc make perl --no-install-recommends&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Insert Guest Additions CD Image&lt;/code&gt; from the Devices menu. If you open a terminal in the mounted CD folder and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh VBoxLinuxAdditions.run&lt;/code&gt; or some variant to run that particular binary. One reboot later (just in case) and you should be off to the races.&lt;/p&gt;
+
+&lt;p&gt;If you’re planning to mount a shared folder from the host then you probably need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usermod -aG vboxsf wh&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Debian doesn’t necessarily have immediate access to the usual ways of adding apt repos so its a bit more manual. Git comes from an ubuntu repo so you have to pick the nearest LTS ubuntu version name so it sort of matches.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apt install apt-transport-https ca-certificates curl software-properties-common;
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg;
+echo &quot;deb https://packages.sury.org/php/ $(lsb_release -sc) main&quot; &amp;gt; /etc/apt/sources.list.d/php.list;
+
+wget -O /etc/apt/trusted.gpg.d/docker.asc https://download.docker.com/linux/debian/gpg
+echo &quot;deb https://download.docker.com/linux/debian $(lsb_release -sc) stable&quot; &amp;gt; /etc/apt/sources.list.d/docker.list;
+
+gpg --recv-keys --keyserver keyserver.ubuntu.com A1715D88E1DF1F24;
+gpg --export A1715D88E1DF1F24 &amp;gt; /etc/apt/trusted.gpg.d/git.gpg;
+gpg --delete-key A1715D88E1DF1F24;
+echo &quot;deb http://ppa.launchpad.net/git-core/ppa/ubuntu jammy main&quot; &amp;gt; /etc/apt/sources.list.d/git.list;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt update&lt;/code&gt; works before continuing to install the main packages.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apt install -y vim git net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client docker-ce
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Installed &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-ce&lt;/code&gt; means you get &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose-plugin&lt;/code&gt; but I prefer to run it separately so remember to remove it later if that is your jam. Don’t forget to add yourself to the docker group and reboot before you wonder why docker is not working.&lt;/p&gt;
+
+&lt;p&gt;Now you should be able to start installing bits and pieces from the other article. The completions directory is still to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/share/bash-completion/completions&lt;/code&gt; as before, just no pkg-config to reveal that information to you unless you install it.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I’m not a big fan of basing my windows account on my microsoft account so I used oobe\bypassnro to make an admin account named after the friendly name for the laptop and then a regular account for my every day use.</summary></entry><entry><title type="html">Zimaboard OpenWRT with Pihole</title><link href="https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html" rel="alternate" type="text/html" title="Zimaboard OpenWRT with Pihole" /><published>2023-12-03T00:00:00+00:00</published><updated>2023-12-03T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/zimaboard-openwrt-pihole</id><content type="html" xml:base="https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html">&lt;p&gt;Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.&lt;/p&gt;
+
+&lt;p&gt;I had a little play with CasaOS and it seemed quite capable but I spend a lot of time messing around with linux and docker elsewhere so I was more comfortable removing it and setting something up from scratch.&lt;/p&gt;
+
+&lt;p&gt;When I eventually got round to this project, I found that my Zimaboard would restart every few minutes with the existing CasaOS on it, not sure if there is some hibernation or power problem as hinted by Reddit or if I just left it in a weird state. The problem did not occur after installing OpenWRT so was not hardware related.&lt;/p&gt;
+
+&lt;p&gt;Conveniently, I had recently received an email from them with instructions for both &lt;a href=&quot;https://icewhale.community/t/diy-your-own-cool-openwrt-router-based-on-zimaboard/73&quot;&gt;OpenWRT&lt;/a&gt; and &lt;a href=&quot;https://icewhale.community/t/build-a-powerful-home-router-with-zimaboard-and-pfsense/74&quot;&gt;pfSense&lt;/a&gt; so I’m largely following their OpenWRT instructions to begin with.&lt;/p&gt;
+
+&lt;h2 id=&quot;openwrt&quot;&gt;OpenWRT&lt;/h2&gt;
+
+&lt;p&gt;The Zimaboard has the existing network plugged in on the power jack side as per their instructions, I have a keyboard and my ventoy stick connected. Bashing the F keys (F11 I think) got me to the boot menu where I can boot into Ventoy UEFI and whatever environment I happen to have.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lsblk&lt;/code&gt; identified /dev/mmcblk0 as the small eMMC onboard storage, I have downloaded the generic-squashfs-combined-efi file from the &lt;a href=&quot;https://downloads.openwrt.org/releases/23.05.2/targets/x86/64/&quot;&gt;most recent release of OpenWRT&lt;/a&gt; and, extracted the gz to leave an img file with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gzip -d openwrt-whatever.gz&lt;/code&gt; so just needs a quick dd and a reboot (don’t forget to remove your USB stick).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;dd if=openwrt-22.03.4-x86-64-generic-squashfs-combined-efi.img of=/dev/mmcblk0 bs=1M status=progress
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now if you plug your computer into the network on the display port side, you should get a local IP address and go to 192.168.1.1 in your browser, you should be able to log in with no password. You can also SSH &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root@192.168.1.1&lt;/code&gt; with no password if you prefer to set up that way. If you find out the IP address given to the Zimaboard by your existing router, you can confirm that the web UI cannot be accessed.&lt;/p&gt;
+
+&lt;p&gt;Obviously the first step is setting yourself a good password.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-yourself-unstuck&quot;&gt;Getting Yourself Unstuck&lt;/h3&gt;
+
+&lt;p&gt;If you break things to the point you can’t get an IP, you can’t connect remotely so you need to have a screen and keyboard plugged in to the Zimaboard and during the boot you will see a message pop up about pressing F and Enter to get into a failsafe mode where you can undo whatever it is that you did.&lt;/p&gt;
+
+&lt;h3 id=&quot;disk-size&quot;&gt;Disk Size&lt;/h3&gt;
+
+&lt;p&gt;Some prerequisites&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;opkg update
+
+opkg install parted lsblk fdisk losetup resize2fs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I did &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;parted&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;print&lt;/code&gt; to fix some awareness of the size mismatch and see how small the partitions were.&lt;/p&gt;
+
+&lt;p&gt;Now confirm the current setup and see that you’re not using very much.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lsblk -o PATH,SIZE,PARTUUID
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You will also see that some partition UUID is crucial in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cat /boot/grub/grub.cfg&lt;/code&gt;, we will come back for this later so write down what you see (or open another terminal).&lt;/p&gt;
+
+&lt;p&gt;Now &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fdisk /dev/mmcblk0&lt;/code&gt; is the quickest way to replace the second partition with a much bigger one.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;p&lt;/code&gt; to confirm current values (remember start and end for partition 2)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;d&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2&lt;/code&gt; to delete second partition from the table (not remove any files)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;n&lt;/code&gt; for new partition&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2&lt;/code&gt; for new second partition&lt;/p&gt;
+
+&lt;p&gt;now enter the old start value for partition 2 and just press enter to confirm the default last sector (i.e. the whole remaining disk)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;n&lt;/code&gt; to not remove the signature&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;w&lt;/code&gt; to write the changes and quit&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lsblk&lt;/code&gt; command from earlier should confirm that the unique identifier has changed so update &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/boot/grub/grub.cfg&lt;/code&gt; with the new identifier.&lt;/p&gt;
+
+&lt;p&gt;If you reboot now, your system should still work but the writeable filesystem has not been extended to the full size of the partition so you need one last bit which I believe evaluates as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;resize2fs -f /dev/loop0&lt;/code&gt; but the full script is along the lines of&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;BOOT=&quot;$(sed -n -e &quot;\|\s/boot\s.*$|{s///p;q}&quot; /etc/mtab)&quot;
+PART=&quot;${BOOT##*[^0-9]}&quot;
+DISK=&quot;${BOOT%${PART}}&quot;
+ROOT=&quot;${DISK}$((PART+1))&quot;
+LOOP=&quot;$(losetup -n -l | sed -n -e &quot;\|\s.*\s${ROOT#/dev}\s.*$|{s///p;q}&quot;)&quot;
+resize2fs -f ${LOOP}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://forum.openwrt.org/t/howto-resizing-root-partition-on-x86-march-2023-edition/153398&quot;&gt;Reference&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;dhcp-configuration&quot;&gt;DHCP Configuration&lt;/h3&gt;
+
+&lt;p&gt;It is not immediately obvious but you can configure the DHCP settings with Network &amp;gt; Interfaces and then Edit LAN.&lt;/p&gt;
+
+&lt;p&gt;You can set the interfaces IP address and netmask and it will start offering DHCP from there.&lt;/p&gt;
+
+&lt;p&gt;You can further customise the limits on the DHCP Server tab.&lt;/p&gt;
+
+&lt;p&gt;e.g.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;IPv4 address: 10.0.0.1&lt;/li&gt;
+  &lt;li&gt;IPv4 netmask: 255.255.0.0&lt;/li&gt;
+  &lt;li&gt;DHCP Server Start: 10.0.1.1 (should be a whole IP address instead of a number as this is more predictable)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Obviously be careful about breaking your nginx IP addresses and you probably need to reboot when changing these.&lt;/p&gt;
+
+&lt;p&gt;Don’t forget there is a save button on the modal window and a save button on the interfaces page. If you find yourself in failsafe mode, you can edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/config/network&lt;/code&gt; to undo whatever you just did.&lt;/p&gt;
+
+&lt;p&gt;Finally, some of my devices struggled with IPv6 and also using pihole was trickier when you couldn’t easily identify the devices getting blocked. The quick solution is to disable odhcpd but apparently you can also try this but I don’t think I needed to.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;uci set 'network.lan.ipv6=0'
+uci set 'network.wan.ipv6=0'
+uci set 'dhcp.lan.dhcpv6=disabled'
+uci commit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;tailscale&quot;&gt;Tailscale&lt;/h2&gt;
+
+&lt;p&gt;In theory, this would be a great exit node, allowing you to block adverts whilst on the road and access your home network however because this device is mostly functioning as a router, I don’t think it will work. I’ve followed the basic instructions and configured sysctl but alas all I got was “destination host unreachable” from anything trying to use the exit node. I presume there is something in the firewall or routing which is stopping traffic from flowing unnaturally.&lt;/p&gt;
+
+&lt;p&gt;You could of course set this up as a separate device using debian or whatever within your network and have your existing router set it as the DNS server for its DHCP clients.&lt;/p&gt;
+
+&lt;h2 id=&quot;docker&quot;&gt;Docker&lt;/h2&gt;
+
+&lt;p&gt;If you have problems installing via opkg, you can search the list in the web UI in case the package has been renamed.&lt;/p&gt;
+
+&lt;p&gt;Basically &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;opkg install dockerd luci-app-dockerman&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You can do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ls /etc/init.d&lt;/code&gt; to see a list of services.&lt;/p&gt;
+
+&lt;p&gt;Now you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker pull nginx:stable-alpine&lt;/code&gt; to confirm it is all working.&lt;/p&gt;
+
+&lt;h3 id=&quot;nginx&quot;&gt;nginx&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /etc/config/uhttpd&lt;/code&gt; to remove all the defaults and then just attach to 127.0.0.1:81 so it can’t be accessed directly. Probably need to reboot to apply is probably what I did. If you get stuck, you can come back and change it to whatever you like so maybe leave the defaults commented rather than removed.&lt;/p&gt;
+
+&lt;p&gt;Anyway, then you can make a directory to keep all the config &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /wpinc/nginx/conf.d&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/proxy_params&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;proxy_set_header Host $http_host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/conf.d/default.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	listen 192.168.1.1:80;
+
+    # don't return 404 as that breaks it
+
+    access_log off;
+    error_log /dev/null crit;
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/conf.d/openwrt.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	listen 192.168.1.1:80;
+
+	server_name openwrt.router.zz;
+
+	location / {
+		proxy_pass http://127.0.0.1:81;
+		include proxy_params;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker run -dit --restart always \
+	--name nginx \
+	--network host \
+	-v /wpinc/nginx/proxy_params:/etc/nginx/proxy_params:ro \
+	-v /wpinc/nginx/conf.d:/etc/nginx/conf.d:ro \
+	nginx:stable-alpine
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/nginx.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now if you modify your hosts file to point openwrt.router.zz to 192.168.1.1 then you should find it working.&lt;/p&gt;
+
+&lt;p&gt;If you can’t then you can confirm everything is okay with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netstat -lnp&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker logs nginx&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;pihole&quot;&gt;pihole&lt;/h3&gt;
+
+&lt;p&gt;You might think you need to disable the dnsmasq service however it handles both DHCP and DNS so this ruins everything (see Getting Yourself Unstuck above).&lt;/p&gt;
+
+&lt;p&gt;You need to go to DHCP and DNS &amp;gt; Advanced Settings and set the DNS port to 0 but obviously don’t unless you’re done searching the internet for a little bit.&lt;/p&gt;
+
+&lt;p&gt;It is however crucial to tell DHCP to still advertise the IPv4 DNS host so Network &amp;gt; Interfaces &amp;gt; LAN &amp;gt; DHCP Server &amp;gt; Advanced Settings and click on + for DHCP-Options and Use 6, DNS Servers
+i.e. 6,192.168.1.1. Without this, devices which struggle with IPv6 will fail to resolve DNS.&lt;/p&gt;
+
+&lt;p&gt;We can reference the original script https://github.com/pi-hole/docker-pi-hole/blob/master/examples/docker_run.sh however I ran into several issues.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;It could not resolve any DNS queries internally until it was running with host networking, I guess this makes sense because the OpenWRT DNS needed to be disabled in order to free up the port&lt;/li&gt;
+  &lt;li&gt;The UI makes use of Content Security Policy which means you need to decide on the hostname you’re accessing it with first and never change it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/conf.d/pihole.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	listen 192.168.1.1:80;
+
+	server_name pihole.router.zz;
+
+	location / {
+		proxy_pass http://127.0.0.1:82;
+		include proxy_params;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker restart nginx&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /wpinc/pihole/dnsmasq /wpinc/pihole/pihole&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/pihole.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker run -dit --restart always \
+    --name pihole \
+	--net host \
+	--hostname pihole \
+	-e WEB_PORT=82 \
+    -e TZ=&quot;Europe/London&quot; \
+    -v &quot;/wpinc/pihole/pihole:/etc/pihole&quot; \
+    -v &quot;/wpinc/pihole/dnsmasq:/etc/dnsmasq.d&quot; \
+    -e VIRTUAL_HOST=&quot;pihole.router.zz&quot; \
+    -e PROXY_LOCATION=&quot;pihole.router.zz&quot; \
+    -e DNSMASQ_USER=root \
+	-e DNSMASQ_LISTENING=all \
+    pihole/pihole:latest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/pihole.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You could use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker logs pihole&lt;/code&gt; to see what your initial password is or you could just reset the password with the command line with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker exec -it pihole pihole -a -p&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you screw up and need a full reset, you can stop and remove the container and then empty the two directories before re doing the container.&lt;/p&gt;
+
+&lt;h4 id=&quot;updating-pihole&quot;&gt;Updating pihole&lt;/h4&gt;
+
+&lt;p&gt;As it is a docker container, you need to pull the latest version, stop and remove the container, then re run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/pihole.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;unbound&quot;&gt;Unbound&lt;/h3&gt;
+
+&lt;p&gt;Pihole is great and all but if you’re still sending DNS requests over the usual protocols then your ISP and others can still see what you’re doing.&lt;/p&gt;
+
+&lt;p&gt;The answer is to forward pihole to a nice DNS provider using a separate thing which uses DoH or DoT so we’ll use unbound as it is also a docker image pointing at Quad9.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /wpinc/unbound&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now you need to run the mvance/unbound container and extract the default config file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker cp unbound:/opt/unbound/etc/unbound/unbound.conf /wpinc/unbound/unbound.conf&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You mostly need to change the port to 5053 but if you want to change the log from /dev/null to /dev/stdout then you can debug issues if you mess around with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker logs unbound&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/unbound/forward-records.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;forward-zone:
+    # Forward all queries (except those in cache and local zone) to
+    # upstream recursive servers
+    name: &quot;.&quot;
+    # Queries to this forward zone use TLS
+    forward-tls-upstream: yes
+
+    # Quad9
+    forward-addr: 9.9.9.9@853
+    forward-addr: 149.112.112.112@853
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/unbound.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker run -dit --restart always \
+	--name unbound \
+	--net host \
+	-v /wpinc/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro \
+	-v /wpinc/unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro \
+	mvance/unbound:latest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/unbound.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now back in your pihole UI, Settings &amp;gt; DNS. Untick the upstream DNS servers and add your own in to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.1#5053&lt;/code&gt; (yes # not :).&lt;/p&gt;
+
+&lt;p&gt;Finally you can confirm you’re fully secure with the output of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dig +short txt proto.on.quad9.net&lt;/code&gt; should confirm you’re using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dot&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you want to do this on the zimaboard, you will need the dig command from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;opkg install bind-dig&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In PowerShell parlance, this is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Resolve-DnsName -Name proto.on.quad9.net -Type txt&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;pppoe&quot;&gt;PPPoE&lt;/h2&gt;
+
+&lt;p&gt;If you’re lucky enough to have ethernet presenting broadband in your home, like FTTP, then you can remove the ISP router from your setup entirely.&lt;/p&gt;
+
+&lt;p&gt;If you’re lucky your ISP will provide PPPoE connection details https://www.plus.net/help/broadband/broadband-connection-settings/&lt;/p&gt;
+
+&lt;p&gt;Looks like PPPoE is installed by default so you might not need this extra information https://openwrt.org/docs/guide-user/network/wan/wan_interface_protocols&lt;/p&gt;
+
+&lt;p&gt;You can edit the WAN interface to change the type to PPPoE, you’ll have to confirm the change before you can see the username and password fields but I didn’t need to enter any other information other than the username and password as informed by my ISP.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.</summary></entry><entry><title type="html">Self-hosted Git with Forgejo and Tailscale</title><link href="https://willpower232.github.io/computing/self-hosted-git.html" rel="alternate" type="text/html" title="Self-hosted Git with Forgejo and Tailscale" /><published>2023-11-11T00:00:00+00:00</published><updated>2023-11-11T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/self-hosted-git</id><content type="html" xml:base="https://willpower232.github.io/computing/self-hosted-git.html">&lt;p&gt;Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.&lt;/p&gt;
+
+&lt;h3 id=&quot;self-hosted-git&quot;&gt;Self-hosted Git&lt;/h3&gt;
+
+&lt;p&gt;I started accessing self-hosted Git repositories over SSH in a past life but the default UI leaves a lot to the imagination. I’ve had Gitea in the back of my mind for some time now, mostly because of the fun name, but then I also saw Forgejo was a fork of it for &lt;a href=&quot;https://forgejo.org/faq/#why-was-forgejo-created&quot;&gt;open source reasons&lt;/a&gt; so have gone with that for now.&lt;/p&gt;
+
+&lt;p&gt;Forgejo can manage deploy keys and webhooks for packagist so should be capable for most of my use cases, Netlify does not seem to have custom connections outside of their enterprise tier so this server will mostly just be for my public code.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://forgejo.org/docs/latest/admin/installation/#installation-from-binary&quot;&gt;installation instructions&lt;/a&gt; are comprehensive enough and I went with the direct binary association so I wouldn’t be burned by apt updates and I started with nginx and debian as always.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	# listen...
+	# ssl_certificate...
+	# ssl_certificate_key...
+	# etc etc
+
+	server_name willpoweredinc.software;
+
+	location /.well-known {
+		alias /var/www/html/.well-known;
+	}
+
+	location / {
+		proxy_pass http://127.0.0.1:3000;
+		include proxy_params;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The installation instructions are along the lines of the following once you have &lt;a href=&quot;https://codeberg.org/forgejo/forgejo/releases&quot;&gt;downloaded the right binary&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cp forgejo-1.20.5-0-linux-amd64 /usr/local/bin/forgejo
+
+chmod 755 /usr/local/bin/forgejo
+
+apt install git git-lfs
+
+adduser --system --shell /bin/bash --gecos 'Git Version Control' --group --disabled-password --home /home/git git
+
+mkdir /var/lib/forgejo
+
+chown git:git /var/lib/forgejo &amp;amp;&amp;amp; chmod 750 /var/lib/forgejo
+
+mkdir /etc/forgejo
+
+chown root:git /etc/forgejo &amp;amp;&amp;amp; chmod 770 /etc/forgejo
+
+wget -O /etc/systemd/system/forgejo.service https://codeberg.org/forgejo/forgejo/raw/branch/forgejo/contrib/systemd/forgejo.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A &lt;em&gt;much&lt;/em&gt; abbreviated copy of the systemd file is&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=Forgejo (Beyond coding. We forge.)
+After=syslog.target
+After=network.target
+
+[Service]
+# Uncomment the next line if you have repos with lots of files and get a HTTP 500 error because of that
+# LimitNOFILE=524288:524288
+RestartSec=2s
+Type=simple
+User=git
+Group=git
+WorkingDirectory=/var/lib/forgejo/
+ExecStart=/usr/local/bin/forgejo web --config /etc/forgejo/app.ini
+Restart=always
+Environment=USER=git HOME=/home/git GITEA_WORK_DIR=/var/lib/forgejo
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;At some point you will need to repace &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GITEA_WORK_DIR&lt;/code&gt; with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FORGEJO_WORK_DIR&lt;/code&gt; but you can probably reference the copy of the service from the git repo.&lt;/p&gt;
+
+&lt;p&gt;I left it with the default sqlite database as I knew there would only be me accessing it and this is much simpler. Also I use snapshots of the server from the provider and MySQL can have consistency issues when it is backed up whilst running. Finally it is time to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl enable forgejo &amp;amp;&amp;amp; systemctl start forgejo&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you can visit the website and complete the initial setup. Once that is done, it is time to secure the config file&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl stop forgejo
+
+chmod 750 /etc/forgejo &amp;amp;&amp;amp; chmod 640 /etc/forgejo/app.ini
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I then made the following changes to the app.ini file so it was only me using it&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[openid]
+ENABLE_OPENID_SIGNIN = false
+ENABLE_OPENID_SIGNUP = false
+
+[service]
+DISABLE_REGISTRATION = true
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The next most important thing to deal with is &lt;a href=&quot;https://forgejo.org/docs/next/admin/search-engines-indexation/&quot;&gt;the search engines&lt;/a&gt;. You may be aware that there are an awful lot of web pages to look at in a git repository so the bandwidth usage can ramp up quite quickly which can be a problem if you’re on a lower tier server.&lt;/p&gt;
+
+&lt;p&gt;Basically, you can create the directory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/lib/forgejo/custom/&lt;/code&gt; and a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;robots.txt&lt;/code&gt; file with at least this content as the archives can be particularly heavy downloads.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;User-agent: *
+Disallow: /*/*/archive/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can also take this opportunity to ban the AI bots from accessing your content if you wish.&lt;/p&gt;
+
+&lt;p&gt;Some of the information about forgejo suggests you can run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;forgejo help&lt;/code&gt; to see what is happening however as we customise the paths in the service file, the output will not be of much use to you.&lt;/p&gt;
+
+&lt;h4 id=&quot;customisation&quot;&gt;Customisation&lt;/h4&gt;
+
+&lt;p&gt;You may have changed the name in the initial setup but you can also change the landing page, description, and theme in the config file. I used the theme switcher in my user configuration to try them all out quickly&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[server]
+LANDING_PAGE = explore
+
+[ui]
+DEFAULT_THEME = arc-green # replaced by gitea-dark in version 7 which isn't quite the same
+
+[ui.meta]
+DESCRIPTION = Software what I made
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Referencing the original Gitea documentation, I saw that you can also replace the images used by adding more directories to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;custom&lt;/code&gt; directory mentioned earlier and then adding image files.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/logo.svg&lt;/code&gt; - Used for site icon, app icon&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/logo.png&lt;/code&gt; - Used for Open Graph&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/avatar_default.png&lt;/code&gt; - Used as the default avatar image&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/apple-touch-icon.png&lt;/code&gt; - Used on iOS devices for bookmarks&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/favicon.svg&lt;/code&gt; - Used for favicon&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/favicon.png&lt;/code&gt; - Used as fallback for browsers that don’t support SVG favicons&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This should leave the only Forgejo reference in the footer but thats fine by me, I was mostly doing this for the social media previews when sharing links.&lt;/p&gt;
+
+&lt;p&gt;In version 7, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;img&lt;/code&gt; folder got moved into an assets folder so the complete path is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/assets/img&lt;/code&gt; now.&lt;/p&gt;
+
+&lt;h4 id=&quot;backup&quot;&gt;Backup&lt;/h4&gt;
+
+&lt;p&gt;I already have a daily backup methodology on the server via a shell script so I added the following to include a copy of all Forgejo data&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo -u git forgejo dump --config /etc/forgejo/app.ini -f forgejo-dump.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The default dump file includes a timestamp in the filename but as I was including this zip in another zip, I chose to give it a plainer name.&lt;/p&gt;
+
+&lt;p&gt;I think the dump would have to be restored manually but it is not an encrypted zip file so this would be relatively trivial if I ever needed it.&lt;/p&gt;
+
+&lt;p&gt;Finally, you may want to include &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--quiet&lt;/code&gt; so you don’t ge emails from your cronjob unless they error.&lt;/p&gt;
+
+&lt;h3 id=&quot;ssh&quot;&gt;SSH&lt;/h3&gt;
+
+&lt;p&gt;I prefer using SSH authentication wherever possible to avoid usernames and passwords everywhere and its nicely built in everywhere I need to be but if I’m hosting &lt;em&gt;spicy&lt;/em&gt; repositories, it would be better to not have public SSH at all. This is where Tailscale comes in.&lt;/p&gt;
+
+&lt;p&gt;As always when messing around with SSH configuration &lt;strong&gt;make sure you have a non-SSH console to access the server!&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;In an ideal world, I would have the SSH daemon only listening on the Tailscale network connection so it was impossible to ever connect on the public interfaces but, spoiler alert, I could not figure it out so I just made sure the port was closed on the firewalls.&lt;/p&gt;
+
+&lt;p&gt;I mostly focussed on editing the SSH systemd service so that it had &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Wants&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires&lt;/code&gt; for the Tailscale service but of course technically the service can be up but not connected so it was unfortunately not enough I guess.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl edit ssh
+
+[Unit]
+Wants=tailscaled.service
+
+systemctl edit tailscaled
+
+[Units]
+Before=ssh.service
+
+systemctl daemon-reload
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd-delta&lt;/code&gt; shows all overrides of config files, can delete the overrides if you want (full overrides are in /etc)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl add-requires ssh.service tailscaled&lt;/code&gt; is a nicer way of doing it and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/systemd/system/ssh.service.requires/tailscaled.service&lt;/code&gt; link is created so should be unlinked if you want to undo it but it does not show up in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd-delta&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Leaving the SSH config back at its original settings, I was able to clone the repositories as I expected substituting the Tailscale IP address for the server domain in the standard &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git clone git@server domain&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;p&gt;Links I tried to follow&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://forum.tailscale.com/t/mount-share-only-if-connected-to-tailscale/3027&lt;/li&gt;
+  &lt;li&gt;https://forum.tailscale.com/t/ubuntus-boot-order-for-tailscale-service/2341/7&lt;/li&gt;
+  &lt;li&gt;https://www.2daygeek.com/linux-modifying-existing-systemd-unit-file/&lt;/li&gt;
+  &lt;li&gt;https://stackoverflow.com/questions/49643551/systemd-service-b-to-start-after-another-service-a-only-if-service-a-exists&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;fail2ban&quot;&gt;Fail2ban&lt;/h3&gt;
+
+&lt;p&gt;My standard server installation includes fail2ban mostly for SSH however with the port firewalled off and tailscale meaning only I can get at it anyway, it isn’t really doing anything.&lt;/p&gt;
+
+&lt;p&gt;You may be aware that there are lots of pages in a web-accessible git repo so sooner or later any amount of merges or force pushes will create an awful amount of 404s.&lt;/p&gt;
+
+&lt;p&gt;Firstly you need a filter in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/fail2ban/filter.d&lt;/code&gt;, I went with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nginx-404-filter.conf&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Definition]
+failregex = ^&amp;lt;HOST&amp;gt;.*&quot;(GET|POST).*&quot; (404|444) .*$
+ignoreregex =
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally you need to add to (or create) &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/fail2ban/jail.local&lt;/code&gt;. This equates to 10 404s in 10 seconds means a 5 minute ban.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[nginx-404]
+enabled = true
+port = http,https
+filter = nginx-404-filter
+logpath = /var/log/nginx/access.log
+bantime = 300
+findtime = 10
+maxretry = 10
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you open a whole bunch of tabs to a page that doesn’t exist, you should find yourself blocked for a few minutes if you fancy a cuppa. If you’re still on SSH to your server, you can confirm you are blocked with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fail2ban-client status nginx-404&lt;/code&gt;.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.</summary></entry><entry><title type="html">Setting up a linux MySQL server</title><link href="https://willpower232.github.io/computing/linux-mysql-server.html" rel="alternate" type="text/html" title="Setting up a linux MySQL server" /><published>2023-05-07T00:00:00+00:00</published><updated>2023-05-07T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/linux-mysql-server</id><content type="html" xml:base="https://willpower232.github.io/computing/linux-mysql-server.html">&lt;p&gt;Following on from &lt;a href=&quot;/computing/setting-up-a-linux-server.html&quot;&gt;Setting up a linux server&lt;/a&gt;, installing a MySQL server has some other steps to make sure the server you’re setting up is secure.&lt;/p&gt;
+
+&lt;p&gt;I delegate a lot of the security to my server providers firewalls (or security group in AWS-speak) so that only other servers I own can reach this server which forces me to use tunnels to manage it.&lt;/p&gt;
+
+&lt;p&gt;If you have set up the same SSH keys on your web server and your database server then you should be able to use jump hosts like this &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh -J wh@yourserver.you.com wh@databaseserver.you.com&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;First step is to install the database server, then start and enable the service so it is always running. It is also worth pointing out that this will install the MySQL 8 equivalent of MariaDB so you may need to tweak the password encryption for your application users.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo apt-get install mariadb-server mariadb-client -y
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thankfully they provide the same script to secure your installation &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo /usr/bin/mysql_secure_installation&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;I went with the following options&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;no root password by default&lt;/li&gt;
+  &lt;li&gt;switch to unix_socket authentication&lt;/li&gt;
+  &lt;li&gt;don’t change root password since it is local only by socket&lt;/li&gt;
+  &lt;li&gt;rm anonymous users&lt;/li&gt;
+  &lt;li&gt;disallow root login remotely&lt;/li&gt;
+  &lt;li&gt;rm test database&lt;/li&gt;
+  &lt;li&gt;reload privilege tables&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can verify this has loosely worked by comparing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mysql&lt;/code&gt; (which won’t let you in) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo mysql&lt;/code&gt; (which will).&lt;/p&gt;
+
+&lt;p&gt;Currently you would need to jump servers to pass through a port to localhost along the lines of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh -L 9999:localhost:3306 -J wh@yourserver.you.com -N wh@databaseserver.you.com&lt;/code&gt; so you could provide remote access to the root user (or a user with all the permissions) for your main server which comes in two parts. You would also need to follow these steps if your websites are hosted on a different server.&lt;/p&gt;
+
+&lt;p&gt;Firstly, now you’re in the mysql cli you can do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;GRANT ALL ON . to 'root'@'yourserver.you.com' IDENTIFIED BY '[password]' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Secondly, you need to get the database server using a public port to expose it to your web server. You can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo vim /etc/mysql/mariadb.conf.d/50-server.cnf&lt;/code&gt; and comment out the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bind-address = 127.0.0.1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After restarting the database server, you should be able to tunnel your local computer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh -L 9999:databaseserver.you.com:3306 -N wh@yourserver.you.com&lt;/code&gt; and then your client of choice can use host 127.0.0.1 and port 9999 with root and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[password]&lt;/code&gt; from earlier.&lt;/p&gt;
+
+&lt;p&gt;Finally, if you need to change the password encryption for a specific user to support, the query is&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ALTER USER '[user]'@'yourserver.you.com' IDENTIFIED WITH mysql_native_password BY '[password]'
+&lt;/code&gt;&lt;/pre&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">Following on from Setting up a linux server, installing a MySQL server has some other steps to make sure the server you’re setting up is secure.</summary></entry><entry><title type="html">Backing up all the things</title><link href="https://willpower232.github.io/computing/backing-up-all-the-things.html" rel="alternate" type="text/html" title="Backing up all the things" /><published>2023-01-21T00:00:00+00:00</published><updated>2023-01-21T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/backing-up-all-the-things</id><content type="html" xml:base="https://willpower232.github.io/computing/backing-up-all-the-things.html">&lt;p&gt;I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here.&lt;/p&gt;
+
+&lt;h2 id=&quot;where&quot;&gt;Where&lt;/h2&gt;
+
+&lt;p&gt;I have a spare computer and a 1TB SSD so that can sit headless somewhere and I can fit everything I need there. I can auth to the git repositories with an SSH key and use the same key for scraping the files off my servers so this computer can have its own key no problem.&lt;/p&gt;
+
+&lt;p&gt;To make it easier, I’ll make a directory in the root of the hard drive called backups so its all in one casual place. To make the final parts easier, I’ll make a subfolder called working so the backed up content is also in its own place and then I can mess around with the scripts between the two.&lt;/p&gt;
+
+&lt;h2 id=&quot;what&quot;&gt;What&lt;/h2&gt;
+
+&lt;p&gt;I’ll start by syncing the content from my servers. Having added the public key to the right place, its an easy rsync. As part of setting up my servers, I keep the websites and configuration in one folder so easy enough to download almost everything in that folder. The secret of course is to add your main server user to each other users group so you have basic read access to everything.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+
+rsync rvt --links --progress wh@myserver.com:/wpinc /backups/working/myserver/ --exclude=letsencrypt --exclude=tmp --exclude=logs --delete
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Keeping each servers files separate means that when a server is retired, the last copy of the files can be easily archived without disturbing the whole thing.&lt;/p&gt;
+
+&lt;p&gt;If you want, you could also add some call to a reporting service if you wanted to record you had backed up stuff here since the really unique and important stuff is covered now.&lt;/p&gt;
+
+&lt;p&gt;I’ll start with gits and gists folders in the working subfolder. Obviously we need all branches and tags from our various repositories so we can use a mirror when cloning the repositories.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone --mirror git@github.com:username/repo.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It turns out you can also grab gists in a similar way which is very handy.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone --mirror git@gist.github.com:123456789.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now everything is cloned, the next part of the script will simply loop through the folders and update them.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;REPOS=(&quot;gists&quot; &quot;gits&quot;)
+for REPO in &quot;${REPOS[@]}&quot;; do
+	DIRS=($(find /backups/working/$REPO -name *.git -type d))
+	for DIR in &quot;${DIRS[@]}&quot;; do
+		cd &quot;$DIR&quot;
+		pwd
+		git remote update
+	done
+done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3-2-1&quot;&gt;3-2-1&lt;/h3&gt;
+
+&lt;p&gt;So now you have two copies of everything and you could be done but it won’t be super safe unless you have a third copy somewhere completely different and “off site”.&lt;/p&gt;
+
+&lt;p&gt;I’m a big fan of Backblaze for object storage (others are available of course) and their B2 service which offers 10GB free and then is cheaper after that than S3 so seems like a solid place to get started.&lt;/p&gt;
+
+&lt;p&gt;I initially used a program called duplicity and it seemed to be pretty good however the restore method was not obvious or trivial so I ended up using tar and GPG directly and then the b2 cli to sync the resulting files up to my bucket.&lt;/p&gt;
+
+&lt;p&gt;As the backup computer is only responsible for encrypting files, you can make the process easier by only adding your GPG public key to the backup computer. This doesn’t need the passphrase to encrypt objects so makes the automation less complex.&lt;/p&gt;
+
+&lt;p&gt;You can export the public key like this, substituting your key ID &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg --armor --export me@my-encryption-key.com &amp;gt; encryption.asc&lt;/code&gt; and then import it on the backup computer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg --import encryption.asc&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You will want to edit the imported public key to tell GPG to trust it &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg --edit-key me@my-encryption-key.com&lt;/code&gt;, you can apply ultimate trust from there.&lt;/p&gt;
+
+&lt;p&gt;Again I’ll make a dedicated directory for the compressed encrypted files called scratch next to the working directory.&lt;/p&gt;
+
+&lt;p&gt;Now it is just a matter of looping through the working directories and outputting the files to the scratch directory.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DIRS=(&quot;gists&quot; &quot;gits&quot; &quot;server1&quot; &quot;server2&quot;)
+for LOCAL_DIR in &quot;${DIRS[@]}&quot;; do
+	echo &quot;starting $LOCAL_DIR...&quot;
+
+	tar czf - working/${LOCAL_DIR} | gpg -r me@my-encryption-key.com -e &amp;gt; scratch/${LOCAL_DIR}.tar.gz.gpg
+
+	echo &quot;finished $LOCAL_DIR&quot;
+done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can add v into czf if you want more detailed output and if you didn’t have a GPG encryption key, you could use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-e&lt;/code&gt; for a regular passworded encryption. To skip the prompt in this case, you would do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c --passphrase yourpassword&lt;/code&gt; otherwise you probably have to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;export GPG_TTY=$(tty)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finally, you can now sync the scratch folder into the cloud using the &lt;a href=&quot;https://github.com/Backblaze/B2_Command_Line_Tool&quot;&gt;b2 cli&lt;/a&gt; which looks like&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;b2 authorize-account abcdefghijkl 012345678901234567890123456789012345678901
+
+b2 sync /backups/scratch/ b2://your-backup-bucket/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Before I forget, you will want to double check the retention settings in the bucket to make sure you only keep backups for as long as you want to. You can also set up a backblaze account in a different region and set up bucket replication so you have multiple copies of your backups in the cloud.&lt;/p&gt;
+
+&lt;p&gt;In my setup, I have each of these parts as separate script files but they could be combined into one process if you wanted.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here.</summary></entry><entry><title type="html">Setting up a linux server</title><link href="https://willpower232.github.io/computing/setting-up-a-linux-server.html" rel="alternate" type="text/html" title="Setting up a linux server" /><published>2023-01-14T00:00:00+00:00</published><updated>2023-01-14T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/setting-up-a-linux-server</id><content type="html" xml:base="https://willpower232.github.io/computing/setting-up-a-linux-server.html">&lt;p&gt;I normally handle almost all of the setup work on the server with &lt;a href=&quot;https://www.ansible.com/&quot;&gt;Ansible&lt;/a&gt;, you can see my general notes &lt;a href=&quot;https://github.com/willpower232/howiuseansibletomanageservers&quot;&gt;on github&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;This means I can manage state manually via a git repository without being super strict and rigid (i.e. not &lt;a href=&quot;https://www.chef.io/&quot;&gt;Chef&lt;/a&gt;) and also control using SSH without having to host any other components.&lt;/p&gt;
+
+&lt;p&gt;Some initial manual setup is required to create a new user and lock down SSH access before I can involve my Ansible repository so after I create the server I need to&lt;/p&gt;
+
+&lt;ol&gt;
+	&lt;li&gt;if the root user is given to me with a password then change that password (not really relevant any more as both AWS and DigitalOcean default to SSH keys)&lt;/li&gt;
+	&lt;li&gt;
+		create a user for me to use
+
+		&lt;pre&gt;&lt;code&gt;mkdir /home/wh &amp;amp;&amp;amp; useradd wh --shell /bin/bash &amp;amp;&amp;amp; passwd wh &amp;amp;&amp;amp; chown -R wh:wh /home/wh &amp;amp;&amp;amp; adduser wh sudo
+&lt;/code&gt;&lt;/pre&gt;
+	&lt;/li&gt;
+	&lt;li&gt;
+		import my base bashrc config (and then uncomment some bits at the end)
+
+		&lt;pre&gt;&lt;code&gt;mv /etc/bash.bashrc /etc/bash.bashrc.old &amp;amp;&amp;amp; curl -LSs https://b.w232.co &amp;gt; /etc/bash.bashrc
+&lt;/code&gt;&lt;/pre&gt;
+
+		no seriously, edit the file to change the commented out bits at the end
+	&lt;/li&gt;
+	&lt;li&gt;
+	tweak SSH server config
+		&lt;ol&gt;
+			&lt;li&gt;comment out `PermitRootLogin` to prevent root login (or just set it to no if that is easier)&lt;/li&gt;
+			&lt;li&gt;
+				force key authentication for sudo users
+
+				&lt;pre&gt;&lt;code&gt;Match Group sudo
+	PasswordAuthentication no
+&lt;/code&gt;&lt;/pre&gt;
+			&lt;/li&gt;
+			&lt;li&gt;don't forget to import the SSH keys before you finish otherwise you're now cut off (also chmod 700 the .ssh folder and 400 the authorized_keys file)&lt;/li&gt;
+		&lt;/ol&gt;
+	&lt;/li&gt;
+	&lt;li&gt;
+		finally set the timezone and name and reboot
+
+		&lt;pre&gt;&lt;code&gt;hostnamectl set-hostname yourserver.you.com &amp;amp;&amp;amp; ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime &amp;amp;&amp;amp; shutdown -r now
+&lt;/code&gt;&lt;/pre&gt;
+	&lt;/li&gt;
+	&lt;li&gt;also if you aren't using a script, you should definitely `sudo apt update &amp;amp;&amp;amp; sudo apt upgrade -y` before getting too much more done. You probably also want to install and configure apticron and logwatch.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I’d be paranoid and check the SSH login one more time (and trying out &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo -i&lt;/code&gt;) before proceeding.&lt;/p&gt;
+
+&lt;p&gt;Now you have a nice stable base server to do what you want. I’d either run my ansible script to install all the various components for websites or just &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install mariadb-server&lt;/code&gt; or whatever.&lt;/p&gt;
+
+&lt;p&gt;I normally find that I run the setup server script so rarely that it needs a few updates as Ansible evolves and changes over time but also there are some complicated bits I haven’t figured out how to automate (yet).&lt;/p&gt;
+
+&lt;p&gt;The most important change is to the Logwatch config which &lt;a href=&quot;/computing/customising-logwatch.html&quot;&gt;I’ve documented here already&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finally there is the somewhat thorny issue of how to send emails from your server. I’ve previously installed Postfix, configured to listen locally only but now I am looking as msmtp and SendGrid. I’m mostly drawn to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.msmtprc&lt;/code&gt; for easy per user configuration.&lt;/p&gt;
+
+&lt;p&gt;If you’re using DigitalOcean and didn’t click the checkbox for monitoring when creating the droplet then you will need to manually install their Metrics Agent to get All The Graphs in the UI.&lt;/p&gt;
+
+&lt;p&gt;Past me decided to install resolvconf and I’ve seen that this breaks DigitalOcean droplets, you can confirm that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ping duckduckgo.com&lt;/code&gt; does not work. Fortunately you can still reference &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/netplan/50-cloud-init.yaml&lt;/code&gt; to find out what the nameservers should be and then edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/resolvconf/resolv.conf.d/tail&lt;/code&gt; to include both the default nameservers and something perhaps more reliable.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver whatever.something.etc.etc
+nameserver whatever.something.etc.etc
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To be continued&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I normally handle almost all of the setup work on the server with Ansible, you can see my general notes on github.</summary></entry><entry><title type="html">OpenWrt and Tailscale</title><link href="https://willpower232.github.io/computing/openwrt-and-tailscale.html" rel="alternate" type="text/html" title="OpenWrt and Tailscale" /><published>2022-08-13T00:00:00+00:00</published><updated>2022-08-13T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/openwrt-and-tailscale</id><content type="html" xml:base="https://willpower232.github.io/computing/openwrt-and-tailscale.html">&lt;p&gt;I am trying out &lt;a href=&quot;https://tailscale.com/&quot;&gt;Tailscale&lt;/a&gt; as a way of securely accessing computers and servers I use without learning the ins and outs of &lt;a href=&quot;https://www.wireguard.com/&quot;&gt;WireGuard&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I also have a &lt;a href=&quot;https://www.gl-inet.com/products/gl-ar750s/&quot;&gt;GL-AR750S&lt;/a&gt; which I picked up as part of finding ways to improve wireless coverage in my house. This happens to run OpenWrt so should be able to do cool things on it.&lt;/p&gt;
+
+&lt;p&gt;I hasten to add that I don’t really know what I’m doing and I still need to learn how Tailscale DNS works so I’ll probably update this later.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately logging in to LuCi and going to the page where you can add additional software doesn’t offer Tailscale as an option and trying to use opkg (the package manager) via SSH doesn’t help either.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://openwrt.org/packages/pkgdata/tailscale&quot;&gt;opkg page for Tailscale&lt;/a&gt; suggests it can only be installed on OpenWrt 21 but it seems we’re currently using OpenWrt 19 which is probably to blame.&lt;/p&gt;
+
+&lt;p&gt;This leaves us with two options, either we try and install manually or we update the device.&lt;/p&gt;
+
+&lt;p&gt;The most recent stock firmware seems to be OpenWrt 19 but thankfully &lt;a href=&quot;https://openwrt.org/toh/gl.inet/gl-ar750s&quot;&gt;OpenWrt provides compatible firmware&lt;/a&gt; with the updated version which is nice and you can upload it into LuCi although you’ll lose the nice UI. Apparently this is the NOR and NAND version of the device so lets go with that.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately that broke it which is mildly annoying but there is a NOR-only version we can try as well but how to do that whilst it is essentially bricked?&lt;/p&gt;
+
+&lt;p&gt;Powering the device whilst holding down the reset button and only having one ethernet cable connected puts it in U-boot mode where, with static IP address 192.168.1.2, you can upload the other firmware (to 192.168.1.1). Apparently if you break U-boot, you can also update that at 192.168.1.1/uboot.html which also might be necessary if the upload page has &lt;em&gt;two&lt;/em&gt; upload fields.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately the NOR-only leaves you without the NAND bit and only 10MB of usable space so whilst usable, doesn’t leave a lot of room for experimenting. There might be a way of mounting the NAND but I am definitely not knowledgeable enough for that.&lt;/p&gt;
+
+&lt;p&gt;Fortunately the stock firmware comes in U-boot version so getting back to stock is trouble free so we’ll go for the manual install after all.&lt;/p&gt;
+
+&lt;p&gt;Meanwhile in SSH on your device, Tailscale &lt;a href=&quot;https://pkgs.tailscale.com/stable/#static&quot;&gt;offers compiled downloads&lt;/a&gt; but you may need to check your architecture with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;uname -m&lt;/code&gt;, I need the mips version. You can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wget&lt;/code&gt; the correct download and then expand the tar file with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tar x -zvf&lt;/code&gt; (that separate &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;x&lt;/code&gt; was necessary for the busybox I had so whatever).&lt;/p&gt;
+
+&lt;p&gt;You can now verify it will work by trying to execute &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale version&lt;/code&gt;, if it doesn’t, you’ll need to install some dependencies with opkg (probably ca-bundle and kmod-tun).&lt;/p&gt;
+
+&lt;p&gt;I stumbled upon &lt;a href=&quot;https://github.com/adyanth/openwrt-tailscale-enabler&quot;&gt;adyanth/openwrt-tailscale-enabler&lt;/a&gt; which provides a complete example but you might want to just reference their files rather than use their provided downloads just in case.&lt;/p&gt;
+
+&lt;p&gt;Basically move &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscaled&lt;/code&gt; into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin&lt;/code&gt; so they’re on PATH and then create the service file at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/init.d/tailscale&lt;/code&gt; (don’t forget to make it executable with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chmod +x&lt;/code&gt;)&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/sh /etc/rc.common
+
+# Copyright 2020 Google LLC.
+# SPDX-License-Identifier: Apache-2.0
+
+USE_PROCD=1
+START=99
+STOP=1
+
+start_service() {
+  procd_open_instance
+  procd_set_param command /usr/bin/tailscaled
+
+  # Set the port to listen on for incoming VPN packets.
+  # Remote nodes will automatically be informed about the new port number,
+  # but you might want to configure this in order to set external firewall
+  # settings.
+  procd_append_param command --port 41641
+
+  # OpenWRT /var is a symlink to /tmp, so write persistent state elsewhere.
+  procd_append_param command --state /etc/config/tailscaled.state
+
+  procd_set_param respawn
+  procd_set_param stdout 1
+  procd_set_param stderr 1
+
+  procd_close_instance
+}
+
+stop_service() {
+  /usr/bin/tailscaled --cleanup
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You should now be able to start the service with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/init.d/tailscale start&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale up&lt;/code&gt; to authenticate. You might want to add on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--accept-dns=false&lt;/code&gt; because you probably don’t want to confuse the routers own DNS (right?)&lt;/p&gt;
+
+&lt;p&gt;Finally enable the service after reboot with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/init.d/tailscale enable&lt;/code&gt; and you’re done.&lt;/p&gt;
+
+&lt;h3 id=&quot;dns&quot;&gt;DNS&lt;/h3&gt;
+
+&lt;p&gt;I’d love to try using this as DNS over my Tailscale network for adblocking on the go so I’ll figure that out next but it probably starts with something along the lines of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale up --advertise-routes=192.168.1.0/24&lt;/code&gt;. OpenWrt has a package called luci-app-adblock which seems to do the trick. Shame it isn’t pihole but I don’t have an alternative suitable low power device at the minute.&lt;/p&gt;
+
+&lt;h3 id=&quot;more-reading&quot;&gt;More Reading&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://yomis.blog/tailscale-openwrt/&quot;&gt;https://yomis.blog/tailscale-openwrt/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://willangley.org/how-i-set-up-tailscale-on-my-wifi-router/&quot;&gt;https://willangley.org/how-i-set-up-tailscale-on-my-wifi-router/&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I am trying out Tailscale as a way of securely accessing computers and servers I use without learning the ins and outs of WireGuard.</summary></entry><entry><title type="html">Arch for a VM</title><link href="https://willpower232.github.io/computing/arch-for-a-vm.html" rel="alternate" type="text/html" title="Arch for a VM" /><published>2021-09-23T00:00:00+00:00</published><updated>2021-09-23T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/arch-for-a-vm</id><content type="html" xml:base="https://willpower232.github.io/computing/arch-for-a-vm.html">&lt;p&gt;I want a lightweight VM so that my laptop can stay Windows and I can still develop as I am used to.&lt;/p&gt;
+
+&lt;h2 id=&quot;manual-installation&quot;&gt;Manual Installation&lt;/h2&gt;
+
+&lt;p&gt;Start by making the VM in Virtualbox and boot an arch iso.&lt;/p&gt;
+
+&lt;p&gt;Open &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cfdisk&lt;/code&gt; to format the disk, select dos type when it asks otherwise none of this will work.&lt;/p&gt;
+
+&lt;p&gt;Make two partitions 1g or so for boot, rest for normal but mark it as bootable.&lt;/p&gt;
+
+&lt;p&gt;Now we can encrypt the main partition for extra security with the following commands.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# cryptsetup -y -v luksFormat /dev/sda2
+# cryptsetup open /dev/sda2 cryptroot
+# mkfs.ext4 /dev/mapper/cryptroot
+# mount /dev/mapper/cryptroot /mnt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, we need to prepare the boot partition.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mkfs.ext4 /dev/sda1
+# mkdir /mnt/boot
+# mount /dev/sda1 /mnt/boot
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now we can continue with the installation, I’ve added a few packages to save some time, at minimum you need linux, linux-firmware if not on a VM, a text editor like vim, a boot manager like grub, and some way of networking.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacstrap /mnt base linux vim grub networkmanager doas which net-tools xclip
+# genfstab -U /mnt &amp;gt;&amp;gt; /mnt/etc/fstab
+# arch-chroot /mnt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;initial-configuration&quot;&gt;Initial configuration&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+# hwclock --systohc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Uncomment your locale from locale.gen and maybe give yourself US as well just in case (e.g. en_US.UTF-8 UTF-8)&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# vim /etc/locale.gen
+# locale-gen to generate the locales
+# echo 'LANG=en-US.UTF-8' &amp;gt; /etc/locale.conf
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;see also localectl status and localectl list-keymaps
+https://wiki.archlinux.org/title/Linux_console/Keyboard_configuration&lt;/p&gt;
+
+&lt;p&gt;if you need to type a fancy character like #~@” in the imminent future then you probably want the short lived version which is just &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;loadkeys uk&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;for the future, you can set console keyboard layout in /etc/vconsole.conf with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;KEYMAP=uk&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;set hostname (e.g. arch) and /etc/hosts file with&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;127.0.0.1 localhost
+::1 localhost
+127.0.1.1 arch.localdomain arch
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;passwd&lt;/code&gt; to set root password then you can make your own account&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkdir /home/wp &amp;amp;&amp;amp; useradd wp --shell /bin/bash &amp;amp;&amp;amp; passwd wp &amp;amp;&amp;amp; chown -R wp:wp /home/wp &amp;amp;&amp;amp; usermod -aG wheel wp
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;prepare-boot-manager&quot;&gt;Prepare boot manager&lt;/h3&gt;
+
+&lt;p&gt;Edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/mkinitcpio.conf&lt;/code&gt; and to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HOOKS&lt;/code&gt; array, add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;keyboard&lt;/code&gt; between &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;autodetect&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;modconf&lt;/code&gt; and add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;encrypt&lt;/code&gt; between &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;block&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;filesystems&lt;/code&gt;. Apply with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkinitcpio -P&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now we need the uuid of the partition we installed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;blkid -s UUID -o value /dev/sda2&lt;/code&gt;. Take a photo or write it down.&lt;/p&gt;
+
+&lt;p&gt;Now edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/default/grub&lt;/code&gt; and update &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GRUB_CMDLINE_LINUX&lt;/code&gt; with your uuid instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xxxx&lt;/code&gt; as follows. Also set timeout to zero to save some time.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GRUB_CMDLINE_LINUX=&quot;cryptdevice=UUID=xxxx:cryptroot&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now we can install grub (its the disk not partition!)&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# grub-install --target=i386-pc /dev/sda
+# grub-mkconfig -o /boot/grub/grub.cfg
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;final-configuration&quot;&gt;Final configuration&lt;/h3&gt;
+
+&lt;p&gt;Allow networking to happen&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# systemctl enable NetworkManager
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I’m trying out &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;doas&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo&lt;/code&gt; but I can’t just remember so &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ln -s $(which doas) /usr/bin/sudo&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You need to add a group to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/doas.conf&lt;/code&gt;. They don’t want you to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;persist&lt;/code&gt; because the timeout for it is weird so &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nopass&lt;/code&gt; is probably preferred in this environment.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;permit nopass :wheel
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can verify the config file&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# doas -C /etc/doas.conf &amp;amp;&amp;amp; echo &quot;config ok&quot; || echo &quot;config error&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;reboot to win&lt;/p&gt;
+
+&lt;p&gt;references:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://blog.bespinian.io/posts/installing-arch-linux-on-uefi-with-full-disk-encryption/&lt;/li&gt;
+  &lt;li&gt;https://wiki.archlinux.org/title/installation_guide&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;desktop-environment&quot;&gt;Desktop Environment&lt;/h2&gt;
+
+&lt;p&gt;full update (also if you’re getting 404’s then just &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-Sy&lt;/code&gt;)&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# sudo pacman -Syu
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;no escape from xorg&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacman -S xorg-server xorg-xinit xorg-twm xorg-xclock xterm xorg-apps
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;xfce4&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacman -S xfce4 xfce4-goodies
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;need graphics&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacman -S xf86-video-vesa
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;need display manager&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacman -S lightdm lightdm-gtk-greeter
+# systemctl enable lightdm
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;reboot to graphics and then
+also now you likely have &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;libxkbcommon&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;libxkbcommon-x11&lt;/code&gt; which means you can do&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;localectl set-x11-keymap gb
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;reference:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://nullcodelinux.wordpress.com/2018/01/21/installing-a-desktop-environment-on-arch-linux/&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;final-setup&quot;&gt;Final Setup&lt;/h3&gt;
+
+&lt;p&gt;In terminal Go to Edit &amp;gt; Preferences &amp;gt; General tab and uncheck “Show unsafe paste dialog”.&lt;/p&gt;
+
+&lt;p&gt;add bashrc’s and then
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pacman -S bash-completion&lt;/code&gt;
+probably need to add this to .bashrc
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;. /usr/share/bash-completion/bash_completion&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;virtualbox-guest-additions&quot;&gt;virtualbox guest additions&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pacman -S linux-headers gcc make perl&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;mount the cdrom (sr0?) and then do the do&lt;/p&gt;
+
+&lt;p&gt;although apparently arch provides but its not as good maybe? (also see tips for mounting folders)
+https://wiki.archlinux.org/title/VirtualBox/Install_Arch_Linux_as_a_guest&lt;/p&gt;
+
+&lt;p&gt;Random things which may help&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo lsmod | grep vbox
+sudo modprobe vboxsf
+sudo pacman -S virtualbox-guest-iso
+sudo rcvboxadd setup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;for ssh client and server but you don’t need to enable server
+pacman -S openssh&lt;/p&gt;
+
+&lt;p&gt;I wanted to use podman but I just couldn’t figure out how to make it work so I’m giving up on it for now.&lt;/p&gt;
+
+&lt;p&gt;vscode full version from yay, can’t install base-devel without overwriting doas pretending to be sudo&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# cd /opt/
+# pacman -S git fakeroot
+# git clone https://aur.archlinux.org/yay.git
+# su wp
+$ cd yay
+$ makepkg -si
+$ yay -S visual-studio-code-bin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;you also need gnome-keyring or keepassxc
+https://www.cogitri.dev/posts/03-keepassxc-freedesktop-secret/&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pacman -S ttf-fira-code&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;also need to have &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.gnupg/gpg-agent.conf&lt;/code&gt; with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pinentry-program /usr/bin/pinentry-qt&lt;/code&gt; and then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg-connect-agent reloadagent /bye&lt;/code&gt; to reload agent&lt;/p&gt;
+
+&lt;p&gt;get epiphany for gnome web&lt;/p&gt;
+
+&lt;h3 id=&quot;mounting-lvm&quot;&gt;Mounting LVM&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# cryptsetup open /dev/sdb5 whatever
+# mkdir /mnt/whatever
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;blkid&lt;/code&gt; shows you have ext4 then you can just mount it&lt;/p&gt;
+
+&lt;p&gt;if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;blkid&lt;/code&gt; shows you have LVM2_member then&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacman -S lvm2
+# lvscan
+# vgchange -ay
+# lvscan
+# mount /dev/oldlvmname/root /mnt/whatever
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;emoji-terminal-support&quot;&gt;Emoji terminal support&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;install  noto-fonts-emoji package
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pacman -S noto-fonts-emoji --needed
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;add font config to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/fonts/conf.d/01-notosans.conf&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo &quot;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;
+&amp;lt;!DOCTYPE fontconfig SYSTEM &quot;fonts.dtd&quot;&amp;gt;
+&amp;lt;fontconfig&amp;gt;
+ &amp;lt;alias&amp;gt;
+   &amp;lt;family&amp;gt;sans-serif&amp;lt;/family&amp;gt;
+   &amp;lt;prefer&amp;gt;
+     &amp;lt;family&amp;gt;Noto Sans&amp;lt;/family&amp;gt;
+     &amp;lt;family&amp;gt;Noto Color Emoji&amp;lt;/family&amp;gt;
+     &amp;lt;family&amp;gt;Noto Emoji&amp;lt;/family&amp;gt;
+     &amp;lt;family&amp;gt;DejaVu Sans&amp;lt;/family&amp;gt;
+   &amp;lt;/prefer&amp;gt;
+ &amp;lt;/alias&amp;gt;
+
+ &amp;lt;alias&amp;gt;
+   &amp;lt;family&amp;gt;serif&amp;lt;/family&amp;gt;
+   &amp;lt;prefer&amp;gt;
+     &amp;lt;family&amp;gt;Noto Serif&amp;lt;/family&amp;gt;
+     &amp;lt;family&amp;gt;Noto Color Emoji&amp;lt;/family&amp;gt;
+     &amp;lt;family&amp;gt;Noto Emoji&amp;lt;/family&amp;gt;
+     &amp;lt;family&amp;gt;DejaVu Serif&amp;lt;/family&amp;gt;
+   &amp;lt;/prefer&amp;gt;
+ &amp;lt;/alias&amp;gt;
+
+ &amp;lt;alias&amp;gt;
+  &amp;lt;family&amp;gt;monospace&amp;lt;/family&amp;gt;
+  &amp;lt;prefer&amp;gt;
+    &amp;lt;family&amp;gt;Noto Mono&amp;lt;/family&amp;gt;
+    &amp;lt;family&amp;gt;Noto Color Emoji&amp;lt;/family&amp;gt;
+    &amp;lt;family&amp;gt;Noto Emoji&amp;lt;/family&amp;gt;
+    &amp;lt;family&amp;gt;DejaVu Sans Mono&amp;lt;/family&amp;gt;
+   &amp;lt;/prefer&amp;gt;
+ &amp;lt;/alias&amp;gt;
+&amp;lt;/fontconfig&amp;gt;
+
+&quot; &amp;gt; /etc/fonts/local.conf
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;update font cache via fc-cache&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# fc-cache
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;https://dev.to/darksmile92/get-emojis-working-on-arch-linux-with-noto-fonts-emoji-2a9&lt;/p&gt;
+
+&lt;h2 id=&quot;automatic-installation&quot;&gt;Automatic Installation&lt;/h2&gt;
+
+&lt;p&gt;The manual installation was okay but the virtualbox integration never fully worked, I was probably missing a implicit dependency somewhere but I don’t know.&lt;/p&gt;
+
+&lt;p&gt;I randomly found that there was an effort to create an installer which reduces a lot of the above into some easy choices https://itsfoss.com/install-arch-linux-virtualbox/&lt;/p&gt;
+
+&lt;p&gt;It does not currently support disk encryption with grub so you have to enable the EFI setting before starting the VM for the first time.&lt;/p&gt;
+
+&lt;p&gt;Boot and enter &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;archinstall&lt;/code&gt;. Answer all the prompts, allow systemd-boot, don’t allow your user to be sudo since we’ll do that differently later. Select “desktop” and your environment of choice (LXQT for lightweightness). Choose virtualbox graphics and probably all the other defaults. additional packages: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim opendoas which net-tools xclip openssh bash-completion sakura&lt;/code&gt;. select the network interface rather than networkmanager to save some time and effort, allow DHCP and enter your timezone.&lt;/p&gt;
+
+&lt;p&gt;You don’t need to chroot so exit back to installer and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shutdown now&lt;/code&gt; so you can remove the iso.&lt;/p&gt;
+
+&lt;p&gt;Install vbox additions from cd, uninstall sudo, configure doas for group named after user you made earlier, also add user you made earlier to group vboxsf.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo mount -t vboxsf -o gid=vboxsf shared_folder_name mount_point_on_guest_system&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;lxqt&quot;&gt;LXQT&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;remove quick launcher and desktop switcher widgets&lt;/li&gt;
+  &lt;li&gt;lxqt preferences - appearance (icons to adwaita, theme to clearlooks)&lt;/li&gt;
+  &lt;li&gt;openbox settings (theme to bear2, desktops down to 1)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;other-des&quot;&gt;OTHER DEs&lt;/h3&gt;
+
+&lt;p&gt;If you want to use lxde or something not on the list then add it to the packages you install &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lightdm lightdm-gtk-greeter lxde&lt;/code&gt; and when prompted, you should chroot so that you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl enable lightdm&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;thrilling-conclusion&quot;&gt;Thrilling Conclusion(?)&lt;/h2&gt;
+
+&lt;p&gt;The automatic install meant that installing the virtualbox tools from the CD worked perfectly so I was able to get further with docker and vscode as above however I needed to install PHP for validating code as I write it.&lt;/p&gt;
+
+&lt;p&gt;I was able to install literally everything else apart from PHP 7.4. That is only available from yay and that means it needs compiling and the VM didn’t quite have enough resources for that so it froze and I had to kill the VM.&lt;/p&gt;
+
+&lt;p&gt;At this point, I don’t know if I will persist or give up and install Zorin Lite 16 when that comes out. We’ll see.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><category term="software-choices" /><summary type="html">I want a lightweight VM so that my laptop can stay Windows and I can still develop as I am used to.</summary></entry><entry><title type="html">Linux laptop as a security camera</title><link href="https://willpower232.github.io/computing/linux-laptop-as-a-security-camera.html" rel="alternate" type="text/html" title="Linux laptop as a security camera" /><published>2021-06-27T00:00:00+00:00</published><updated>2021-06-27T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/linux-laptop-as-a-security-camera</id><content type="html" xml:base="https://willpower232.github.io/computing/linux-laptop-as-a-security-camera.html">&lt;p&gt;Here I’m installing debian without a desktop environment but with the SSH server for later use. You’ll need to be root but haven’t got &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo&lt;/code&gt; so &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su&lt;/code&gt; will do for now.&lt;/p&gt;
+
+&lt;p&gt;Firstly you need to extend the PATH to include all the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sbin&lt;/code&gt; directories. The easiest fix is to append &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PATH=&quot;$PATH:/usr/local/sbin:/usr/sbin:/sbin&quot;&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/bash.bashrc&lt;/code&gt; with nano.&lt;/p&gt;
+
+&lt;p&gt;If you back out of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su&lt;/code&gt; and go back in then you should have access to all the useful commands.&lt;/p&gt;
+
+&lt;p&gt;Now its wireless time. First, figure out the name of your wireless device according to the OS&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iw dev&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Mine was wlp2s0. Then you can prepare wpa_supplicant&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wpa_passphrase &amp;lt;network-name&amp;gt; &amp;lt;network-password&amp;gt; &amp;gt; /etc/wpa_supplicant/wpa_supplicant.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You can also use this command to avoid copying and pasting when you don’t have access to copy and paste (just remember to append and not overwrite)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wpa_passphrase &amp;lt;network-name&amp;gt; &amp;lt;network-password&amp;gt; &amp;gt;&amp;gt; /etc/network/interfaces&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now you can edit the interfaces file like this&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;allow-hotplug wlp2s0
+iface wlp2s0 inet dhcp
+	wpa-ssid &amp;lt;network-name&amp;gt;
+	wpa-psk &amp;lt;encrypted-network-password&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally you can make the connection with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ifup wlp2s0&lt;/code&gt; and verify the connection with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;iw wlp2s0 link&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ip a&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You may also need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl enable wpa_supplicant&lt;/code&gt; or reboot if you’re having a bad time.&lt;/p&gt;
+
+&lt;p&gt;If you see the error message “option with an empty value” its likely there is a typo in the lines you added so double check and make sure you haven’t written &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dchp&lt;/code&gt; or left an equals sign in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wpa-ssid=whatever&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://wiki.debian.org/WiFi/HowToUse&quot;&gt;Reference&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Now you can install the basics &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt install -y vim curl net-tools dnsutils sudo rsync&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;If you have a laptop that you want to keep turned on, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo vim /etc/systemd/logind.conf&lt;/code&gt; and set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HandleLidSwitch=ignore&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;camera-identification&quot;&gt;Camera Identification&lt;/h2&gt;
+
+&lt;p&gt;Verify you have something video connected &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ls -l /dev/video*&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Find the device &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lsusb&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Identify available resolutions using the appropriate bus and device numbers from above &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lsusb -s &amp;lt;bus&amp;gt;:&amp;lt;device&amp;gt; -v | egrep &quot;Width|Height&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.netinstructions.com/automating-picture-capture-using-webcams-on-linuxubuntu/&quot;&gt;Reference&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;motion&quot;&gt;Motion&lt;/h2&gt;
+
+&lt;p&gt;https://motion-project.github.io&lt;/p&gt;
+
+&lt;h3 id=&quot;install-and-setup&quot;&gt;Install and Setup&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt install motion&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo vim /etc/motion/motion.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;daemon on&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;width&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;height&lt;/code&gt; to something within the cameras ability (identified above) and then increase &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;threshold&lt;/code&gt; at least proportionally, motion will adapt to match the resolutions listed above&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;framerate 4&lt;/code&gt; because that might be nicer if the device deals with it&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max_movie_time 600&lt;/code&gt; for shorter videos&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ffmpeg_video_codec mp4&lt;/code&gt; for videos that are more open-able&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;target_dir&lt;/code&gt; if we need to export videos easier?&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;stream_localhost off&lt;/code&gt; to verify easily that the video is being picked up&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;webcontrol_localhost off&lt;/code&gt; to verify easily that the video is being picked up&lt;/p&gt;
+
+&lt;p&gt;If you have to mount the camera at a weird angle then you can change &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rotate&lt;/code&gt; to the appropriate amount of degrees&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo vim /etc/default/motion&lt;/code&gt; and turn daemon on then reboot.&lt;/p&gt;
+
+&lt;h3 id=&quot;now-make-it-useful&quot;&gt;Now Make It Useful&lt;/h3&gt;
+
+&lt;h4 id=&quot;slack-app&quot;&gt;Slack App&lt;/h4&gt;
+
+&lt;p&gt;Create an app&lt;/p&gt;
+
+&lt;p&gt;Oauth and Permissions -&amp;gt; bot token scopes&lt;/p&gt;
+
+&lt;p&gt;incoming-webhook
+files:write&lt;/p&gt;
+
+&lt;p&gt;Install App To Workspace (copy bot token)&lt;/p&gt;
+
+&lt;p&gt;Right click on its name in slack, open app details, add this app to a channel&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://dev.to/c0d3b0t/upload-and-publish-a-file-on-slack-channel-with-bash-i2e&quot;&gt;Reference&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;bash-scripts&quot;&gt;bash scripts&lt;/h4&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+
+curl -F file=@$1 -F &quot;initial_comment=$2&quot; -F channels=&amp;lt;channel-ID&amp;gt; -H &quot;Authorization: Bearer &amp;lt;bot-token&amp;gt;&quot; https://slack.com/api/files.upload
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+
+JSON=&quot;{\&quot;channel\&quot;: \&quot;&amp;lt;channel-name&amp;gt;\&quot;, \&quot;text\&quot;: \&quot;$1\&quot;}&quot;
+
+curl -s -d &quot;payload=$JSON&quot; https://hooks.slack.com/services/&amp;lt;webhook-url&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;configure&quot;&gt;configure&lt;/h4&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;output_pictures first&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;on_event_start bash /postToSlack.sh &quot;event start %C&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;on_event_end bash /postToSlack.sh &quot;event end %C&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;on_picture_save bash /uploadToSlack.sh %f &quot;picture saved %C&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;on_movie_end bash /uploadToSlack.sh %f &quot;video saved %C&quot;&lt;/code&gt;&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><category term="software-choices" /><summary type="html">Here I’m installing debian without a desktop environment but with the SSH server for later use. You’ll need to be root but haven’t got sudo so su will do for now.</summary></entry><entry><title type="html">Minecraft with a controller</title><link href="https://willpower232.github.io/computing/minecraft-with-controller.html" rel="alternate" type="text/html" title="Minecraft with a controller" /><published>2021-05-03T00:00:00+00:00</published><updated>2021-05-03T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/minecraft-with-controller</id><content type="html" xml:base="https://willpower232.github.io/computing/minecraft-with-controller.html">&lt;p&gt;Initially I attempted to follow &lt;a href=&quot;https://www.youtube.com/watch?v=Ze7MyUrDNKs&quot;&gt;this YouTube video&lt;/a&gt; but my minecraft crashed in this configuration so I had to do something less well integrated. Fortunately I stumbled into &lt;a href=&quot;https://github.com/AntiMicro/antimicro&quot;&gt;antimicro&lt;/a&gt; which seems to fit the job perfectly.&lt;/p&gt;
+
+&lt;p&gt;I am using the following configuration with my Xbox One controller&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Left stick - WASD for movement&lt;/li&gt;
+  &lt;li&gt;Right stick - mouse up/down/left/right for looking&lt;/li&gt;
+  &lt;li&gt;Left trigger - right click for placing blocks&lt;/li&gt;
+  &lt;li&gt;Right trigger - left click for breaking blocks&lt;/li&gt;
+  &lt;li&gt;Left bumper - mouse 4 (wheel up) for scrolling left through hotbar&lt;/li&gt;
+  &lt;li&gt;Right bumper - mouse 5 (wheel down) for scrolling right through hotbar&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I also needed to lower the vertical notch count for the bumpers so that the scrolling through items was more controllable, it was 20 by default but 5-10 should suffice.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;D pad up - F3 for debug (to see current coordinates)&lt;/li&gt;
+  &lt;li&gt;D pad left - F to swap item to left hand&lt;/li&gt;
+  &lt;li&gt;D pad down - left shift for sneaking&lt;/li&gt;
+  &lt;li&gt;D pad right - &lt;em&gt;unused&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Right stick click - &lt;em&gt;unused&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Left stick click - &lt;em&gt;unused&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I don’t need to sneak really but that is uncomfortable to hold so might change that in the future. I had it on a stick press as a toggle at one point however the controls glitched out and I drowned trying to get into a boat.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Guide - ESC for menu&lt;/li&gt;
+  &lt;li&gt;Start - ESC for menu&lt;/li&gt;
+  &lt;li&gt;Back - ESC for menu&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These are all the same but I don’t have a need for them all to be different.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A - space to jump&lt;/li&gt;
+  &lt;li&gt;B - Q for drop item&lt;/li&gt;
+  &lt;li&gt;X - E for inventory&lt;/li&gt;
+  &lt;li&gt;Y - left ctrl for sprinting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I also still have a keyboard and mouse available so that I can do chat, commands, or search for things to craft but having a controller (and auto jump) means I can navigate the world more comfortably. I also inverted the mouse because that is how I roll.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="gaming" /><summary type="html">Initially I attempted to follow this YouTube video but my minecraft crashed in this configuration so I had to do something less well integrated. Fortunately I stumbled into antimicro which seems to fit the job perfectly.</summary></entry></feed>
