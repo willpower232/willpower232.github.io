@@ -4,7 +4,7 @@ title: Zimaboard OpenWRT with Pihole
 description:
 category: computing
 tags: linux
-modified_date: 2024-02-25
+modified_date: 2024-09-15
 ---
 
 Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.
@@ -126,9 +126,13 @@ You can do `ls /etc/init.d` to see a list of services.
 
 Now you can `docker pull nginx:stable-alpine` to confirm it is all working.
 
+Portainer is a great way to see what is happening so you can also do `docker run -d --rm --network host -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce:2.18.4`
+
 ### nginx
 
 `vim /etc/config/uhttpd` to remove all the defaults and then just attach to 127.0.0.1:81 so it can't be accessed directly. Probably need to reboot to apply is probably what I did. If you get stuck, you can come back and change it to whatever you like so maybe leave the defaults commented rather than removed.
+
+You can also edit the hosts file to help you get unstuck if you break docker based DNS later, i.e. add `192.168.1.1 openwrt.router.zz`.
 
 Anyway, then you can make a directory to keep all the config `mkdir -p /wpinc/nginx/conf.d`
 
@@ -159,6 +163,8 @@ server {
 
 ```
 server {
+	client_max_body_size 50M;
+
 	listen 192.168.1.1:80;
 
 	server_name openwrt.router.zz;
@@ -191,7 +197,7 @@ If you can't then you can confirm everything is okay with `netstat -lnp` and `do
 
 You might think you need to disable the dnsmasq service however it handles both DHCP and DNS so this ruins everything (see Getting Yourself Unstuck above).
 
-You need to go to DHCP and DNS > Advanced Settings and set the DNS port to 0 but obviously don't unless you're done searching the internet for a little bit.
+You need to go to DHCP and DNS > Advanced Settings and set the DNS port to 0 but obviously don't unless you're done searching the internet for a little bit. If you get stuck, this port is specific in `/etc/config/dhcp` so you can set it back to 53 if you break docker.
 
 It is however crucial to tell DHCP to still advertise the IPv4 DNS host so Network > Interfaces > LAN > DHCP Server > Advanced Settings and click on + for DHCP-Options and Use 6, DNS Servers
 i.e. 6,192.168.1.1. Without this, devices which struggle with IPv6 will fail to resolve DNS.
@@ -305,3 +311,31 @@ If you're lucky your ISP will provide PPPoE connection details https://www.plus.
 Looks like PPPoE is installed by default so you might not need this extra information https://openwrt.org/docs/guide-user/network/wan/wan_interface_protocols
 
 You can edit the WAN interface to change the type to PPPoE, you'll have to confirm the change before you can see the username and password fields but I didn't need to enter any other information other than the username and password as informed by my ISP.
+
+## Upgrading OpenWRT
+
+We have added random files in a custom location so we need to make sure these are preserved when a big firmware upgrade happens. You can add more directories to `/etc/sysupgrade.conf` so make sure `/wpinc` is on the list. It would be nice to include `/opt/docker` however this is obviously a massive directory and easily recreated with the scripts in `/wpinc`.
+
+Now make sure you have installed the attended sysupgrade program `luci-app-attendedsysupgrade` from the software lists.
+
+The last bit of preparation is recording all the packages you have installed. [opkgscript](https://github.com/richb-hanover/OpenWrtScripts/blob/main/opkgscript.sh) makes it easy, save it to `/wpinc` and run `sh opkgscript.sh -v write`.
+
+You can download a backup of all config files in the web UI System > Backup / Flash Firmware and confirm that `/wpinc` and the list of installed software is present.
+
+Finally the fun part. Under System you should see Attended Sysupgrade so you can check for upgrades and follow the prompts.
+
+I found that docker was using a lot of space so had to break it thoroughly to get my disk space usage down. Unfortunately the attended upgrade service refused to be updated after this point so I guess I'm going in manually.
+
+Now you need to figure out the latest image using similar instructions as above. The current version is at the bottom of the web UI or in the banner when you log in to the terminal.
+
+```sh
+cd /tmp
+wget https://downloads.openwrt.org/releases/23.05.4/targets/x86/64/openwrt-23.05.4-x86-64-generic-squashfs-combined-efi.img.gz
+sysupgrade -v openwrt-23.05.4-x86-64-generic-squashfs-combined-efi.img.gz
+```
+
+I had to add --force because the image metadata was missing.
+
+Unfortunately nothing had changed after the reboot so I tried it uploading the file in the UI and that also accomplished nothing.
+
+The only way to make some progress was to install the (now deprecated) auc and run that. owut (its replacement) was not available to me. Of course this had the same error as before so I am giving up.
