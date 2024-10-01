@@ -4,7 +4,7 @@ title: Zimaboard OpenWRT with Pihole
 description:
 category: computing
 tags: linux
-modified_date: 2024-09-15
+modified_date: 2024-10-01
 ---
 
 Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.
@@ -253,6 +253,10 @@ If you screw up and need a full reset, you can stop and remove the container and
 #### Updating pihole
 
 As it is a docker container, you need to pull the latest version, stop and remove the container, then re run `sh /wpinc/pihole.sh`
+
+#### Whitelisting in pihole
+
+I found that `s.youtube.com` needed adding to the whitelist to make YouTube watch history work properly.
 
 ### Unbound
 
