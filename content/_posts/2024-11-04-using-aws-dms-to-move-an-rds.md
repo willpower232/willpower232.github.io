@@ -32,6 +32,8 @@ In fact, if you are using RDS for your new database server then definitely take 
 
 If you aren't using RDS, you will need to select which Source Engine it is using and then "Provide Access Information Manually" to see all the fields you expect.
 
+If you have a cluster then the most important part of endpoint selection is that you pick the writer directly and specifically as that is the only one with the binary log.
+
 Now you have a Replication Instance, the Test Endpoint Connection section will be able to work and confirm that the endpoint settings are correct. If you skip over the test part, you can go into the Endpoint and go to the Connections tab to test directly. You will not be able to start the Task until this is successful so it seems to handle most of this itself.
 
 Once you have created both source and destination Endpoints (if you have a cluster, remember to select the appropriate reader and writer instances or the correct endpoint), you can go to the source Endpoint and the Schemas tab to see the refresh button and load a list of databases available. I saw some error about a missing arn but it generated the list of schemas eventually anyway.
