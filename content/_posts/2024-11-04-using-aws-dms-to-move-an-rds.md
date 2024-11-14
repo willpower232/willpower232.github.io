@@ -4,7 +4,7 @@ title: Using AWS DMS To Move An RDS
 description:
 category: computing
 tags: aws
-modified_date: 2024-11-08
+modified_date: 2024-11-14
 ---
 
 My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general.
@@ -46,6 +46,8 @@ Finally you can create a task, I prefer to create one task per database being mo
 This is critical because the initial creation of your database is more or less guaranteed to create the tables (and insert the data) in the "wrong" order so foreign key creation will fail. I mention it as a separate step because once the database has been created, you would want to remove it so that the subsequent ongoing inserts are more typical.
 
 I would name the task after the database you're going to move to provide flexibility and make it clear what is happening. After picking the only option from the dropdowns, the Migration Type is Migrate And Replicate and "indefinitely". Now you can use the wizard to Do Nothing on target, Stop After Applying Cached Changes. You can turn on CloudWatch Logs if you need debugging but I am going to be confident initially (foreshadowing).
+
+The Migration Type is the only attribute that you can't change after creating the task so make sure you select Migrate and Replicate otherwise you'll have to either fully start over or keep pressing resume every so often.
 
 The Table Mappings wizard should let you select the Schema (database) from a dropdown. You can probably leave the rest of the settings for this purpose.
 
