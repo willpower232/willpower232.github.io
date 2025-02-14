@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2024-03-18
+modified_date: 2025-02-14
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -213,6 +213,7 @@ install aws cli from the [official instructions](https://docs.aws.amazon.com/cli
 install and configure vs code
 - manually install https://github.com/IronLu233/vscode-color-exchange
 - add globalStorage and History to `.config/Code/User/syncLocalSettings.json` under  `ignoreUploadFolders`
+- using the customise layout button I like to put quick input in the centre and justify the panel alignment which isn't in the preferences json for some reason
 
 don't forget about your vim preferences and gitconfig
 - [https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc](https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc)
