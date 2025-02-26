@@ -4,7 +4,7 @@ title: Customising Logwatch
 description: getting the most out of Logwatch
 category: computing
 tags: linux server-config
-modified_date: 2024-03-27
+modified_date: 2025-02-26
 ---
 
 Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.
@@ -234,3 +234,6 @@ if ( $show_disk_usage == 1 ) { DiskUsage(); }; #Turn on in zz-disk_space.conf
 ```
 
 You can also make other changes in this area if your use of mountable disks is a bit more exciting.
+
+If you are using docker on your server, then alongside the mentions of `-x tmpfs` you will probably want to add `-x overlay` as well.
+
