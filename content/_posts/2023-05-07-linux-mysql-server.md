@@ -4,7 +4,7 @@ title: Setting up a linux MySQL server
 description:
 category: computing
 tags: linux
-modified_date: 2023-11-11
+modified_date: 2025-04-01
 ---
 
 Following on from [Setting up a linux server]({% post_url 2023-01-14-setting-up-a-linux-server %}), installing a MySQL server has some other steps to make sure the server you're setting up is secure.
@@ -50,3 +50,12 @@ Finally, if you need to change the password encryption for a specific user to su
 
 <pre><code>ALTER USER '[user]'@'yourserver.you.com' IDENTIFIED WITH mysql_native_password BY '[password]'
 </code></pre>
+
+### Timezones
+
+I have apps that tend to run in UTC but I normally run the servers in my local time so their automatic processes line up to me.
+
+This is a problem for MySQL which runs in "system" time by default and then struggles with inserts when summer time starts.
+
+Given you have probably already modified `50-server.cnf`, you can add `default-time-zone = '+00:00'` and restart MySQL to apply.
+
