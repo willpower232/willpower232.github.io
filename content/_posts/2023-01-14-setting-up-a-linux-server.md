@@ -4,7 +4,7 @@ title: Setting up a linux server
 description:
 category: computing
 tags: linux
-modified_date: 2023-05-07
+modified_date: 2025-04-29
 ---
 
 I normally handle almost all of the setup work on the server with [Ansible](https://www.ansible.com/), you can see my general notes [on github](https://github.com/willpower232/howiuseansibletomanageservers).
@@ -71,5 +71,17 @@ nameserver 8.8.8.8
 nameserver whatever.something.etc.etc
 nameserver whatever.something.etc.etc
 </code></pre>
+
+### SMTP Providers
+
+I am looking to send about 150 emails per month in total across 4 servers so setting up subdomains is important. I'm not averse to paying but most providers don't care at this scale so it pays to have a rummage around the pricing pages and find where each providers tolerance is.
+
+I first started trying to use SendGrid, I don't think they have a free tier any more but they also have a ludicrously complicated interface and its really hard to actually just send emails.
+
+I had a go with Postmark and they have a lovely interface, it is really easy to separate your servers and track their usage. They have a free tier of 100 emails per month so I hit this quite quickly and then you're paying £15 a month which is a bit much paying 12p or so per email for something which doesn't really matter.
+
+Elastic Email is a good option, they allow unlimited emails for free to the account holders email which works for some use cases but I had a little variety in the receiving addresses so didn't work out for me. They also include an unsubscribe link on transaction email messages which is annoying.
+
+Brevo has more of a marketing focus, like mailchimp, but they do allow 300 emails per month for free which escapes the Postmark limitation for me. You can create server-specific passwords for SMTP but they do get you using a "master password" by default which is a little sketchy.
 
 To be continued
