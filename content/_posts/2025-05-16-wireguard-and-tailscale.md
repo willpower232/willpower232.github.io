@@ -47,6 +47,10 @@ AllowedIPs = 192.168.2.1/32,192.168.2.18/32,192.168.1.100/32
 
 Now its working properly, you can use `systemctl enable --now wg-quick@my-vpn.service` to just have it around all the time but don't forget to `wg-quick down` before you try enabling the service though, otherwise it won't enable because `--now` starts it.
 
+## Android?
+
+Now you're having a great time, you can `tailscale file cp /etc/wireguard/my-vpn.conf tailscale-ip-of-phone:` and get [wireguard from the play store](https://play.google.com/store/apps/details?id=com.wireguard.android) and import the file. Naturally Android only lets you connect to a single VPN at a time so automatically disconnects tailscale but now you can use [connectbot](https://play.google.com/store/apps/details?id=org.connectbot) to get at your SSH connections.
+
 ## More Reading
 
 - https://shibumi.dev/posts/disable-routing-for-wireguard/
