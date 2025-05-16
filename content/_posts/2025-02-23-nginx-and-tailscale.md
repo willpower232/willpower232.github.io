@@ -4,6 +4,7 @@ title: Configuring nginx to work only on tailscale
 description:
 category: computing
 tags: linux server-config
+modified_date: 2025-05-16
 ---
 
 ## Background
@@ -36,6 +37,10 @@ ExecStartPost=timeout 60s bash -c 'until tailscale status --peers=false; do slee
 ```
 
 One more `systemctl daemon-reload` and a reboot proved that the problem was now resolved.
+
+## Problem 3
+
+You didn't think that would be the end of it did you? Unfortunately in spite of all the above, subsequent updates removed the modifications so instead I changed `/etc/crontab` to include `@reboot root sleep 15 && systemctl start nginx` to act as a super fallback.
 
 ## More Reading
 
