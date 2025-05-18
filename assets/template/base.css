@@ -1,0 +1,185 @@
+:root {
+    font-family:arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-size:0.9rem;
+    line-height:2;
+}
+
+html {
+    background:#8f8f8f;
+    background:var(--page-background, #8f8f8f);
+    scroll-behavior:smooth;
+}
+
+/* reset...sort of */
+body {
+    margin:0;
+    padding:0;
+}
+
+/* future proof */
+img {
+    max-width:100%;
+    display:block;
+}
+
+/* not sure if necessary but sounds good */
+input,button,textarea,select {
+    font:inherit;
+}
+
+body {
+    background:white;
+    background:var(--content-background, white);
+    color:black;
+    color:var(--content-color, black);
+    display:block; /* IE */
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    width:98%;
+}
+
+/* area padding with or without columns */
+header,body > nav,main,footer {
+    padding:1.33em;
+}
+aside {
+    padding:0 1.33em;
+}
+
+/* fix content padding */
+nav > *,main * {
+    margin:0;
+}
+nav > * + *,main * + * {
+    margin-top:0.9em;
+}
+
+nav menu {
+    list-style:none;
+    padding:0;
+}
+
+nav li {
+    display:inline-block;
+    margin:0 0.5em 0.5em 0;
+}
+
+nav li a {
+    border:0.2em solid;
+    border-color:#007;
+    border-color:var(--link-active, #007);
+    border-radius:0.2em;
+    color:#007;
+    color:var(--link-active, #007);
+    display:inline-block;
+    font-weight:bold;
+    padding:0.5em 0.9em;
+    outline:0; /* IE */
+    text-decoration:none;
+    transition:all .25s ease-out
+}
+
+nav li a:hover,nav li a:focus,nav li a.sel {
+    background:#007;
+    background:var(--link-active, #007);
+    color:white;
+    color:var(--link-background-active-text, white);
+}
+
+h1,h2 {
+    font-size:2.3em;
+    text-wrap:balance;
+}
+h3,h4 {
+    font-size:1.7em;
+}
+h5,h6 {
+    font-size:1.2em;
+}
+
+blockquote {
+    border-left:0.3em solid currentcolor;
+    color:#007;
+    color:var(--link-active, #007);
+    font-size:1.1em;
+    padding:0.9em;
+}
+
+main a {
+    color:#00e;
+    color:var(--link-color, #00e);
+    text-decoration-thickness:0.2em;
+    text-underline-offset:0.2em;
+}
+
+main a:hover {
+    color:#007;
+    color:var(--link-active, #007);
+}
+
+main a:focus,footer a:focus,aside a:focus {
+    outline:0.2em solid;
+    outline-color:currentcolor;
+    outline-offset:0.2em;
+    text-decoration:none;
+}
+
+code, pre {
+    font-family: courier new, Courier, monospace;
+}
+
+footer {
+    background:#444;
+    background:var(--side-background, #444);
+    color:white;
+    color:var(--side-color, white);
+}
+
+footer a {
+    color:inherit;
+}
+
+aside {
+    background:#444;
+    background:var(--side-background, #444);
+    bottom:0;
+    box-sizing:border-box;
+    position:absolute;
+    right:0;
+    width:100px;
+}
+
+aside a,aside svg {
+    display:block;
+}
+
+aside a:focus {
+    outline-color:white;
+    outline-color:var(--side-color, white);
+}
+
+aside svg {
+    max-height:90px; /* IE */
+    width:100%;
+}
+
+aside use {
+    fill:white;
+    fill:var(--side-color, white);
+}
+
+/* https://twitter.com/LeaVerou/status/1045768279753666562 */
+:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation:none !important;
+        transition:none !important;
+    }
+    html {
+        scroll-behavior:auto;
+    }
+}
