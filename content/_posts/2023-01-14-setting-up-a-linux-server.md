@@ -4,7 +4,7 @@ title: Setting up a linux server
 description:
 category: computing
 tags: linux
-modified_date: 2025-04-29
+modified_date: 2025-05-18
 ---
 
 I normally handle almost all of the setup work on the server with [Ansible](https://www.ansible.com/), you can see my general notes [on github](https://github.com/willpower232/howiuseansibletomanageservers).
@@ -85,3 +85,9 @@ Elastic Email is a good option, they allow unlimited emails for free to the acco
 Brevo has more of a marketing focus, like mailchimp, but they do allow 300 emails per month for free which escapes the Postmark limitation for me. You can create server-specific passwords for SMTP but they do get you using a "master password" by default which is a little sketchy.
 
 To be continued
+
+## Apache
+
+I am primarily an nginx user but I am responsible for a couple of WordPress's so I forward nginx to apache so my dear associates can use .htaccess to their hearts content.
+
+The default configuration of apache appears to have the mpm_event module enabled which is fine but might be configured a little higher than you need. I halfed the numbers to see what that would do and the worse thing that happened was apache started complaining that `MaxRequestWorkers` was not a multiple of `ThreadsPerChild` so I just took a couple more off.
