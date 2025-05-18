@@ -80,11 +80,9 @@ I first started trying to use SendGrid, I don't think they have a free tier any 
 
 I had a go with Postmark and they have a lovely interface, it is really easy to separate your servers and track their usage. They have a free tier of 100 emails per month so I hit this quite quickly and then you're paying £15 a month which is a bit much paying 12p or so per email for something which doesn't really matter.
 
-Elastic Email is a good option, they allow unlimited emails for free to the account holders email which works for some use cases but I had a little variety in the receiving addresses so didn't work out for me. They also include an unsubscribe link on transaction email messages which is annoying.
+Elastic Email is a good option, they allow unlimited emails for free to the account holders email which works for some use cases but I had a little variety in the receiving addresses so didn't work out for me. They also include an unsubscribe link on transaction email messages which is annoying. They don't support plus addressing so you can't cheese your way around it either.
 
-Brevo has more of a marketing focus, like mailchimp, but they do allow 300 emails per month for free which escapes the Postmark limitation for me. You can create server-specific passwords for SMTP but they do get you using a "master password" by default which is a little sketchy.
-
-To be continued
+Brevo has more of a marketing focus, like mailchimp, but they do allow 300 emails per day for free which escapes the Postmark limitation. You can create server-specific passwords for SMTP but they do get you using a "master password" by default which is a little sketchy. Unfortunately they insist on including a tracking pixel which converts all plain text emails to HTML and so you can kiss goodbye to any email formatting you had hoped to include.
 
 ## Apache
 
