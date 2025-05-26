@@ -1,5 +1,5 @@
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 {%- seo title=false -%}
 
@@ -12,25 +12,27 @@
 </title>
 
 {% if page.description %}
-	<meta itemprop="description" name="description" content="{{ page.description | truncate: 160 }}">
+	<meta itemprop="description" name="description" content="{{ page.description | truncate: 160 }}" />
 {% endif %}
 
-<meta property="og:locale" content="en_GB">
-<meta property="og:type" content="article">
-<meta property="og:title" content="{%if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
-<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="{%if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}" />
+<meta property="og:site_name" content="{{ site.title }}" />
 {% if page.description %}
-	<meta property="og:description" content="{{ page.description }}">
+	<meta property="og:description" content="{{ page.description }}" />
 {% endif %}
 
-<meta name="twitter:title" content="{%if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+<meta name="twitter:title" content="{%if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}" />
 {% if page.description %}
-<meta name="twitter:description" content="{{ page.description }}">
+	<meta name="twitter:description" content="{{ page.description }}" />
 {% endif %}
 <meta name="twitter:site" content="@willpower232" />
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary" />
 
-<link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}" />
 
 <link rel="icon" href="/favicon.png" />
 
