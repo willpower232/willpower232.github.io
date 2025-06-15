@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Configuring wireguard and tailscale at the same time" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I’ll preface this by saying I have no idea what I am doing, other than writing down what I needed to do." />
+<meta property="og:description" content="I’ll preface this by saying I have no idea what I am doing, other than writing down what I needed to do." />
+<link rel="canonical" href="https://willpower232.github.io/computing/wireguard-and-tailscale.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/wireguard-and-tailscale.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-05-16T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Configuring wireguard and tailscale at the same time" />
+<script type="application/ld+json">
+{"description":"I’ll preface this by saying I have no idea what I am doing, other than writing down what I needed to do.","url":"https://willpower232.github.io/computing/wireguard-and-tailscale.html","@type":"BlogPosting","headline":"Configuring wireguard and tailscale at the same time","dateModified":"2025-05-16T00:00:00+00:00","datePublished":"2025-05-16T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/wireguard-and-tailscale.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Configuring wireguard and tailscale at the same time
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Configuring wireguard and tailscale at the same time" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Configuring wireguard and tailscale at the same time" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Configuring wireguard and tailscale at the same time</h1>
+	<p class="post-meta"><time datetime="2025-05-16T00:00:00+00:00" itemprop="datePublished">
+			2025-05-16
+		</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>I’ll preface this by saying I have no idea what I am doing, other than writing down what I needed to do.</p>
+
+<p>I don’t know how to set up a wireguard server but I needed to have the client and tailscale functioning on the same computer.</p>
+
+<p>Basically a quick <code class="language-plaintext highlighter-rouge">apt install wireguard resolvconf</code> and a config file is all I need to get going. The config file ends up in <code class="language-plaintext highlighter-rouge">/etc/wireguard</code> which exists after the <code class="language-plaintext highlighter-rouge">apt install</code>.</p>
+
+<p>My wireguard config file looks like this</p>
+
+<pre><code>[Interface]
+PrivateKey = ...
+Address = 192.168.2.18/32
+DNS = 192.168.2.1
+
+[Peer]
+PublicKey = ...
+AllowedIPs = 192.168.2.1/32,192.168.2.18/32,0.0.0.0/0
+Endpoint = 1.2.3.4:5678
+</code></pre>
+
+<p>This forwards all my traffic through the wireguard connection which is great for the VPN but actually also fights with the tailscale connection so not having a great time at all.</p>
+
+<p>I had a go with some bash aliases to juggle things but its a little annoying.</p>
+
+<pre><code>alias my-vpn-connect="sudo tailscale down &amp;&amp; wg-quick up /etc/wireguard/my-vpn.conf"
+
+alias my-vpn-disconnect="wg-quick down /etc/wireguard/my-vpn.conf &amp;&amp; sudo tailscale up"
+
+alias my-vpn-status='[ -z "$(sudo wg show)" ] &amp;&amp; echo "disconnected" || echo "connected"'
+</code></pre>
+
+<p>There seems to be two options for an easier fix, firstly you could do <code class="language-plaintext highlighter-rouge">Table = off</code> to prevent it from writing network routing tables but that makes it a bit annoying to use the VPN.</p>
+
+<p>The easier option is to remove <code class="language-plaintext highlighter-rouge">0.0.0.0/0</code> and add whatever resources you are hoping to use on the other side of the VPN, for example</p>
+
+<pre><code>...
+AllowedIPs = 192.168.2.1/32,192.168.2.18/32,192.168.1.100/32
+...
+</code></pre>
+
+<p>Now its working properly, you can use <code class="language-plaintext highlighter-rouge">systemctl enable --now wg-quick@my-vpn.service</code> to just have it around all the time but don’t forget to <code class="language-plaintext highlighter-rouge">wg-quick down</code> before you try enabling the service though, otherwise it won’t enable because <code class="language-plaintext highlighter-rouge">--now</code> starts it.</p>
+
+<h2 id="android">Android?</h2>
+
+<p>Now you’re having a great time, you can <code class="language-plaintext highlighter-rouge">tailscale file cp /etc/wireguard/my-vpn.conf tailscale-ip-of-phone:</code> and get <a href="https://play.google.com/store/apps/details?id=com.wireguard.android" target="_blank" rel="noopener noreferrer">wireguard from the play store</a> and import the file. Naturally Android only lets you connect to a single VPN at a time so automatically disconnects tailscale but now you can use <a href="https://play.google.com/store/apps/details?id=org.connectbot" target="_blank" rel="noopener noreferrer">connectbot</a> to get at your SSH connections.</p>
+
+<h2 id="more-reading">More Reading</h2>
+
+<ul>
+  <li>https://shibumi.dev/posts/disable-routing-for-wireguard/</li>
+</ul>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->
