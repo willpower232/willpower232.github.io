@@ -4,7 +4,7 @@ title: Setting up a linux server
 description:
 category: computing
 tags: linux
-modified_date: 2025-05-18
+modified_date: 2025-07-06
 ---
 
 I normally handle almost all of the setup work on the server with [Ansible](https://www.ansible.com/), you can see my general notes [on github](https://github.com/willpower232/howiuseansibletomanageservers).
@@ -89,3 +89,7 @@ Brevo has more of a marketing focus, like mailchimp, but they do allow 300 email
 I am primarily an nginx user but I am responsible for a couple of WordPress's so I forward nginx to apache so my dear associates can use .htaccess to their hearts content.
 
 The default configuration of apache appears to have the mpm_event module enabled which is fine but might be configured a little higher than you need. I halfed the numbers to see what that would do and the worse thing that happened was apache started complaining that `MaxRequestWorkers` was not a multiple of `ThreadsPerChild` so I just took a couple more off.
+
+## logrotate
+
+Shout out to `/var/lib/logrotate/status` for listing every log file it has ever rotated and the last time it got rotated, handy for confirming you're rotating the files you think you are (or if something went horribly wrong in your configuration at some point and one stopped getting rotated).
