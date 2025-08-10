@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2025-02-14
+modified_date: 2025-08-10
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -45,7 +45,7 @@ If you want a windows-like hostname then you can do something like this and rebo
 
 ### Software
 
-Zorin OS should have flatpak installed and set up, can check with `sudo flatpak remote-list` then if you can't see flathub `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`
+Zorin OS should have flatpak installed and set up, can check with `sudo flatpak remote-list` then if you can't see flathub `sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`. Ubuntu doesn't have flatpak or the default software centre so you need to `sudo apt install flatpak` AND `sudo apt install gnome-software --install-suggests` and then just don't open the default app centre.
 
 Remove unwanted apps from software centre (worth checking the ones you leave which could be super old like Remmina which is much newer in flatpak form). You should use the app list to check if any things you don't want are installed via apt, (i.e. libreoffice). Unfortunately, you will also need to manually remove libreoffice-common via apt in your terminal.
 
@@ -62,7 +62,8 @@ now software centre can install flatpak apps
 - gnome web (for safari-related debugging)
 - break timer
 - chromium
-- opera
+- ~opera~ I'm using a firefox fork instead, currently floorp
+- Antares SQL
 
 if you have a microphone or fancy speakers
 - PulseAudio Volume Control
@@ -81,11 +82,11 @@ Configure firefox for maximum privacy, nice theme, and extensions. I do like to 
 Configure chrome for maximum privacy, dark theme, and extensions (password managers and don't close with last tab)
 - right-click the address bar and choose 'Always show full URLs'. If you don't see that option, go to chrome://flags/#omnibox-context-menu-show-full-urls and set the highlighted flag to 'Enabled'.
 
-Configure opera for some privacy, I usually use opera for background media and email so its definitely worth checking widevine/netflix if thats what you want ([this is useful](https://www.reddit.com/r/operabrowser/wiki/opera/linux_widevine_config)). I did experience initial loading problems with snap opera but regular opera did not have working widevine initially. For whatever reason, "Show Full URL" is a setting and not on the right-click menu.
+~Configure opera for some privacy, I usually use opera for background media and email so its definitely worth checking widevine/netflix if thats what you want ([this is useful](https://www.reddit.com/r/operabrowser/wiki/opera/linux_widevine_config)). I did experience initial loading problems with snap opera but regular opera did not have working widevine initially. For whatever reason, "Show Full URL" is a setting and not on the right-click menu.~ Floorp can b adapted similarly to opera to remove all the rando toolbars and make it look slightly nice.
 
 Instead of Hardware Indicator Sensors I started using [this particular system monitor](https://extensions.gnome.org/extension/120/system-monitor/) which is a bit more interesting and less buggy in my experience. Unfortunately it seems to not be updated any more however there is a [new fork](https://extensions.gnome.org/extension/3010/system-monitor-next/) which works nicely. Don't forget to `sudo apt install gir1.2-gtop-2.0 gir1.2-nm-1.0 gir1.2-clutter-1.0` and maybe `sudo apt-get install lm-sensors && sudo service kmod start && sudo sensors-detect` although it doesn't seem I have many sensors available to me which is odd. If the plugin isn't changing when you update the preferences, just lock and unlock and that should be enough to apply your latest preferences. Also don't forget `sudo apt install htop` for some backup in looking at your systems status.
 
-I have started using [Burn My Windows](https://extensions.gnome.org/extension/4679/burn-my-windows/) to make things a little more snazzy.
+I have started using [Burn My Windows](https://extensions.gnome.org/extension/4679/burn-my-windows/) to make things a little more snazzy. If you find that the computer sleeping the monitors re arranges your windows (or worse, crashes the whole computer) you can use [unblank](https://extensions.gnome.org/extension/1414/unblank/) to keep the screens awake at all times to make using the computer easier.
 
 If you're really into gnome extensions, this [extension manager](https://flathub.org/apps/details/com.mattjakeman.ExtensionManager) would be a good install.
 
@@ -189,6 +190,8 @@ also whilst you're in there
 `org.gnome.mutter.dynamic-workspaces` to off
 `org.gnome.desktop.interface.gtk-enable-primary-paste` to off
 
+If you happen to have a big background to span across all your monitors, you might have to set `org.gnome.desktop.background` to `spanned`.
+
 need to reboot to apply
 
 In order for the workspaces setting to work I also ended up in Settings > Multitasking, switching it to "fixed number of workspaces" and "workspaces on all displays".
@@ -204,13 +207,28 @@ Don't forget that if you don't have a print key, you could borrow the windows pr
 
 You will need to specify the full path to passmenu if it isn't in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won't let you.
 
-install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) and then make sure you have `apt remove docker-compose-plugin` if you like managing your own binary for that purpose.
+install [docker for ubuntu](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) (but I'd probably use `/usr/share/keyrings` as that directory actually exists) and then make sure you have `apt remove docker-compose-plugin` if you like managing your own binary for that purpose.
 
 `sudo usermod -aG docker wp`
 
 install aws cli from the [official instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
-install and configure vs code
+VS Code has some weird instructions nowadays which are a little too complicated for my liking. You just need the `asc` with `sudo curl -fsSL https://packages.microsoft.com/keys/microsoft.asc -o /usr/share/keyrings/microsoft.asc` and then you can add in `/etc/apt/sources.list.d/vscode.sources` as follows
+
+```
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64,arm64,armhf
+Signed-By: /usr/share/keyrings/microsoft.asc
+```
+
+(It looks like their apt output doesn't behave the same way as the OG version so you have to use this newer syntax but at least you don't have to convert the asc to gpg unnecessarily.)
+
+Then you can `apt update` and `apt install code`. If you can import the previous profile then you can probably skip the below but if you do import the profile, don't forget to expand the extensions section so it actually installs the extensions you had.
+
+In the old days I had to
 - manually install https://github.com/IronLu233/vscode-color-exchange
 - add globalStorage and History to `.config/Code/User/syncLocalSettings.json` under  `ignoreUploadFolders`
 - using the customise layout button I like to put quick input in the centre and justify the panel alignment which isn't in the preferences json for some reason
