@@ -4,7 +4,7 @@ title: Self-hosted Git with Forgejo and Tailscale
 description:
 category: computing
 tags: linux
-modified_date: 2024-05-04
+modified_date: 2025-10-19
 ---
 
 Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I've been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.
@@ -196,6 +196,14 @@ Links I tried to follow
 - https://forum.tailscale.com/t/ubuntus-boot-order-for-tailscale-service/2341/7
 - https://www.2daygeek.com/linux-modifying-existing-systemd-unit-file/
 - https://stackoverflow.com/questions/49643551/systemd-service-b-to-start-after-another-service-a-only-if-service-a-exists
+
+#### Signing Keys
+
+You can easily upload your SSH keys to Forgejo to allow access to your repositories. Unfortunately they make you do an extra step to verify the SSH keys in order to use them as signing keys which is what I do to avoid worrying about GPG rotation.
+
+You can expand the verification section which provides a random token and some instructions on the command to run to create a signature to verify the key. As you have hopefully provided a public key to Forgejo, you need to supply the file path to the corresponding public key in your filesystem.
+
+If it works, you'll see lots of green padlocks in the list of commits in the UI.
 
 ### Fail2ban
 
