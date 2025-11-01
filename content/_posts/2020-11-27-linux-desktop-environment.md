@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2025-09-22
+modified_date: 2025-11-01
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -98,7 +98,7 @@ Finally there is [Modern CSV](https://www.moderncsv.com) which is ridiculously e
 
 `sudo add-apt-repository ppa:git-core/ppa`
 
-`sudo apt update && sudo apt upgrade -y && sudo apt install -y vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer dconf-editor icedtea-netx`
+`sudo apt update && sudo apt upgrade -y && sudo apt install -y gnupg vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer dconf-editor icedtea-netx`
 
 Install your php versions of choice, i.e. `sudo apt install -y php7.4-cli` or `sudo apt install -y php8.0-cli`. Actually you probably want to install both to validate everything you do and then choose the one you want to use with `sudo update-alternatives --config php`.
 
