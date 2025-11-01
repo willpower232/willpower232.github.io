@@ -80,3 +80,9 @@ If you wanted to use MagicDNS and their `ts.net` subdomains then you can supply 
 I have both one service and a tailscale exit node I'd like to share. I got them to create a tailscale account and add it to their devices before sharing the two tailscale machines to their account.
 
 I was briefly worried that I'd have to add some access control but that doesn't seem necessary in my "everything can access everything else" universe but if you don't have one of those then you probably want to have a look at using the `autogroup:shared` as the source.
+
+## Problem 5 - SSH
+
+Tailscale would love you to use Tailscale SSH to access your devices and I'm sure its great but I already have SSH keys everywhere for using with git and one device which has selectively public access so I can't really rely on it.
+
+Either way, you can totally block public SSH access with your cloud server provider and connect using your tailscale IP address or subdomains as you would any other server. I do have one place with a static IP address so I do keep it slightly open but basically don't have to worry about fail2ban any more.
