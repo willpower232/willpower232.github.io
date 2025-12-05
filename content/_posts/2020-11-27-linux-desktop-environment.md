@@ -282,3 +282,11 @@ and then in .gitconfig-whatever you just have your email address
 The break timer application should be set up with "a mix of short breaks and long breaks" so you can do the 20 second break every 20 minutes (to relax your eyes by looking at something 20 feet away) and a 4 minute break every hour so you remember to get up and make a drink.
 
 Finally, Zorin comes with a service called touchegg installed and running by default. If you don't have a touchscreen or trackpad directly connected you can probably disable it to save some memory.
+
+### Future Things To Remember
+
+Every so often Docker likes to bring up the minimum api version which is a great way of reminding you that you're using some super old docker containers or tools.
+
+Obviously it would be nice to update but sometimes (cough portainer) it takes a couple of weeks for a docker-based tool to get updated and it takes a few minutes for people to fill Github issues with wild ideas like downgrading docker itself and locking the apt version.
+
+The best answer is to create (or update) `/etc/docker/daemon.json` and add `"min-api-version": "1.24"` or whatever version was the most recent minimum.
