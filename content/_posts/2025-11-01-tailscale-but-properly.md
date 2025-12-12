@@ -4,6 +4,7 @@ title: Using Tailscale Properly
 description:
 category: computing
 tags: linux
+modified_date: 2025-12-12
 ---
 
 I've written a couple of times about using [Tailscale](https://tailscale.com/) but not really documented how I'm using it. I'm also definitely using it "wrong" so I'll try to atone for that now.
@@ -41,7 +42,9 @@ Obviously tailscale is targetted at businesses and organisations, and that is wh
 
 It only really matters if you have other users in your tailnet (or are a business) and want to secure access in between your network. I had a little look but mostly ended up tying myself in knots and the default "everything can access everything else" access control is fine.
 
-I created one tag and applied it to a few things to see what would happen and mostly the list of machines is slightly differently sorted now.
+One side effect of tagging devices is that as they are no longer "yours", you can't use taildrop with them so I end up using rsync with ssh or scp in Windows.
+
+It does nicely sort the list of machines in the app so that things like your phone and computers are at the top and the tagged devices are grouped separately.
 
 ## Problem 3 - ports or hosts
 
@@ -67,7 +70,7 @@ This means I'm no longer wrangling a lot of ports on the same server and everyth
 
 Tailscale would love you to use their MagicDNS so everything you have is on one of their ts.net domains but I'm unsure about messing up my local DNS arrangements.
 
-My first attempt at solving this combined `tailscale status` with hostctl https://gist.github.com/willpower232/7ea6f3e0b016a98a4d776d10108d388a but that didn't really help with using it on my phone. Obviously you could copy the IP address out of the tailscale app but I wanted something easier still.
+My first attempt at solving this combined `tailscale status` with hostctl https://gist.github.com/willpower232/7ea6f3e0b016a98a4d776d10108d388a but that didn't really help with using it on my phone. Obviously you could copy the IP address out of the tailscale app but I wanted something easier still. That said I do like doing this as a stand in for reverse DNS so that my logwatch emails can identify which tailscale device I SSHed in from.
 
 I already have a short domain for my server so I just added the tailscale IP addresses to my public DNS records and called it a day.
 

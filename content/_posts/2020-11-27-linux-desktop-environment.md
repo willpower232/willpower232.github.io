@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2025-11-01
+modified_date: 2025-12-12
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -16,6 +16,28 @@ The only thing that has irked me about Zorin OS so far is that somehow suspend o
 ### Cosmetics
 
 Set dark theme, layout, and highlight colour and clear pinned apps from whatever taskbar you have now.
+
+In Ubuntu, I found that I was missing the main font for logging in with Microsoft so thankfully there is a way of getting Segoe in your life from https://github.com/mrbvrz/segoe-ui-linux. Basically once you've followed their installer you can
+
+```
+mkdir -p ~/.config/fontconfig
+vim ~/.config/fontconfig/fonts.conf
+```
+
+with this content
+
+```
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <match target="pattern">
+    <test qual="any" name="family"><string>Segoe UI Webfont</string></test>
+    <edit name="family" mode="assign" binding="same"><string>Segoe UI</string></edit>
+  </match>
+</fontconfig>
+```
+
+then `fc-cache -fv; fc-match "Segoe UI Webfont"` to check. Should return `segoeui.ttf: "Segoe UI" "Regular"`. Probably have to restart almost everything to apply fully so just endure the serif for a little bit longer I'd say.
 
 ### Terminal
 

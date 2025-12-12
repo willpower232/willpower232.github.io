@@ -4,7 +4,7 @@ title: Setting up a linux server
 description:
 category: computing
 tags: linux
-modified_date: 2025-10-20
+modified_date: 2025-12-12
 ---
 
 I normally handle almost all of the setup work on the server with [Ansible](https://www.ansible.com/), you can see my general notes [on github](https://github.com/willpower232/howiuseansibletomanageservers).
@@ -117,3 +117,7 @@ The default configuration of apache appears to have the mpm_event module enabled
 ## logrotate
 
 Shout out to `/var/lib/logrotate/status` for listing every log file it has ever rotated and the last time it got rotated, handy for confirming you're rotating the files you think you are (or if something went horribly wrong in your configuration at some point and one stopped getting rotated).
+
+## tailscale
+
+If I am adding tailscale then I like to [create hosts file entries for each machine using hostctl](https://gist.github.com/willpower232/7ea6f3e0b016a98a4d776d10108d388a) to stand in for reverse DNS for my tailscale devices so that the logwatch email is more useful.
