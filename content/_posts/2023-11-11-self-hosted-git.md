@@ -4,7 +4,7 @@ title: Self-hosted Git with Forgejo and Tailscale
 description:
 category: computing
 tags: linux
-modified_date: 2025-10-19
+modified_date: 2026-01-10
 ---
 
 Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I've been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.
@@ -232,4 +232,14 @@ findtime = 10
 maxretry = 10
 ```
 
-If you open a whole bunch of tabs to a page that doesn't exist, you should find yourself blocked for a few minutes if you fancy a cuppa. If you're still on SSH to your server, you can confirm you are blocked with `fail2ban-client status nginx-404`.
+If you open a whole bunch of tabs to a page that doesn't exist, you should find yourself blocked for a few minutes if you fancy a cuppa. If you're still on SSH to your server, you can confirm you are blocked with `fail2ban-client status nginx-404`
+
+## Pivoting to Docker
+
+If you want to move your installation to Docker (mostly to use a tailscale sidecar) then you need to struggle through a few things because the docker image handles things slightly differently and uses none of the same paths.
+
+You'll note that the docker installation instructions tell you to mount a volume to `/data`. If you're moving from a binary then you'll have to put the contents of `/var/lib/forgejo` into `/data/gitea` and `/etc/forgejo/app.ini` to `/data/gitea/conf/app.ini` as well as updating all the paths in the config file to replace every `/var/lib/forgejo` with `/data/gitea`.
+
+That should be enough to get it to start and preserve your repositories however the other reason the `/data` mount is generic is because the docker image generates its own SSH keys and preserves them in there. Probably related is the need to remove and re-add all your SSH keys in order to restore access for cloning. You can verify your connection with `ssh git@your.tailscale.ip.address` to see if its ready to like you.
+
+As part of debugging, I changed the port in app.ini from 3000 to 80 but of course if you have a passkey then that won't work because of no HTTPS until you set that up properly.
