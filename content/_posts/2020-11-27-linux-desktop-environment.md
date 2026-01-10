@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2025-12-12
+modified_date: 2026-01-10
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -226,6 +226,8 @@ clear all printscreen keyboard shortcuts with backspace and set keyboard shortcu
 - passmenu --type - ctrl + alt + shift + p
 
 Don't forget that if you don't have a print key, you could borrow the windows print screen shortcut or just Ctrl Alt Shift S even.
+
+Being a portrait screen fan, Flameshot sometimes struggles with the mismatched resolutions and monitor locations so I leave Ctrl Alt Shift R as screen record and then swap back to screenshot for basic ones until Flameshot sorts its life out. Unfortunately the built in Ubuntu screenshot tool insists on making files so I end up doing `mv ~/Pictures/Screenshots ~/Pictures/Screenshots.old && ln -s /dev/null ~/Pictures/Screenshots`.
 
 You will need to specify the full path to passmenu if it isn't in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won't let you.
 
