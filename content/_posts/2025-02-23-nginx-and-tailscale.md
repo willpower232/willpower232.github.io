@@ -4,7 +4,7 @@ title: Configuring nginx to work only on tailscale
 description:
 category: computing
 tags: linux server-config
-modified_date: 2025-05-16
+modified_date: 2026-01-25
 ---
 
 ## Background
@@ -41,6 +41,23 @@ One more `systemctl daemon-reload` and a reboot proved that the problem was now 
 ## Problem 3
 
 You didn't think that would be the end of it did you? Unfortunately in spite of all the above, subsequent updates removed the modifications so instead I changed `/etc/crontab` to include `@reboot root sleep 15 && systemctl start nginx` to act as a super fallback.
+
+## The Actual Solution
+
+Unfortunately 15 seconds wasn't always the right amount of time so a tip of my hat goes to Bernat for getting in touch, digging a little deeper and providing their solution.
+
+I'm guessing that ExecStartPost isn't delaying the next part of systemd but one can of course delay nginx from starting. Similar to before, `mkdir -p /etc/systemd/system/nginx.service.d/` and `vim /etc/systemd/system/nginx.service.d/override.conf`
+
+```
+[Service]
+ExecStartPre=
+ExecStartPre=timeout 60s bash -c 'until tailscale status --peers=false; do sleep 1; done'
+ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
+```
+
+I also took the liberty of removing the tailscale override.conf I added before the next `systemctl daemon-reload`.
+
+By way of explanation, the empty ExecStartPre prevents any previous one applying, we included the official ExecStartPre as the third one (note the `-t` to indicate nginx is testing the config before trying to start). You'll recognise the second ExecStartPre from before.
 
 ## More Reading
 
