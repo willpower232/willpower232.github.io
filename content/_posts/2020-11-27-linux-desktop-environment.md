@@ -4,7 +4,7 @@ title: Linux Desktop Environment
 description: how I set up a linux development computer
 category: computing
 tags: linux software-choices
-modified_date: 2026-01-10
+modified_date: 2026-01-25
 ---
 
 Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just...not great for how I want to develop.
@@ -75,12 +75,12 @@ now software centre can install flatpak apps
 - flameshot
 - peek
 - vlc
-- filezilla
+- ~filezilla~ apparently the flatpak version is [effectively abandoned](https://github.com/flathub/org.filezillaproject.Filezilla/issues/103) and I haven't used it in ages so
 - remmina
 - slack
 - ONLYOFFICE desktop editors
 - ~postman~ bruno is better as it keeps your data on your computer
-- geary or thunderbird which looks slightly nicer currently
+- fastmail (I used to use geary or thunderbird whichever looked slightly nicer at the time but the native app is much nicer)
 - gnome web (for safari-related debugging)
 - break timer
 - chromium
