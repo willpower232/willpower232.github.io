@@ -4,7 +4,7 @@ title: Setting up a linux server
 description:
 category: computing
 tags: linux
-modified_date: 2025-12-12
+modified_date: 2026-01-25
 ---
 
 I normally handle almost all of the setup work on the server with [Ansible](https://www.ansible.com/), you can see my general notes [on github](https://github.com/willpower232/howiuseansibletomanageservers).
@@ -83,6 +83,8 @@ I had a go with Postmark and they have a lovely interface, it is really easy to 
 Elastic Email is a good option, they allow unlimited emails for free to the account holders email which works for some use cases but I had a little variety in the receiving addresses so didn't work out for me. They also include an unsubscribe link on transaction email messages which is annoying. They don't support plus addressing so you can't cheese your way around it either.
 
 Brevo has more of a marketing focus, like mailchimp, but they do allow 300 emails per day for free which escapes the Postmark limitation. You can create server-specific passwords for SMTP but they do get you using a "master password" by default which is a little sketchy. Unfortunately they insist on including a tracking pixel which converts all plain text emails to HTML and so you can kiss goodbye to any email formatting you had hoped to include.
+
+Scaleway also offers 300 emails per day however they have apparently decided to do everything AWS does but worse, I will proceed to help you more than Scaleway wants to. Referencing [these docs](https://www.scaleway.com/en/docs/transactional-email/how-to/generate-api-keys-for-tem-with-iam/), you can add an IAM Application per server to limit the API keys AND create a policy for each application since Scaleway doesn't seem to have any form of reuse. Each policy needs the aptly named TransactionalEmailEmailSmtpCreate permission. Then you need the project UUID (copied from the name) and the secret key you can only see once and the host and port details from those docs. If you can tolerate this garbage attempt at a permission system then this might be the one for you.
 
 Whichever one you try and use, you can use `msmtp` to route mail sent by your server through your provider of choice, you can also install `msmtp-mta` to fake the usual email commands. The caveat is that there must be a `.msmtprc` file at the users home directory. Most of your mail can be sent by root so you need a `/root/.msmtprc` which looks a little like this
 
