@@ -4,7 +4,7 @@ title: Setting up a linux server
 description:
 category: computing
 tags: linux
-modified_date: 2026-01-25
+modified_date: 2026-02-02
 ---
 
 I normally handle almost all of the setup work on the server with [Ansible](https://www.ansible.com/), you can see my general notes [on github](https://github.com/willpower232/howiuseansibletomanageservers).
@@ -108,7 +108,13 @@ MAILFROM=cron@yourserver.com
 MAILTO=you@whereever.com
 ```
 
-I usually add one alias to complete the loop `root: you@whereever.com` so that any email to root is actually received by me.
+I usually add one alias to `/etc/aliases` to complete the loop `root: you@whereever.com` so that any email to root is actually received by me. No idea if `newaliases` is required but fun to run anyway I guess.
+
+You can test msmtprc yourself with something like `echo "this is a testing email" | mail -s "testing this email" you@you.com`
+
+References:
+- https://dt.iki.fi/msmtp
+- https://wiki.archlinux.org/title/Msmtp
 
 ## Apache
 
