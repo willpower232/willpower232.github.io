@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Self-hosted Git with Forgejo and Tailscale" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself." />
+<meta property="og:description" content="Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself." />
+<link rel="canonical" href="https://willpower232.github.io/computing/self-hosted-git.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/self-hosted-git.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-11-11T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Self-hosted Git with Forgejo and Tailscale" />
+<script type="application/ld+json">
+{"description":"Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.","url":"https://willpower232.github.io/computing/self-hosted-git.html","@type":"BlogPosting","headline":"Self-hosted Git with Forgejo and Tailscale","dateModified":"2023-11-11T00:00:00+00:00","datePublished":"2023-11-11T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/self-hosted-git.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Self-hosted Git with Forgejo and Tailscale
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Self-hosted Git with Forgejo and Tailscale" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Self-hosted Git with Forgejo and Tailscale" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Self-hosted Git with Forgejo and Tailscale</h1>
+	<p class="post-meta">First written<time datetime="2023-11-11T00:00:00+00:00" itemprop="datePublished">
+			2023-11-11
+		</time>~ last updated<time datetime="2026-01-10T00:00:00+00:00" itemprop="dateModified">
+				2026-01-10
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.</p>
+
+<h3 id="self-hosted-git">Self-hosted Git</h3>
+
+<p>I started accessing self-hosted Git repositories over SSH in a past life but the default UI leaves a lot to the imagination. I’ve had Gitea in the back of my mind for some time now, mostly because of the fun name, but then I also saw Forgejo was a fork of it for <a href="https://forgejo.org/faq/#why-was-forgejo-created" target="_blank" rel="noopener noreferrer">open source reasons</a> so have gone with that for now.</p>
+
+<p>Forgejo can manage deploy keys and webhooks for packagist so should be capable for most of my use cases, Netlify does not seem to have custom connections outside of their enterprise tier so this server will mostly just be for my public code.</p>
+
+<p>The <a href="https://forgejo.org/docs/latest/admin/installation/#installation-from-binary" target="_blank" rel="noopener noreferrer">installation instructions</a> are comprehensive enough and I went with the direct binary association so I wouldn’t be burned by apt updates and I started with nginx and debian as always.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server {
+	# listen...
+	# ssl_certificate...
+	# ssl_certificate_key...
+	# etc etc
+
+	server_name willpoweredinc.software;
+
+	location /.well-known {
+		alias /var/www/html/.well-known;
+	}
+
+	location / {
+		proxy_pass http://127.0.0.1:3000;
+		include proxy_params;
+	}
+}
+</code></pre></div></div>
+
+<p>The installation instructions are along the lines of the following once you have <a href="https://codeberg.org/forgejo/forgejo/releases" target="_blank" rel="noopener noreferrer">downloaded the right binary</a></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp forgejo-1.20.5-0-linux-amd64 /usr/local/bin/forgejo
+
+chmod 755 /usr/local/bin/forgejo
+
+apt install git git-lfs
+
+adduser --system --shell /bin/bash --gecos 'Git Version Control' --group --disabled-password --home /home/git git
+
+mkdir /var/lib/forgejo
+
+chown git:git /var/lib/forgejo &amp;&amp; chmod 750 /var/lib/forgejo
+
+mkdir /etc/forgejo
+
+chown root:git /etc/forgejo &amp;&amp; chmod 770 /etc/forgejo
+
+wget -O /etc/systemd/system/forgejo.service https://codeberg.org/forgejo/forgejo/raw/branch/forgejo/contrib/systemd/forgejo.service
+</code></pre></div></div>
+
+<p>A <em>much</em> abbreviated copy of the systemd file is</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+Description=Forgejo (Beyond coding. We forge.)
+After=syslog.target
+After=network.target
+
+[Service]
+# Uncomment the next line if you have repos with lots of files and get a HTTP 500 error because of that
+# LimitNOFILE=524288:524288
+RestartSec=2s
+Type=simple
+User=git
+Group=git
+WorkingDirectory=/var/lib/forgejo/
+ExecStart=/usr/local/bin/forgejo web --config /etc/forgejo/app.ini
+Restart=always
+Environment=USER=git HOME=/home/git GITEA_WORK_DIR=/var/lib/forgejo
+
+[Install]
+WantedBy=multi-user.target
+</code></pre></div></div>
+
+<p>At some point you will need to repace <code class="language-plaintext highlighter-rouge">GITEA_WORK_DIR</code> with <code class="language-plaintext highlighter-rouge">FORGEJO_WORK_DIR</code> but you can probably reference the copy of the service from the git repo.</p>
+
+<p>I left it with the default sqlite database as I knew there would only be me accessing it and this is much simpler. Also I use snapshots of the server from the provider and MySQL can have consistency issues when it is backed up whilst running. Finally it is time to <code class="language-plaintext highlighter-rouge">systemctl enable forgejo &amp;&amp; systemctl start forgejo</code>.</p>
+
+<p>Now you can visit the website and complete the initial setup. Once that is done, it is time to secure the config file</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl stop forgejo
+
+chmod 750 /etc/forgejo &amp;&amp; chmod 640 /etc/forgejo/app.ini
+</code></pre></div></div>
+
+<p>I then made the following changes to the app.ini file so it was only me using it</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[openid]
+ENABLE_OPENID_SIGNIN = false
+ENABLE_OPENID_SIGNUP = false
+
+[service]
+DISABLE_REGISTRATION = true
+</code></pre></div></div>
+
+<p>The next most important thing to deal with is <a href="https://forgejo.org/docs/next/admin/search-engines-indexation/" target="_blank" rel="noopener noreferrer">the search engines</a>. You may be aware that there are an awful lot of web pages to look at in a git repository so the bandwidth usage can ramp up quite quickly which can be a problem if you’re on a lower tier server.</p>
+
+<p>Basically, you can create the directory <code class="language-plaintext highlighter-rouge">/var/lib/forgejo/custom/</code> and a <code class="language-plaintext highlighter-rouge">robots.txt</code> file with at least this content as the archives can be particularly heavy downloads.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>User-agent: *
+Disallow: /*/*/archive/
+</code></pre></div></div>
+
+<p>You can also take this opportunity to ban the AI bots from accessing your content if you wish.</p>
+
+<p>Some of the information about forgejo suggests you can run <code class="language-plaintext highlighter-rouge">forgejo help</code> to see what is happening however as we customise the paths in the service file, the output will not be of much use to you.</p>
+
+<h4 id="customisation">Customisation</h4>
+
+<p>You may have changed the name in the initial setup but you can also change the landing page, description, and theme in the config file. I used the theme switcher in my user configuration to try them all out quickly</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[server]
+LANDING_PAGE = explore
+
+[ui]
+DEFAULT_THEME = arc-green # replaced by gitea-dark in version 7 which isn't quite the same
+
+[ui.meta]
+DESCRIPTION = Software what I made
+</code></pre></div></div>
+
+<p>Referencing the original Gitea documentation, I saw that you can also replace the images used by adding more directories to the <code class="language-plaintext highlighter-rouge">custom</code> directory mentioned earlier and then adding image files.</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">public/img/logo.svg</code> - Used for site icon, app icon</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">public/img/logo.png</code> - Used for Open Graph</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">public/img/avatar_default.png</code> - Used as the default avatar image</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">public/img/apple-touch-icon.png</code> - Used on iOS devices for bookmarks</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">public/img/favicon.svg</code> - Used for favicon</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">public/img/favicon.png</code> - Used as fallback for browsers that don’t support SVG favicons</li>
+</ul>
+
+<p>This should leave the only Forgejo reference in the footer but thats fine by me, I was mostly doing this for the social media previews when sharing links.</p>
+
+<p>In version 7, the <code class="language-plaintext highlighter-rouge">img</code> folder got moved into an assets folder so the complete path is <code class="language-plaintext highlighter-rouge">public/assets/img</code> now.</p>
+
+<h4 id="backup">Backup</h4>
+
+<p>I already have a daily backup methodology on the server via a shell script so I added the following to include a copy of all Forgejo data</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo -u git forgejo dump --config /etc/forgejo/app.ini -f forgejo-dump.zip
+</code></pre></div></div>
+
+<p>The default dump file includes a timestamp in the filename but as I was including this zip in another zip, I chose to give it a plainer name.</p>
+
+<p>I think the dump would have to be restored manually but it is not an encrypted zip file so this would be relatively trivial if I ever needed it.</p>
+
+<p>Finally, you may want to include <code class="language-plaintext highlighter-rouge">--quiet</code> so you don’t ge emails from your cronjob unless they error.</p>
+
+<h3 id="ssh">SSH</h3>
+
+<p>I prefer using SSH authentication wherever possible to avoid usernames and passwords everywhere and its nicely built in everywhere I need to be but if I’m hosting <em>spicy</em> repositories, it would be better to not have public SSH at all. This is where Tailscale comes in.</p>
+
+<p>As always when messing around with SSH configuration <strong>make sure you have a non-SSH console to access the server!</strong></p>
+
+<p>In an ideal world, I would have the SSH daemon only listening on the Tailscale network connection so it was impossible to ever connect on the public interfaces but, spoiler alert, I could not figure it out so I just made sure the port was closed on the firewalls.</p>
+
+<p>I mostly focussed on editing the SSH systemd service so that it had <code class="language-plaintext highlighter-rouge">Wants</code> or <code class="language-plaintext highlighter-rouge">Requires</code> for the Tailscale service but of course technically the service can be up but not connected so it was unfortunately not enough I guess.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl edit ssh
+
+[Unit]
+Wants=tailscaled.service
+
+systemctl edit tailscaled
+
+[Units]
+Before=ssh.service
+
+systemctl daemon-reload
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">systemd-delta</code> shows all overrides of config files, can delete the overrides if you want (full overrides are in /etc)</p>
+
+<p><code class="language-plaintext highlighter-rouge">systemctl add-requires ssh.service tailscaled</code> is a nicer way of doing it and <code class="language-plaintext highlighter-rouge">/etc/systemd/system/ssh.service.requires/tailscaled.service</code> link is created so should be unlinked if you want to undo it but it does not show up in <code class="language-plaintext highlighter-rouge">systemd-delta</code>.</p>
+
+<p>Leaving the SSH config back at its original settings, I was able to clone the repositories as I expected substituting the Tailscale IP address for the server domain in the standard <code class="language-plaintext highlighter-rouge">git clone git@server domain</code> command.</p>
+
+<p>Links I tried to follow</p>
+<ul>
+  <li>https://forum.tailscale.com/t/mount-share-only-if-connected-to-tailscale/3027</li>
+  <li>https://forum.tailscale.com/t/ubuntus-boot-order-for-tailscale-service/2341/7</li>
+  <li>https://www.2daygeek.com/linux-modifying-existing-systemd-unit-file/</li>
+  <li>https://stackoverflow.com/questions/49643551/systemd-service-b-to-start-after-another-service-a-only-if-service-a-exists</li>
+</ul>
+
+<h4 id="signing-keys">Signing Keys</h4>
+
+<p>You can easily upload your SSH keys to Forgejo to allow access to your repositories. Unfortunately they make you do an extra step to verify the SSH keys in order to use them as signing keys which is what I do to avoid worrying about GPG rotation.</p>
+
+<p>You can expand the verification section which provides a random token and some instructions on the command to run to create a signature to verify the key. As you have hopefully provided a public key to Forgejo, you need to supply the file path to the corresponding public key in your filesystem.</p>
+
+<p>If it works, you’ll see lots of green padlocks in the list of commits in the UI.</p>
+
+<h3 id="fail2ban">Fail2ban</h3>
+
+<p>My standard server installation includes fail2ban mostly for SSH however with the port firewalled off and tailscale meaning only I can get at it anyway, it isn’t really doing anything.</p>
+
+<p>You may be aware that there are lots of pages in a web-accessible git repo so sooner or later any amount of merges or force pushes will create an awful amount of 404s.</p>
+
+<p>Firstly you need a filter in <code class="language-plaintext highlighter-rouge">/etc/fail2ban/filter.d</code>, I went with <code class="language-plaintext highlighter-rouge">nginx-404-filter.conf</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Definition]
+failregex = ^&lt;HOST&gt;.*"(GET|POST).*" (404|444) .*$
+ignoreregex =
+</code></pre></div></div>
+
+<p>Finally you need to add to (or create) <code class="language-plaintext highlighter-rouge">/etc/fail2ban/jail.local</code>. This equates to 10 404s in 10 seconds means a 5 minute ban.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[nginx-404]
+enabled = true
+port = http,https
+filter = nginx-404-filter
+logpath = /var/log/nginx/access.log
+bantime = 300
+findtime = 10
+maxretry = 10
+</code></pre></div></div>
+
+<p>If you open a whole bunch of tabs to a page that doesn’t exist, you should find yourself blocked for a few minutes if you fancy a cuppa. If you’re still on SSH to your server, you can confirm you are blocked with <code class="language-plaintext highlighter-rouge">fail2ban-client status nginx-404</code></p>
+
+<h2 id="pivoting-to-docker">Pivoting to Docker</h2>
+
+<p>If you want to move your installation to Docker (mostly to use a tailscale sidecar) then you need to struggle through a few things because the docker image handles things slightly differently and uses none of the same paths.</p>
+
+<p>You’ll note that the docker installation instructions tell you to mount a volume to <code class="language-plaintext highlighter-rouge">/data</code>. If you’re moving from a binary then you’ll have to put the contents of <code class="language-plaintext highlighter-rouge">/var/lib/forgejo</code> into <code class="language-plaintext highlighter-rouge">/data/gitea</code> and <code class="language-plaintext highlighter-rouge">/etc/forgejo/app.ini</code> to <code class="language-plaintext highlighter-rouge">/data/gitea/conf/app.ini</code> as well as updating all the paths in the config file to replace every <code class="language-plaintext highlighter-rouge">/var/lib/forgejo</code> with <code class="language-plaintext highlighter-rouge">/data/gitea</code>.</p>
+
+<p>That should be enough to get it to start and preserve your repositories however the other reason the <code class="language-plaintext highlighter-rouge">/data</code> mount is generic is because the docker image generates its own SSH keys and preserves them in there. Probably related is the need to remove and re-add all your SSH keys in order to restore access for cloning. You can verify your connection with <code class="language-plaintext highlighter-rouge">ssh git@your.tailscale.ip.address</code> to see if its ready to like you.</p>
+
+<p>As part of debugging, I changed the port in app.ini from 3000 to 80 but of course if you have a passkey then that won’t work because of no HTTPS until you set that up properly.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

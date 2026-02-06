@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Linux laptop as a security camera" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Repurpose an old laptop as a basic motion detecting camera" />
+<meta property="og:description" content="Repurpose an old laptop as a basic motion detecting camera" />
+<link rel="canonical" href="https://willpower232.github.io/computing/linux-laptop-as-a-security-camera.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/linux-laptop-as-a-security-camera.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-06-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Linux laptop as a security camera" />
+<script type="application/ld+json">
+{"description":"Repurpose an old laptop as a basic motion detecting camera","url":"https://willpower232.github.io/computing/linux-laptop-as-a-security-camera.html","@type":"BlogPosting","headline":"Linux laptop as a security camera","dateModified":"2021-06-27T00:00:00+00:00","datePublished":"2021-06-27T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/linux-laptop-as-a-security-camera.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Linux laptop as a security camera
+	
+</title>
+
+
+	<meta itemprop="description" name="description" content="Repurpose an old laptop as a basic motion detecting camera" />
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Linux laptop as a security camera" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+	<meta property="og:description" content="Repurpose an old laptop as a basic motion detecting camera" />
+
+
+<meta name="twitter:title" content="Linux laptop as a security camera" />
+
+	<meta name="twitter:description" content="Repurpose an old laptop as a basic motion detecting camera" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Linux laptop as a security camera</h1>
+	<p class="post-meta">First written<time datetime="2021-06-27T00:00:00+00:00" itemprop="datePublished">
+			2021-06-27
+		</time>~ last updated<time datetime="2025-06-15T00:00:00+00:00" itemprop="dateModified">
+				2025-06-15
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>Here I’m installing debian without a desktop environment but with the SSH server for later use. You’ll need to be root but haven’t got <code class="language-plaintext highlighter-rouge">sudo</code> so <code class="language-plaintext highlighter-rouge">su</code> will do for now.</p>
+
+<p>Firstly you need to extend the PATH to include all the <code class="language-plaintext highlighter-rouge">sbin</code> directories. The easiest fix is to append <code class="language-plaintext highlighter-rouge">PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"</code> to <code class="language-plaintext highlighter-rouge">/etc/bash.bashrc</code> with nano.</p>
+
+<p>If you back out of <code class="language-plaintext highlighter-rouge">su</code> and go back in then you should have access to all the useful commands.</p>
+
+<p>Now its wireless time. First, figure out the name of your wireless device according to the OS</p>
+
+<p><code class="language-plaintext highlighter-rouge">iw dev</code></p>
+
+<p>Mine was wlp2s0. Then you can prepare wpa_supplicant</p>
+
+<p><code class="language-plaintext highlighter-rouge">wpa_passphrase &lt;network-name&gt; &lt;network-password&gt; &gt; /etc/wpa_supplicant/wpa_supplicant.conf</code></p>
+
+<p>You can also use this command to avoid copying and pasting when you don’t have access to copy and paste (just remember to append and not overwrite)</p>
+
+<p><code class="language-plaintext highlighter-rouge">wpa_passphrase &lt;network-name&gt; &lt;network-password&gt; &gt;&gt; /etc/network/interfaces</code></p>
+
+<p>Now you can edit the interfaces file like this</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>allow-hotplug wlp2s0
+iface wlp2s0 inet dhcp
+	wpa-ssid &lt;network-name&gt;
+	wpa-psk &lt;encrypted-network-password&gt;
+</code></pre></div></div>
+
+<p>Finally you can make the connection with <code class="language-plaintext highlighter-rouge">ifup wlp2s0</code> and verify the connection with <code class="language-plaintext highlighter-rouge">iw wlp2s0 link</code> and <code class="language-plaintext highlighter-rouge">ip a</code>.</p>
+
+<p>You may also need to <code class="language-plaintext highlighter-rouge">systemctl enable wpa_supplicant</code> or reboot if you’re having a bad time.</p>
+
+<p>If you see the error message “option with an empty value” its likely there is a typo in the lines you added so double check and make sure you haven’t written <code class="language-plaintext highlighter-rouge">dchp</code> or left an equals sign in <code class="language-plaintext highlighter-rouge">wpa-ssid=whatever</code>.</p>
+
+<p><a href="https://wiki.debian.org/WiFi/HowToUse" target="_blank" rel="noopener noreferrer">Reference</a></p>
+
+<p>You can also see if your device can see any networks with <code class="language-plaintext highlighter-rouge">iwlist wlp2s0 scan | grep SSID</code>, the output is quite long so grep or less is useful.</p>
+
+<p>Now you can install the basics <code class="language-plaintext highlighter-rouge">sudo apt install -y vim curl net-tools dnsutils sudo rsync</code></p>
+
+<p>If you have a laptop that you want to keep turned on, <code class="language-plaintext highlighter-rouge">sudo vim /etc/systemd/logind.conf</code> and set <code class="language-plaintext highlighter-rouge">HandleLidSwitch=ignore</code></p>
+
+<h2 id="camera-identification">Camera Identification</h2>
+
+<p>Verify you have something video connected <code class="language-plaintext highlighter-rouge">ls -l /dev/video*</code></p>
+
+<p>Find the device <code class="language-plaintext highlighter-rouge">lsusb</code></p>
+
+<p>Identify available resolutions using the appropriate bus and device numbers from above <code class="language-plaintext highlighter-rouge">lsusb -s &lt;bus&gt;:&lt;device&gt; -v | egrep "Width|Height"</code></p>
+
+<p><a href="http://www.netinstructions.com/automating-picture-capture-using-webcams-on-linuxubuntu/" target="_blank" rel="noopener noreferrer">Reference</a></p>
+
+<h2 id="motion">Motion</h2>
+
+<p>https://motion-project.github.io</p>
+
+<h3 id="install-and-setup">Install and Setup</h3>
+
+<p><code class="language-plaintext highlighter-rouge">sudo apt install motion</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">sudo vim /etc/motion/motion.conf</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">daemon on</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">width</code> and <code class="language-plaintext highlighter-rouge">height</code> to something within the cameras ability (identified above) and then increase <code class="language-plaintext highlighter-rouge">threshold</code> at least proportionally, motion will adapt to match the resolutions listed above</p>
+
+<p><code class="language-plaintext highlighter-rouge">framerate 4</code> because that might be nicer if the device deals with it</p>
+
+<p><code class="language-plaintext highlighter-rouge">max_movie_time 600</code> for shorter videos</p>
+
+<p><code class="language-plaintext highlighter-rouge">ffmpeg_video_codec mp4</code> for videos that are more open-able</p>
+
+<p><code class="language-plaintext highlighter-rouge">target_dir</code> if we need to export videos easier?</p>
+
+<p><code class="language-plaintext highlighter-rouge">stream_localhost off</code> to verify easily that the video is being picked up</p>
+
+<p><code class="language-plaintext highlighter-rouge">webcontrol_localhost off</code> to verify easily that the video is being picked up</p>
+
+<p>If you have to mount the camera at a weird angle then you can change <code class="language-plaintext highlighter-rouge">rotate</code> to the appropriate amount of degrees</p>
+
+<p><code class="language-plaintext highlighter-rouge">sudo vim /etc/default/motion</code> and turn daemon on then reboot.</p>
+
+<h3 id="now-make-it-useful">Now Make It Useful</h3>
+
+<h4 id="slack-app">Slack App</h4>
+
+<p>Create an app</p>
+
+<p>Oauth and Permissions -&gt; bot token scopes</p>
+
+<p>incoming-webhook
+files:write</p>
+
+<p>Install App To Workspace (copy bot token)</p>
+
+<p>Right click on its name in slack, open app details, add this app to a channel</p>
+
+<p><a href="https://dev.to/c0d3b0t/upload-and-publish-a-file-on-slack-channel-with-bash-i2e" target="_blank" rel="noopener noreferrer">Reference</a></p>
+
+<h4 id="bash-scripts">bash scripts</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/bash
+
+curl -F file=@$1 -F "initial_comment=$2" -F channels=&lt;channel-ID&gt; -H "Authorization: Bearer &lt;bot-token&gt;" https://slack.com/api/files.upload
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/bash
+
+JSON="{\"channel\": \"&lt;channel-name&gt;\", \"text\": \"$1\"}"
+
+curl -s -d "payload=$JSON" https://hooks.slack.com/services/&lt;webhook-url&gt;
+</code></pre></div></div>
+
+<h4 id="configure">configure</h4>
+
+<p><code class="language-plaintext highlighter-rouge">output_pictures first</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">on_event_start bash /postToSlack.sh "event start %C"</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">on_event_end bash /postToSlack.sh "event end %C"</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">on_picture_save bash /uploadToSlack.sh %f "picture saved %C"</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">on_movie_end bash /uploadToSlack.sh %f "video saved %C"</code></p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

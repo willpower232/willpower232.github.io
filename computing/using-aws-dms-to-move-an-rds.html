@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Using AWS DMS To Move An RDS" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general." />
+<meta property="og:description" content="My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general." />
+<link rel="canonical" href="https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-11-04T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Using AWS DMS To Move An RDS" />
+<script type="application/ld+json">
+{"description":"My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general.","url":"https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds.html","@type":"BlogPosting","headline":"Using AWS DMS To Move An RDS","dateModified":"2024-11-04T00:00:00+00:00","datePublished":"2024-11-04T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Using AWS DMS To Move An RDS
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Using AWS DMS To Move An RDS" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Using AWS DMS To Move An RDS" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Using AWS DMS To Move An RDS</h1>
+	<p class="post-meta">First written<time datetime="2024-11-04T00:00:00+00:00" itemprop="datePublished">
+			2024-11-04
+		</time>~ last updated<time datetime="2024-11-14T00:00:00+00:00" itemprop="dateModified">
+				2024-11-14
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general.</p>
+
+<p>The aim is to avoid lengthy downtime so Just Doing It In HeidiSQL ™ isn’t going to help because that will take ages and probably be error prone.</p>
+
+<p>AWS has the Database Migration Service which can do all the hard work in the cloud BUT of course there are a few caveats. I do this with click-ops instead of terraform because this is a one off, not a long running process.</p>
+
+<h3 id="preparation">Preparation</h3>
+
+<p>Firstly and most importantly, your soon to be old database should have <code class="language-plaintext highlighter-rouge">binlog_format</code> set to <code class="language-plaintext highlighter-rouge">ROW</code>. This requires a reboot so make sure you’ve sorted that out before you progress too far. You can also confirm that <code class="language-plaintext highlighter-rouge">log_bin</code> is set to <code class="language-plaintext highlighter-rouge">ON</code>, if it is not <code class="language-plaintext highlighter-rouge">ON</code> then you may be looking at a reader instance and not a writer instance.</p>
+
+<h3 id="instance">Instance</h3>
+
+<p>The first step is to create a Replication Instance, this is used for all queries to your Endpoints, not just the data moving. I go with all the defaults and select Dev/Test/Single AZ mode because this instance isn’t mission critical and will be long forgotten by the end of the week.</p>
+
+<p>It took a couple of goes to create one first time because it had to auto-create the IAM role (and then I dared to put spaces in the name of the instance) but I gave it a minute for the IAM dust to settle and tried again and it worked.</p>
+
+<h3 id="endpoints">Endpoints</h3>
+
+<p>Eventually the Instance has been created so now you can create the Endpoints.</p>
+
+<p>You need to select Source and Target as appropriate and then if you are using RDS then you can shortcut some of the other settings by picking “Select RDS DB Instance” to pick one.</p>
+
+<p>In fact, if you are using RDS for your new database server then definitely take a moment to verify you can connect to it because it is good to confirm that before trying to connect from the AWS console, i.e. you have not got any funky or missing VPC routing.</p>
+
+<p>If you are not using RDS, you will need to select which Source Engine it is using and then “Provide Access Information Manually” to see all the fields you expect.</p>
+
+<p>If you have a cluster then the most important part of endpoint selection is that you pick the writer directly in both Source and Target cases as that is the only one with the binary log mentioned above. This problem is not detected until you start the Task so hopefully you have not doubled back to this point to find out what is going wrong.</p>
+
+<p>Now you have a Replication Instance, the Test Endpoint Connection section will be able to work and confirm that the Endpoint settings are correct. If you skip over the test part, you can go into the Endpoint and go to the Connections tab to test directly. You will not be able to start the Task until this is successful so it seems to handle most of this itself.</p>
+
+<p>Once you have created both source and target Endpoints, you can go to the source Endpoint and the Schemas tab to see the refresh button and load a list of databases available. I saw some error about a missing arn but it generated the list of schemas eventually anyway.</p>
+
+<h3 id="tasks">Tasks</h3>
+
+<p>Finally you can create a task, I prefer to create one task per database being moved. You might be excited and want to create all your tasks now however there is one final change to make. On the target Endpoint, you need to modify it and set an Extra Connection Attribute: <code class="language-plaintext highlighter-rouge">Initstmt=SET FOREIGN_KEY_CHECKS=0;</code></p>
+
+<p>This is critical because the initial creation of your database is more or less guaranteed to create the tables (and insert the data) in the “wrong” order so foreign key creation will fail. I mention it as a separate step because once the database has been created, you would want to remove it so that the subsequent ongoing inserts are more typical.</p>
+
+<p>I would name the task after the database you’re going to move to provide flexibility and make it clear what is happening. After picking the only option from the dropdowns, the Migration Type is Migrate And Replicate and “indefinitely”. Now you can use the wizard to Do Nothing on target, Stop After Applying Cached Changes. You can turn on CloudWatch Logs if you need debugging but I am going to be confident initially (foreshadowing).</p>
+
+<p>The Migration Type is the only attribute that you can’t change after creating the task so make sure you select Migrate and Replicate otherwise you’ll have to either fully start over or keep pressing resume every so often.</p>
+
+<p>The Table Mappings wizard should let you select the Schema (database) from a dropdown. You can probably leave the rest of the settings for this purpose.</p>
+
+<p>I turn off the Premigration Assessment as this is a relatively simple task and now you can decide if you are starting the copy now or want to manually start it later.</p>
+
+<p>Now you can start it (or have it start when it gets saved) and wait for it to either error or complete.</p>
+
+<p>If it errors, you can modify the Task to have CloudWatch Logs enabled and re run the task. Don’t forget to change the dropdowns to debug so it actually logs something. You probably just want Target Load and Target Apply but you never know.</p>
+
+<p>If you’re still not seeing any logs, make sure there is a role called <code class="language-plaintext highlighter-rouge">dms-cloudwatch-logs-role</code> which has the <code class="language-plaintext highlighter-rouge">AmazonDMSCloudWatchLogsRole</code> and has the following trust policy (if the wizard doesn’t do it for you)</p>
+
+<pre><code>{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "dms.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}</code></pre>
+
+<p>If you are looking for errors in the Log Stream then do a quick find in page in your browser for <code class="language-plaintext highlighter-rouge">]E:</code> which should find the issues although you will have to refer to the other lines to get a bit more context.</p>
+
+<h3 id="first-run---confirm-the-structure">First Run - Confirm the structure</h3>
+
+<p>Eventually you get to Migration Process 100% and the task should stop safely. The first step is to verify the database structure so I am going to use HeidiSQL to export the table creation statements only, not the data, and then I can use VS Code on my computer to do a side-by-side diff of the old and new databases.</p>
+
+<p>In my case, I noted several massive issues in the new database</p>
+
+<ul>
+  <li>no AUTO_INCREMENT</li>
+  <li>no KEYs or CONSTRAINTs</li>
+  <li>no DEFAULT values</li>
+</ul>
+
+<p>Obviously, none of these changes are tolerable so I ended up dropping the new database and recreating it using the exported table creation statements from the old database and restarted (not resumed) the task.</p>
+
+<p>You can also disable the logging at this point to save on your CloudWatch bill and delete the Log Stream if you do not need the information any longer.</p>
+
+<h3 id="second-run---confirm-the-row-counts">Second Run - Confirm the row counts</h3>
+
+<p>Now you have re run the task following the manual schema creation, or you got lucky the first time, and you have a database full of information. I noted that HeidiSQL did not think there was any content in the tables but I think that is just a side effect of all the inserts being very recent and the RDS has not fully understood what it is now full of.</p>
+
+<p>Obviously you do not want to spend an age writing out lots of SQL queries so you can use this to get the repetitive work done for you by your database itself</p>
+
+<pre><code>SELECT CONCAT(
+    'SELECT "',
+    table_name,
+    '" AS table_name, COUNT(*) AS exact_row_count FROM `',
+    table_schema,
+    '`.`',
+    table_name,
+    '` UNION '
+)
+FROM INFORMATION_SCHEMA.TABLES
+WHERE table_schema = 'your_database_name';</code></pre>
+
+<p>Then copy the output and remove the final <code class="language-plaintext highlighter-rouge">UNION</code> from the it and you should be good to go. Also make sure your editor didn’t leave the original query in the top as the column name. You can also compare the output of all the counts however you did the earlier diff.</p>
+
+<p>Depending on how long it took the initial sync to complete and if you have any structure errors, you should find the numbers are identical or close enough. If there are large gaps then you may have forgotten to turn off the <code class="language-plaintext highlighter-rouge">FOREIGN_KEY_CHECKS</code> in the endpoint.</p>
+
+<h3 id="ongoing-runs">Ongoing Runs</h3>
+
+<p>Once you are happy with the results of a run where the Task stops, you can resume it at your discretion and it should pick up from where it left off. You could also modify the task so it doesn’t stop after the initial migration but that means you are spending even more time.</p>
+
+<h3 id="grand-finale">Grand Finale</h3>
+
+<p>Now it is down to you to schedule a small window of downtime to complete the migration of the app which is using the database. The order would roughly be as follows:</p>
+
+<ol>
+  <li>stop writing data using the app, i.e. use a maintenance page or just accept a few 500 errors on the next step</li>
+  <li>change the password on the database user on the old database to really prevent writes to the old database</li>
+  <li>stop the DMS Task now there is definitely no new data in the old database (double check the table row counts if you like)</li>
+  <li>set up the new user and password on the new database</li>
+  <li>deploy your application with the new hostname, username, and password</li>
+  <li>delete the DMS Task now you have newer data in the new database and you can clean up the old database at your leisure</li>
+</ol>
+
+<p>In theory the actual downtime require is quite small but hopefully you have a staging environment you can do a complete end-to-end test with first before annoying the end users of your production environment.</p>
+
+<p>If you have queue workers running, it might be easier to stop them for the duration of the switchover, just to avoid a few more exceptions being recorded. Hopefully you have a Redis-powered queue to store the jobs separately from the database.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

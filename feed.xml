@@ -1,0 +1,1099 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://willpower232.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://willpower232.github.io/" rel="alternate" type="text/html" /><updated>2026-02-06T09:50:29+00:00</updated><id>https://willpower232.github.io/feed.xml</id><title type="html">Blogumentation | willpower232</title><subtitle>I'm writing stuff down so I remember it.</subtitle><entry><title type="html">Using Tailscale Properly</title><link href="https://willpower232.github.io/computing/tailscale-but-properly.html" rel="alternate" type="text/html" title="Using Tailscale Properly" /><published>2025-11-01T00:00:00+00:00</published><updated>2025-11-01T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/tailscale-but-properly</id><content type="html" xml:base="https://willpower232.github.io/computing/tailscale-but-properly.html">&lt;p&gt;I’ve written a couple of times about using &lt;a href=&quot;https://tailscale.com/&quot;&gt;Tailscale&lt;/a&gt; but not really documented how I’m using it. I’m also definitely using it “wrong” so I’ll try to atone for that now.&lt;/p&gt;
+
+&lt;p&gt;Tailscale is a device-to-device mesh style VPN using wireguard, you install it on every device you use and now you can directly and securely access every other device without having to open ports.&lt;/p&gt;
+
+&lt;p&gt;Its also &lt;em&gt;enthusiastically&lt;/em&gt; free at a very reasonable level for home use which is great for getting introduced to it.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-1---key-expiry&quot;&gt;Problem 1 - key expiry&lt;/h2&gt;
+
+&lt;p&gt;At this point, you can install tailscale on any device, tailscale up, and join it to your tailnet. What they don’t tell you is that you now have 6 months before you have to manually reapprove the device.&lt;/p&gt;
+
+&lt;p&gt;As a bash shell customiser, I added this to my .bashrc and it has been quite useful. The important part is that you don’t forget &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale up --force-reauth&lt;/code&gt; but don’t do it on ssh over tailscale as you’ll get cut off.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if [[ &quot;$TERM&quot; == &quot;xterm-256color&quot; &amp;amp;&amp;amp; &quot;$SHLVL&quot; == &quot;1&quot; ]]; then
+	echo &quot;&quot;
+
+	if [[ $(which tailscale) != &quot;&quot; ]]; then
+		expiryEpoch=$(date -d $(tailscale status --json | jq -r '.Self.KeyExpiry') +%s)
+		nowEpoch=$(date +%s)
+
+		if [[ $(($expiryEpoch - $nowEpoch)) -lt $((86400 * 3)) ]]; then
+			echo -e &quot;tailscale key expiring soon, time to \e[38;5;208mtailscale up --force-reauth\e[0m but not over ssh, obviously&quot;
+		fi
+	fi
+ fi
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can go into the console and disable key expiry for some of your devices given that having a server randomly disconnect sucks but that isn’t really what tailscale wants you to do.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-2---who-is-really-the-user-of-the-device&quot;&gt;Problem 2 - who is really the user of the device&lt;/h2&gt;
+
+&lt;p&gt;Obviously tailscale is targetted at businesses and organisations, and that is where they make their money, but even at the free tier, you can use their tagging feature to label servers and other devices where you don’t log in. Adding a tag &lt;em&gt;replaces&lt;/em&gt; you as the user of the device in the eyes of tailscale as well as automatically disabling key expiry. This is really a one way process as you can’t remove all tags from a device.&lt;/p&gt;
+
+&lt;p&gt;It only really matters if you have other users in your tailnet (or are a business) and want to secure access in between your network. I had a little look but mostly ended up tying myself in knots and the default “everything can access everything else” access control is fine.&lt;/p&gt;
+
+&lt;p&gt;One side effect of tagging devices is that as they are no longer “yours”, you can’t use taildrop with them so I end up using rsync with ssh or scp in Windows.&lt;/p&gt;
+
+&lt;p&gt;It does nicely sort the list of machines in the app so that things like your phone and computers are at the top and the tagged devices are grouped separately.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-3---ports-or-hosts&quot;&gt;Problem 3 - ports or hosts&lt;/h2&gt;
+
+&lt;p&gt;I am used to servers and port wrangling and I am used to docker and docker compose fighting for ports so that is what I initially set up but what is infinitely easier is adding tailscale docker container as a “sidecar”.&lt;/p&gt;
+
+&lt;p&gt;In your main docker image, change the network mode to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;service:whatever-ts&lt;/code&gt; and then you can grab a one use auth key and add&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;whatever-ts:
+	image: tailscale/tailscale
+	hostname: whatever
+	restart: unless-stopped
+	volumes:
+		- ./tailscale:/var/lib/tailscale
+	environment:
+		- TS_AUTHKEY=tskey-auth-something-somethingelse
+		- TS_STATE_DIR=/var/lib/tailscale
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you swap &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whatever&lt;/code&gt; to the name of your service then when it appears in the console, it will be named something cool and useful. All you have to do then is make sure that your service is on port 80 and you’ll have a great time in most things unless you’re relying on a different port.&lt;/p&gt;
+
+&lt;p&gt;This means I’m no longer wrangling a lot of ports on the same server and everything has a nice name in my tailscale console so now how to easily handle the tailscale IP addresses.&lt;/p&gt;
+
+&lt;p&gt;Tailscale would love you to use their MagicDNS so everything you have is on one of their ts.net domains but I’m unsure about messing up my local DNS arrangements.&lt;/p&gt;
+
+&lt;p&gt;My first attempt at solving this combined &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale status&lt;/code&gt; with hostctl https://gist.github.com/willpower232/7ea6f3e0b016a98a4d776d10108d388a but that didn’t really help with using it on my phone. Obviously you could copy the IP address out of the tailscale app but I wanted something easier still. That said I do like doing this as a stand in for reverse DNS so that my logwatch emails can identify which tailscale device I SSHed in from.&lt;/p&gt;
+
+&lt;p&gt;I already have a short domain for my server so I just added the tailscale IP addresses to my public DNS records and called it a day.&lt;/p&gt;
+
+&lt;h3 id=&quot;https&quot;&gt;HTTPS&lt;/h3&gt;
+
+&lt;p&gt;If you wanted to use MagicDNS and their &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ts.net&lt;/code&gt; subdomains then you can supply a serve.json to the tailscale docker image and do more things if you like https://gist.github.com/dkaser/f4f21e864ead60bc5d059b1c819627dc (note the double dollar for docker compose reasons)&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-4---sharing-access&quot;&gt;Problem 4 - sharing access&lt;/h2&gt;
+
+&lt;p&gt;I have both one service and a tailscale exit node I’d like to share. I got them to create a tailscale account and add it to their devices before sharing the two tailscale machines to their account.&lt;/p&gt;
+
+&lt;p&gt;I was briefly worried that I’d have to add some access control but that doesn’t seem necessary in my “everything can access everything else” universe but if you don’t have one of those then you probably want to have a look at using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;autogroup:shared&lt;/code&gt; as the source.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-5---ssh&quot;&gt;Problem 5 - SSH&lt;/h2&gt;
+
+&lt;p&gt;Tailscale would love you to use Tailscale SSH to access your devices and I’m sure its great but I already have SSH keys everywhere for using with git and one device which has selectively public access so I can’t really rely on it.&lt;/p&gt;
+
+&lt;p&gt;Either way, you can totally block public SSH access with your cloud server provider and connect using your tailscale IP address or subdomains as you would any other server. I do have one place with a static IP address so I do keep it slightly open but basically don’t have to worry about fail2ban any more.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I’ve written a couple of times about using Tailscale but not really documented how I’m using it. I’m also definitely using it “wrong” so I’ll try to atone for that now.</summary></entry><entry><title type="html">Configuring wireguard and tailscale at the same time</title><link href="https://willpower232.github.io/computing/wireguard-and-tailscale.html" rel="alternate" type="text/html" title="Configuring wireguard and tailscale at the same time" /><published>2025-05-16T00:00:00+00:00</published><updated>2025-05-16T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/wireguard-and-tailscale</id><content type="html" xml:base="https://willpower232.github.io/computing/wireguard-and-tailscale.html">&lt;p&gt;I’ll preface this by saying I have no idea what I am doing, other than writing down what I needed to do.&lt;/p&gt;
+
+&lt;p&gt;I don’t know how to set up a wireguard server but I needed to have the client and tailscale functioning on the same computer.&lt;/p&gt;
+
+&lt;p&gt;Basically a quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install wireguard resolvconf&lt;/code&gt; and a config file is all I need to get going. The config file ends up in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/wireguard&lt;/code&gt; which exists after the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;My wireguard config file looks like this&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Interface]
+PrivateKey = ...
+Address = 192.168.2.18/32
+DNS = 192.168.2.1
+
+[Peer]
+PublicKey = ...
+AllowedIPs = 192.168.2.1/32,192.168.2.18/32,0.0.0.0/0
+Endpoint = 1.2.3.4:5678
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This forwards all my traffic through the wireguard connection which is great for the VPN but actually also fights with the tailscale connection so not having a great time at all.&lt;/p&gt;
+
+&lt;p&gt;I had a go with some bash aliases to juggle things but its a little annoying.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;alias my-vpn-connect=&quot;sudo tailscale down &amp;amp;&amp;amp; wg-quick up /etc/wireguard/my-vpn.conf&quot;
+
+alias my-vpn-disconnect=&quot;wg-quick down /etc/wireguard/my-vpn.conf &amp;amp;&amp;amp; sudo tailscale up&quot;
+
+alias my-vpn-status='[ -z &quot;$(sudo wg show)&quot; ] &amp;amp;&amp;amp; echo &quot;disconnected&quot; || echo &quot;connected&quot;'
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There seems to be two options for an easier fix, firstly you could do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Table = off&lt;/code&gt; to prevent it from writing network routing tables but that makes it a bit annoying to use the VPN.&lt;/p&gt;
+
+&lt;p&gt;The easier option is to remove &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0.0.0.0/0&lt;/code&gt; and add whatever resources you are hoping to use on the other side of the VPN, for example&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+AllowedIPs = 192.168.2.1/32,192.168.2.18/32,192.168.1.100/32
+...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now its working properly, you can use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl enable --now wg-quick@my-vpn.service&lt;/code&gt; to just have it around all the time but don’t forget to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wg-quick down&lt;/code&gt; before you try enabling the service though, otherwise it won’t enable because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--now&lt;/code&gt; starts it.&lt;/p&gt;
+
+&lt;h2 id=&quot;android&quot;&gt;Android?&lt;/h2&gt;
+
+&lt;p&gt;Now you’re having a great time, you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscale file cp /etc/wireguard/my-vpn.conf tailscale-ip-of-phone:&lt;/code&gt; and get &lt;a href=&quot;https://play.google.com/store/apps/details?id=com.wireguard.android&quot;&gt;wireguard from the play store&lt;/a&gt; and import the file. Naturally Android only lets you connect to a single VPN at a time so automatically disconnects tailscale but now you can use &lt;a href=&quot;https://play.google.com/store/apps/details?id=org.connectbot&quot;&gt;connectbot&lt;/a&gt; to get at your SSH connections.&lt;/p&gt;
+
+&lt;h2 id=&quot;more-reading&quot;&gt;More Reading&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;https://shibumi.dev/posts/disable-routing-for-wireguard/&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><category term="server-config" /><summary type="html">I’ll preface this by saying I have no idea what I am doing, other than writing down what I needed to do.</summary></entry><entry><title type="html">Configuring nginx to work only on tailscale</title><link href="https://willpower232.github.io/computing/nginx-and-tailscale.html" rel="alternate" type="text/html" title="Configuring nginx to work only on tailscale" /><published>2025-02-23T00:00:00+00:00</published><updated>2025-02-23T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/nginx-and-tailscale</id><content type="html" xml:base="https://willpower232.github.io/computing/nginx-and-tailscale.html">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;My &lt;a href=&quot;/computing/linux-laptop-as-a-security-camera.html&quot;&gt;laptop as a camera project&lt;/a&gt; relies on using slack for a quick and dirty way of sharing the pictures and video it takes however &lt;a href=&quot;https://api.slack.com/changelog/2024-04-a-better-way-to-upload-files-is-here-to-stay&quot;&gt;Slack have decided to get rid of the simple endpoint&lt;/a&gt; in favour of two to make a presumably less server intensive way of doing things.&lt;/p&gt;
+
+&lt;p&gt;Given Slacks overall hatred of people having free accounts, I thought I would come up with something to replace the process which happened to match the Slack API to make it easier.&lt;/p&gt;
+
+&lt;p&gt;Also with both server and camera/laptop on my tailscale network I wanted to make use of the more direct way of the camera transferring the files to my code.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem&quot;&gt;Problem&lt;/h2&gt;
+
+&lt;p&gt;Adding a new vhost in nginx that only listens on the tailscale IP is just as easy as you might think however I had a bad feeling and went for a server reboot to see what would happen and indeed, the tailscale IP was not ready by the time nginx was so nginx refused to start.&lt;/p&gt;
+
+&lt;p&gt;Frustratingly this took a while to find any information on so here I am documenting it.&lt;/p&gt;
+
+&lt;p&gt;As I am using debian and there is systemd involved, I needed to have a look at the service file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/systemd/system/multi-user.target.wants/nginx.service&lt;/code&gt; and in my case the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;After&lt;/code&gt; line was already &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;After=network-online.target remote-fs.target nss-lookup.target&lt;/code&gt;, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-online&lt;/code&gt; part of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;network-online&lt;/code&gt; being regularly crucial.&lt;/p&gt;
+
+&lt;p&gt;I added &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tailscaled.service&lt;/code&gt; to the end of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;After&lt;/code&gt; line and ran &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl daemon-reload&lt;/code&gt; as I think you’re supposed to do.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-2&quot;&gt;Problem 2&lt;/h2&gt;
+
+&lt;p&gt;Rebooting the server did not change anything and after a little more digging, now I was in the right place, it turns out that &lt;a href=&quot;https://github.com/tailscale/tailscale/issues/11504&quot;&gt;the service is telling systemd it is ready before the IP address is available&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I went with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /etc/systemd/system/tailscaled.service.d/&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /etc/systemd/system/tailscaled.service.d/override.conf&lt;/code&gt; with one of the suggestions&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Service]
+ExecStartPost=timeout 60s bash -c 'until tailscale status --peers=false; do sleep 1; done'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;One more &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl daemon-reload&lt;/code&gt; and a reboot proved that the problem was now resolved.&lt;/p&gt;
+
+&lt;h2 id=&quot;problem-3&quot;&gt;Problem 3&lt;/h2&gt;
+
+&lt;p&gt;You didn’t think that would be the end of it did you? Unfortunately in spite of all the above, subsequent updates removed the modifications so instead I changed &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/crontab&lt;/code&gt; to include &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@reboot root sleep 15 &amp;amp;&amp;amp; systemctl start nginx&lt;/code&gt; to act as a super fallback.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-actual-solution&quot;&gt;The Actual Solution&lt;/h2&gt;
+
+&lt;p&gt;Unfortunately 15 seconds wasn’t always the right amount of time so a tip of my hat goes to Bernat for getting in touch, digging a little deeper and providing their solution.&lt;/p&gt;
+
+&lt;p&gt;I’m guessing that ExecStartPost isn’t delaying the next part of systemd but one can of course delay nginx from starting. Similar to before, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /etc/systemd/system/nginx.service.d/&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /etc/systemd/system/nginx.service.d/override.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Service]
+ExecStartPre=
+ExecStartPre=timeout 60s bash -c 'until tailscale status --peers=false; do sleep 1; done'
+ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I also took the liberty of removing the tailscale override.conf I added before the next &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl daemon-reload&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;By way of explanation, the empty ExecStartPre prevents any previous one applying, we included the official ExecStartPre as the third one (note the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-t&lt;/code&gt; to indicate nginx is testing the config before trying to start). You’ll recognise the second ExecStartPre from before.&lt;/p&gt;
+
+&lt;h2 id=&quot;more-reading&quot;&gt;More Reading&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.reddit.com/r/Tailscale/comments/ubk9mo/systemd_how_do_get_something_to_run_if_tailscale/&quot;&gt;Convenient reddit thread providing all the answers&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.ispmanager.com/docs/ispmanager-business/if-nginx-does-not-start-after-rebooting-the-server&quot;&gt;Random help article about making sure nginx waits for the network&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><category term="server-config" /><summary type="html">Background</summary></entry><entry><title type="html">Using AWS DMS To Move An RDS</title><link href="https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds.html" rel="alternate" type="text/html" title="Using AWS DMS To Move An RDS" /><published>2024-11-04T00:00:00+00:00</published><updated>2024-11-04T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds</id><content type="html" xml:base="https://willpower232.github.io/computing/using-aws-dms-to-move-an-rds.html">&lt;p&gt;My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general.&lt;/p&gt;
+
+&lt;p&gt;The aim is to avoid lengthy downtime so Just Doing It In HeidiSQL ™ isn’t going to help because that will take ages and probably be error prone.&lt;/p&gt;
+
+&lt;p&gt;AWS has the Database Migration Service which can do all the hard work in the cloud BUT of course there are a few caveats. I do this with click-ops instead of terraform because this is a one off, not a long running process.&lt;/p&gt;
+
+&lt;h3 id=&quot;preparation&quot;&gt;Preparation&lt;/h3&gt;
+
+&lt;p&gt;Firstly and most importantly, your soon to be old database should have &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;binlog_format&lt;/code&gt; set to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ROW&lt;/code&gt;. This requires a reboot so make sure you’ve sorted that out before you progress too far. You can also confirm that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;log_bin&lt;/code&gt; is set to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ON&lt;/code&gt;, if it is not &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ON&lt;/code&gt; then you may be looking at a reader instance and not a writer instance.&lt;/p&gt;
+
+&lt;h3 id=&quot;instance&quot;&gt;Instance&lt;/h3&gt;
+
+&lt;p&gt;The first step is to create a Replication Instance, this is used for all queries to your Endpoints, not just the data moving. I go with all the defaults and select Dev/Test/Single AZ mode because this instance isn’t mission critical and will be long forgotten by the end of the week.&lt;/p&gt;
+
+&lt;p&gt;It took a couple of goes to create one first time because it had to auto-create the IAM role (and then I dared to put spaces in the name of the instance) but I gave it a minute for the IAM dust to settle and tried again and it worked.&lt;/p&gt;
+
+&lt;h3 id=&quot;endpoints&quot;&gt;Endpoints&lt;/h3&gt;
+
+&lt;p&gt;Eventually the Instance has been created so now you can create the Endpoints.&lt;/p&gt;
+
+&lt;p&gt;You need to select Source and Target as appropriate and then if you are using RDS then you can shortcut some of the other settings by picking “Select RDS DB Instance” to pick one.&lt;/p&gt;
+
+&lt;p&gt;In fact, if you are using RDS for your new database server then definitely take a moment to verify you can connect to it because it is good to confirm that before trying to connect from the AWS console, i.e. you have not got any funky or missing VPC routing.&lt;/p&gt;
+
+&lt;p&gt;If you are not using RDS, you will need to select which Source Engine it is using and then “Provide Access Information Manually” to see all the fields you expect.&lt;/p&gt;
+
+&lt;p&gt;If you have a cluster then the most important part of endpoint selection is that you pick the writer directly in both Source and Target cases as that is the only one with the binary log mentioned above. This problem is not detected until you start the Task so hopefully you have not doubled back to this point to find out what is going wrong.&lt;/p&gt;
+
+&lt;p&gt;Now you have a Replication Instance, the Test Endpoint Connection section will be able to work and confirm that the Endpoint settings are correct. If you skip over the test part, you can go into the Endpoint and go to the Connections tab to test directly. You will not be able to start the Task until this is successful so it seems to handle most of this itself.&lt;/p&gt;
+
+&lt;p&gt;Once you have created both source and target Endpoints, you can go to the source Endpoint and the Schemas tab to see the refresh button and load a list of databases available. I saw some error about a missing arn but it generated the list of schemas eventually anyway.&lt;/p&gt;
+
+&lt;h3 id=&quot;tasks&quot;&gt;Tasks&lt;/h3&gt;
+
+&lt;p&gt;Finally you can create a task, I prefer to create one task per database being moved. You might be excited and want to create all your tasks now however there is one final change to make. On the target Endpoint, you need to modify it and set an Extra Connection Attribute: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Initstmt=SET FOREIGN_KEY_CHECKS=0;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This is critical because the initial creation of your database is more or less guaranteed to create the tables (and insert the data) in the “wrong” order so foreign key creation will fail. I mention it as a separate step because once the database has been created, you would want to remove it so that the subsequent ongoing inserts are more typical.&lt;/p&gt;
+
+&lt;p&gt;I would name the task after the database you’re going to move to provide flexibility and make it clear what is happening. After picking the only option from the dropdowns, the Migration Type is Migrate And Replicate and “indefinitely”. Now you can use the wizard to Do Nothing on target, Stop After Applying Cached Changes. You can turn on CloudWatch Logs if you need debugging but I am going to be confident initially (foreshadowing).&lt;/p&gt;
+
+&lt;p&gt;The Migration Type is the only attribute that you can’t change after creating the task so make sure you select Migrate and Replicate otherwise you’ll have to either fully start over or keep pressing resume every so often.&lt;/p&gt;
+
+&lt;p&gt;The Table Mappings wizard should let you select the Schema (database) from a dropdown. You can probably leave the rest of the settings for this purpose.&lt;/p&gt;
+
+&lt;p&gt;I turn off the Premigration Assessment as this is a relatively simple task and now you can decide if you are starting the copy now or want to manually start it later.&lt;/p&gt;
+
+&lt;p&gt;Now you can start it (or have it start when it gets saved) and wait for it to either error or complete.&lt;/p&gt;
+
+&lt;p&gt;If it errors, you can modify the Task to have CloudWatch Logs enabled and re run the task. Don’t forget to change the dropdowns to debug so it actually logs something. You probably just want Target Load and Target Apply but you never know.&lt;/p&gt;
+
+&lt;p&gt;If you’re still not seeing any logs, make sure there is a role called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dms-cloudwatch-logs-role&lt;/code&gt; which has the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AmazonDMSCloudWatchLogsRole&lt;/code&gt; and has the following trust policy (if the wizard doesn’t do it for you)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+    &quot;Version&quot;: &quot;2012-10-17&quot;,
+    &quot;Statement&quot;: [
+        {
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Principal&quot;: {
+                &quot;Service&quot;: &quot;dms.amazonaws.com&quot;
+            },
+            &quot;Action&quot;: &quot;sts:AssumeRole&quot;
+        }
+    ]
+}&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you are looking for errors in the Log Stream then do a quick find in page in your browser for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;]E:&lt;/code&gt; which should find the issues although you will have to refer to the other lines to get a bit more context.&lt;/p&gt;
+
+&lt;h3 id=&quot;first-run---confirm-the-structure&quot;&gt;First Run - Confirm the structure&lt;/h3&gt;
+
+&lt;p&gt;Eventually you get to Migration Process 100% and the task should stop safely. The first step is to verify the database structure so I am going to use HeidiSQL to export the table creation statements only, not the data, and then I can use VS Code on my computer to do a side-by-side diff of the old and new databases.&lt;/p&gt;
+
+&lt;p&gt;In my case, I noted several massive issues in the new database&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;no AUTO_INCREMENT&lt;/li&gt;
+  &lt;li&gt;no KEYs or CONSTRAINTs&lt;/li&gt;
+  &lt;li&gt;no DEFAULT values&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Obviously, none of these changes are tolerable so I ended up dropping the new database and recreating it using the exported table creation statements from the old database and restarted (not resumed) the task.&lt;/p&gt;
+
+&lt;p&gt;You can also disable the logging at this point to save on your CloudWatch bill and delete the Log Stream if you do not need the information any longer.&lt;/p&gt;
+
+&lt;h3 id=&quot;second-run---confirm-the-row-counts&quot;&gt;Second Run - Confirm the row counts&lt;/h3&gt;
+
+&lt;p&gt;Now you have re run the task following the manual schema creation, or you got lucky the first time, and you have a database full of information. I noted that HeidiSQL did not think there was any content in the tables but I think that is just a side effect of all the inserts being very recent and the RDS has not fully understood what it is now full of.&lt;/p&gt;
+
+&lt;p&gt;Obviously you do not want to spend an age writing out lots of SQL queries so you can use this to get the repetitive work done for you by your database itself&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;SELECT CONCAT(
+    'SELECT &quot;',
+    table_name,
+    '&quot; AS table_name, COUNT(*) AS exact_row_count FROM `',
+    table_schema,
+    '`.`',
+    table_name,
+    '` UNION '
+)
+FROM INFORMATION_SCHEMA.TABLES
+WHERE table_schema = 'your_database_name';&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then copy the output and remove the final &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UNION&lt;/code&gt; from the it and you should be good to go. Also make sure your editor didn’t leave the original query in the top as the column name. You can also compare the output of all the counts however you did the earlier diff.&lt;/p&gt;
+
+&lt;p&gt;Depending on how long it took the initial sync to complete and if you have any structure errors, you should find the numbers are identical or close enough. If there are large gaps then you may have forgotten to turn off the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FOREIGN_KEY_CHECKS&lt;/code&gt; in the endpoint.&lt;/p&gt;
+
+&lt;h3 id=&quot;ongoing-runs&quot;&gt;Ongoing Runs&lt;/h3&gt;
+
+&lt;p&gt;Once you are happy with the results of a run where the Task stops, you can resume it at your discretion and it should pick up from where it left off. You could also modify the task so it doesn’t stop after the initial migration but that means you are spending even more time.&lt;/p&gt;
+
+&lt;h3 id=&quot;grand-finale&quot;&gt;Grand Finale&lt;/h3&gt;
+
+&lt;p&gt;Now it is down to you to schedule a small window of downtime to complete the migration of the app which is using the database. The order would roughly be as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;stop writing data using the app, i.e. use a maintenance page or just accept a few 500 errors on the next step&lt;/li&gt;
+  &lt;li&gt;change the password on the database user on the old database to really prevent writes to the old database&lt;/li&gt;
+  &lt;li&gt;stop the DMS Task now there is definitely no new data in the old database (double check the table row counts if you like)&lt;/li&gt;
+  &lt;li&gt;set up the new user and password on the new database&lt;/li&gt;
+  &lt;li&gt;deploy your application with the new hostname, username, and password&lt;/li&gt;
+  &lt;li&gt;delete the DMS Task now you have newer data in the new database and you can clean up the old database at your leisure&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In theory the actual downtime require is quite small but hopefully you have a staging environment you can do a complete end-to-end test with first before annoying the end users of your production environment.&lt;/p&gt;
+
+&lt;p&gt;If you have queue workers running, it might be easier to stop them for the duration of the switchover, just to avoid a few more exceptions being recorded. Hopefully you have a Redis-powered queue to store the jobs separately from the database.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="aws" /><summary type="html">My task was to move databases containing tens of GB of data from one MySQL-compatible database server to another. This is mostly for doing a safe-ish upgrade of MySQL (now AWS charges extra support for 5.7-like versions) but also handy for moving things around in general.</summary></entry><entry><title type="html">Kublet Development</title><link href="https://willpower232.github.io/computing/kublet-development.html" rel="alternate" type="text/html" title="Kublet Development" /><published>2024-10-18T00:00:00+00:00</published><updated>2024-10-18T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/kublet-development</id><content type="html" xml:base="https://willpower232.github.io/computing/kublet-development.html">&lt;p&gt;&lt;em&gt;this post is referring to the kublet arduino device available from &lt;a href=&quot;https://thekublet.com&quot;&gt;thekublet.com&lt;/a&gt;, if you’re here for kubernetes because search engines have taken a dive in quality, I can only apologise&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/20241018_100332.JPG&quot; alt=&quot;My kublet at home&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up&quot;&gt;Setting Up&lt;/h2&gt;
+
+&lt;p&gt;I hasten to add that I have never worked with c++ (aka cpp) or arduino development before so if I get anything wrong, bear with me. Also the information available at &lt;a href=&quot;https://developers.thekublet.com&quot;&gt;developers.thekublet.com&lt;/a&gt; does have a few gaps.&lt;/p&gt;
+
+&lt;p&gt;I am already a Visual Studio Code (or VSCodium) person and I work exclusively on Linux computers so if you’re not using either of those, I’m sorry for you.&lt;/p&gt;
+
+&lt;p&gt;I needed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo apt install python3-venv&lt;/code&gt; in order for PlatformIO to work so do that first.&lt;/p&gt;
+
+&lt;p&gt;I grabbed the &lt;a href=&quot;https://platformio.org&quot;&gt;PlatformIO&lt;/a&gt; extension for Code but apparently you can install the CLI directly but I don’t know what that means beyond you probably have to manage your own dependency installations.&lt;/p&gt;
+
+&lt;p&gt;Finally you need the krate binary from the kublet maker, I got mine from &lt;a href=&quot;https://github.com/kublet/krate&quot;&gt;Github&lt;/a&gt;, as well as the kublet mobile app for your phone.&lt;/p&gt;
+
+&lt;p&gt;You almost definitely need a different micro USB cable in order to get the serial output but only time will tell. If you do want this then you probably also need to plug directly into your computer rather than through a USB hub which can still power the device, just not route the serial connection properly at least in my case.&lt;/p&gt;
+
+&lt;p&gt;One other pain point, when connecting the kublet to the computer and trying to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;krate monitor&lt;/code&gt; I got permission errors. Now that it was connected I was able to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ls -hal /dev/ttyUSB0&lt;/code&gt; and see that the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dialout&lt;/code&gt; group has access to it so I needed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo usermod -aG dialout wh&lt;/code&gt; and reboot in order to see the serial output.&lt;/p&gt;
+
+&lt;h2 id=&quot;getting-started&quot;&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;I set up the working directory and a git repo as I normally do at the start of a new project. I then needed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;krate init&lt;/code&gt; to get everything happening. You can also reference &lt;a href=&quot;https://github.com/kublet/community/tree/main/apps/bored&quot;&gt;their community GitHub&lt;/a&gt; to see what structure you should end up with, I liked how the PlatformIO extension automatically installs any changes to the platformio.ini file which is handy.&lt;/p&gt;
+
+&lt;p&gt;You can also look at the contents of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main.cpp&lt;/code&gt; to get started (mostly because I’d never seen c++ code before). I wanted my screen to reference a remote API so this bored project was also pretty close.&lt;/p&gt;
+
+&lt;p&gt;As a couple of major roadblocks, ArduinoJSON.h should be ArduinoJson.h as it is case sensitive and I had to copy HTTPClient.h and HTTPClient.cpp into the src directory in order to use a custom header making a request to my API.&lt;/p&gt;
+
+&lt;h2 id=&quot;development&quot;&gt;Development&lt;/h2&gt;
+
+&lt;p&gt;As a scripting language, it works top to bottom so I added a function between setup and loop which drew to the screen so that loop could send through testing data and I could see what the screen looks like completely filled. Unfortunately, I wanted to set three separate variables to 888 but that caused some kind of memory issue and crashed the device.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ui.drawText&lt;/code&gt; method specifically requires a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;const char*&lt;/code&gt; (probably also called a reference) so I had to change the type of some data from my REST API which is a little annoying. Apparently this uses C++11 so I was able to do the following:&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;JsonObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stats_hpa&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;doc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hpa&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hpaMinInt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stats_hpa&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;min&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hpaMinTemp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;to_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hpaMinInt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hpaMin&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hpaMinTemp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Even though the sprite looks like it is 240 by 150, you can actually address the entire 240x240 screen. I did choose to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ui.clear()&lt;/code&gt; before writing to the screen a second time, I tried to just overwrite some parts but it didn’t really work so mostly you just have to remember to draw things top to bottom, left to right, and you should have a good time.&lt;/p&gt;
+
+&lt;h3 id=&quot;todo&quot;&gt;Todo&lt;/h3&gt;
+
+&lt;p&gt;I briefly considered &lt;a href=&quot;https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html&quot;&gt;ESP-NOW&lt;/a&gt; as hinted by the developer docs since I have three kublets but it was easier to just develop one application and deploy it three times.&lt;/p&gt;
+
+&lt;p&gt;On the standard apps you can press the button on the back to access a menu but that didn’t seem possible with my output so I can only presume the documentation is missing something.&lt;/p&gt;
+
+&lt;h2 id=&quot;deployment&quot;&gt;Deployment&lt;/h2&gt;
+
+&lt;p&gt;When you think you’re ready to try something, you can use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;krate build&lt;/code&gt; to confirm it builds. I’m not sure if it is necessary before each &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;krate send &amp;lt;ip&amp;gt;&lt;/code&gt; but it does offer piece of mind.&lt;/p&gt;
+
+&lt;p&gt;Also when you want to reset the device, plug it in whilst holding the button on the back, this will eventually flash the screen white and you’ll see the “Open mobile app” message. &lt;strong&gt;Make sure not to apply pressure to the screen whilst you do this&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I found that the mobile app (1.0.5 on Android anyway) needed to have the storage reset in order to allow me to change the name of a second kublet but then I was reflashing it repeatedly during this process anyway so I only named it on the final run. The mobile app is the only way to apply the WiFi details (2.4Ghz only btw) so a little annoying. Flashing the Developer app to the device will take a few minutes but the screen on the device (and the serial output) will tell you which IP address you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;krate send &amp;lt;ip&amp;gt;&lt;/code&gt; to.&lt;/p&gt;
+
+&lt;p&gt;I had some problems so I ended up resetting the device all the time but once you know the IP address of the device, you should be able to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;krate send &amp;lt;ip&amp;gt;&lt;/code&gt; to it repeatedly until you’re happy.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">this post is referring to the kublet arduino device available from thekublet.com, if you’re here for kubernetes because search engines have taken a dive in quality, I can only apologise</summary></entry><entry><title type="html">Windows 11 with Virtualbox and Debian</title><link href="https://willpower232.github.io/computing/windows-11-virtualbox-debian.html" rel="alternate" type="text/html" title="Windows 11 with Virtualbox and Debian" /><published>2024-03-12T00:00:00+00:00</published><updated>2024-03-12T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/windows-11-virtualbox-debian</id><content type="html" xml:base="https://willpower232.github.io/computing/windows-11-virtualbox-debian.html">&lt;p&gt;I’m not a big fan of basing my windows account on my microsoft account so I used &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;oobe\bypassnro&lt;/code&gt; to make an admin account named after the friendly name for the laptop and then a regular account for my every day use.&lt;/p&gt;
+
+&lt;p&gt;After clearing out the pre installed garbage and installing tailscale, I found I needed to give the regular account write access to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Program Files\Tailscale&lt;/code&gt; in order to maintain the tailscale connection.&lt;/p&gt;
+
+&lt;p&gt;One of my favourite things to do is install sublime text, run it as administator and open the hosts file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Windows\System32\drivers\etc\hosts&lt;/code&gt; so there is quick access to it in the future. My VM didn’t seem to use the hosts hosts file but its even easier to edit the local hosts file.&lt;/p&gt;
+
+&lt;p&gt;Installing the latest virtualbox and preparing a VM with half the CPU and half the RAM, I grabbed the latest debian ISO and installed it to the VM with the MATE desktop environment but I’m sure there is probably a better choice.&lt;/p&gt;
+
+&lt;p&gt;If you install no desktop environment then you could do something like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install xserver-xorg lightdm gnome-tweaks gnome-core --no-install-recommends &amp;amp;&amp;amp; apt install vim sudo gnupg chromium&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you might think I’m roughly ready to follow my usual linux desktop setup however OG debian makes it a little harder to get going so you need to follow the steps in order.&lt;/p&gt;
+
+&lt;p&gt;Now you’re logged in as the user you created (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;wh&lt;/code&gt; for me) but you don’t have sudo access which means the only way to get into the root user is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su&lt;/code&gt;. Unfortunately they don’t like you doing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su&lt;/code&gt; without a user so you have to remember to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su -&lt;/code&gt; instead otherwise the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PATH&lt;/code&gt; will be incomplete and it is slightly more annoying as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usermod&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reboot&lt;/code&gt; won’t be easily available.&lt;/p&gt;
+
+&lt;p&gt;If this annoys you then you can do  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;export PATH=&quot;$PATH:/usr/local/sbin:/usr/sbin:/sbin&quot;&lt;/code&gt; so you can easily call the missing commands but really you want to just do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su -&lt;/code&gt;. Have a read of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=918754 but if you are really confused and want to see which package is responsible for a specific command you can use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dpkg -S &amp;lt;command&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Anyway, you need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;su -&lt;/code&gt; and then you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usermod -aG sudo wh&lt;/code&gt;. With a reboot or logout/login, you can now sudo and have a better time.&lt;/p&gt;
+
+&lt;p&gt;The next step is to install the virtualbox addons for clipboard sharing, mounted drives, and screen resolution fixes, but there are some pre requisites &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt install linux-headers-amd64 gcc make perl --no-install-recommends&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Insert Guest Additions CD Image&lt;/code&gt; from the Devices menu. If you open a terminal in the mounted CD folder and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh VBoxLinuxAdditions.run&lt;/code&gt; or some variant to run that particular binary. One reboot later (just in case) and you should be off to the races.&lt;/p&gt;
+
+&lt;p&gt;If you’re planning to mount a shared folder from the host then you probably need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;usermod -aG vboxsf wh&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Debian doesn’t necessarily have immediate access to the usual ways of adding apt repos so its a bit more manual. Git comes from an ubuntu repo so you have to pick the nearest LTS ubuntu version name so it sort of matches.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apt install apt-transport-https ca-certificates curl software-properties-common;
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg;
+echo &quot;deb https://packages.sury.org/php/ $(lsb_release -sc) main&quot; &amp;gt; /etc/apt/sources.list.d/php.list;
+
+wget -O /etc/apt/trusted.gpg.d/docker.asc https://download.docker.com/linux/debian/gpg
+echo &quot;deb https://download.docker.com/linux/debian $(lsb_release -sc) stable&quot; &amp;gt; /etc/apt/sources.list.d/docker.list;
+
+gpg --recv-keys --keyserver keyserver.ubuntu.com A1715D88E1DF1F24;
+gpg --export A1715D88E1DF1F24 &amp;gt; /etc/apt/trusted.gpg.d/git.gpg;
+gpg --delete-key A1715D88E1DF1F24;
+echo &quot;deb http://ppa.launchpad.net/git-core/ppa/ubuntu jammy main&quot; &amp;gt; /etc/apt/sources.list.d/git.list;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt update&lt;/code&gt; works before continuing to install the main packages.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apt install -y vim git net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client docker-ce
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Installed &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-ce&lt;/code&gt; means you get &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose-plugin&lt;/code&gt; but I prefer to run it separately so remember to remove it later if that is your jam. Don’t forget to add yourself to the docker group and reboot before you wonder why docker is not working.&lt;/p&gt;
+
+&lt;p&gt;Now you should be able to start installing bits and pieces from the other article. The completions directory is still to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/share/bash-completion/completions&lt;/code&gt; as before, just no pkg-config to reveal that information to you unless you install it.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I’m not a big fan of basing my windows account on my microsoft account so I used oobe\bypassnro to make an admin account named after the friendly name for the laptop and then a regular account for my every day use.</summary></entry><entry><title type="html">Zimaboard OpenWRT with Pihole</title><link href="https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html" rel="alternate" type="text/html" title="Zimaboard OpenWRT with Pihole" /><published>2023-12-03T00:00:00+00:00</published><updated>2023-12-03T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/zimaboard-openwrt-pihole</id><content type="html" xml:base="https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html">&lt;p&gt;Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.&lt;/p&gt;
+
+&lt;p&gt;I had a little play with CasaOS and it seemed quite capable but I spend a lot of time messing around with linux and docker elsewhere so I was more comfortable removing it and setting something up from scratch.&lt;/p&gt;
+
+&lt;p&gt;When I eventually got round to this project, I found that my Zimaboard would restart every few minutes with the existing CasaOS on it, not sure if there is some hibernation or power problem as hinted by Reddit or if I just left it in a weird state. The problem did not occur after installing OpenWRT so was not hardware related.&lt;/p&gt;
+
+&lt;p&gt;Conveniently, I had recently received an email from them with instructions for both &lt;a href=&quot;https://icewhale.community/t/diy-your-own-cool-openwrt-router-based-on-zimaboard/73&quot;&gt;OpenWRT&lt;/a&gt; and &lt;a href=&quot;https://icewhale.community/t/build-a-powerful-home-router-with-zimaboard-and-pfsense/74&quot;&gt;pfSense&lt;/a&gt; so I’m largely following their OpenWRT instructions to begin with.&lt;/p&gt;
+
+&lt;h2 id=&quot;openwrt&quot;&gt;OpenWRT&lt;/h2&gt;
+
+&lt;p&gt;The Zimaboard has the existing network plugged in on the power jack side as per their instructions, I have a keyboard and my ventoy stick connected. Bashing the F keys (F11 I think) got me to the boot menu where I can boot into Ventoy UEFI and whatever environment I happen to have.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lsblk&lt;/code&gt; identified /dev/mmcblk0 as the small eMMC onboard storage, I have downloaded the generic-squashfs-combined-efi file from the &lt;a href=&quot;https://downloads.openwrt.org/releases/23.05.2/targets/x86/64/&quot;&gt;most recent release of OpenWRT&lt;/a&gt; and, extracted the gz to leave an img file with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gzip -d openwrt-whatever.gz&lt;/code&gt; so just needs a quick dd and a reboot (don’t forget to remove your USB stick).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;dd if=openwrt-22.03.4-x86-64-generic-squashfs-combined-efi.img of=/dev/mmcblk0 bs=1M status=progress
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now if you plug your computer into the network on the display port side, you should get a local IP address and go to 192.168.1.1 in your browser, you should be able to log in with no password. You can also SSH &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root@192.168.1.1&lt;/code&gt; with no password if you prefer to set up that way. If you find out the IP address given to the Zimaboard by your existing router, you can confirm that the web UI cannot be accessed.&lt;/p&gt;
+
+&lt;p&gt;Obviously the first step is setting yourself a good password.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-yourself-unstuck&quot;&gt;Getting Yourself Unstuck&lt;/h3&gt;
+
+&lt;p&gt;If you break things to the point you can’t get an IP, you can’t connect remotely so you need to have a screen and keyboard plugged in to the Zimaboard and during the boot you will see a message pop up about pressing F and Enter to get into a failsafe mode where you can undo whatever it is that you did.&lt;/p&gt;
+
+&lt;h3 id=&quot;disk-size&quot;&gt;Disk Size&lt;/h3&gt;
+
+&lt;p&gt;Some prerequisites&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;opkg update
+
+opkg install parted lsblk fdisk losetup resize2fs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I did &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;parted&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;print&lt;/code&gt; to fix some awareness of the size mismatch and see how small the partitions were.&lt;/p&gt;
+
+&lt;p&gt;Now confirm the current setup and see that you’re not using very much.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lsblk -o PATH,SIZE,PARTUUID
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You will also see that some partition UUID is crucial in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cat /boot/grub/grub.cfg&lt;/code&gt;, we will come back for this later so write down what you see (or open another terminal).&lt;/p&gt;
+
+&lt;p&gt;Now &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fdisk /dev/mmcblk0&lt;/code&gt; is the quickest way to replace the second partition with a much bigger one.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;p&lt;/code&gt; to confirm current values (remember start and end for partition 2)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;d&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2&lt;/code&gt; to delete second partition from the table (not remove any files)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;n&lt;/code&gt; for new partition&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2&lt;/code&gt; for new second partition&lt;/p&gt;
+
+&lt;p&gt;now enter the old start value for partition 2 and just press enter to confirm the default last sector (i.e. the whole remaining disk)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;n&lt;/code&gt; to not remove the signature&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;w&lt;/code&gt; to write the changes and quit&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lsblk&lt;/code&gt; command from earlier should confirm that the unique identifier has changed so update &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/boot/grub/grub.cfg&lt;/code&gt; with the new identifier.&lt;/p&gt;
+
+&lt;p&gt;If you reboot now, your system should still work but the writeable filesystem has not been extended to the full size of the partition so you need one last bit which I believe evaluates as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;resize2fs -f /dev/loop0&lt;/code&gt; but the full script is along the lines of&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;BOOT=&quot;$(sed -n -e &quot;\|\s/boot\s.*$|{s///p;q}&quot; /etc/mtab)&quot;
+PART=&quot;${BOOT##*[^0-9]}&quot;
+DISK=&quot;${BOOT%${PART}}&quot;
+ROOT=&quot;${DISK}$((PART+1))&quot;
+LOOP=&quot;$(losetup -n -l | sed -n -e &quot;\|\s.*\s${ROOT#/dev}\s.*$|{s///p;q}&quot;)&quot;
+resize2fs -f ${LOOP}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://forum.openwrt.org/t/howto-resizing-root-partition-on-x86-march-2023-edition/153398&quot;&gt;Reference&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;dhcp-configuration&quot;&gt;DHCP Configuration&lt;/h3&gt;
+
+&lt;p&gt;It is not immediately obvious but you can configure the DHCP settings with Network &amp;gt; Interfaces and then Edit LAN.&lt;/p&gt;
+
+&lt;p&gt;You can set the interfaces IP address and netmask and it will start offering DHCP from there.&lt;/p&gt;
+
+&lt;p&gt;You can further customise the limits on the DHCP Server tab.&lt;/p&gt;
+
+&lt;p&gt;e.g.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;IPv4 address: 10.0.0.1&lt;/li&gt;
+  &lt;li&gt;IPv4 netmask: 255.255.0.0&lt;/li&gt;
+  &lt;li&gt;DHCP Server Start: 10.0.1.1 (should be a whole IP address instead of a number as this is more predictable)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Obviously be careful about breaking your nginx IP addresses and you probably need to reboot when changing these.&lt;/p&gt;
+
+&lt;p&gt;Don’t forget there is a save button on the modal window and a save button on the interfaces page. If you find yourself in failsafe mode, you can edit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/config/network&lt;/code&gt; to undo whatever you just did.&lt;/p&gt;
+
+&lt;p&gt;Finally, some of my devices struggled with IPv6 and also using pihole was trickier when you couldn’t easily identify the devices getting blocked. The quick solution is to disable odhcpd but apparently you can also try this but I don’t think I needed to.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;uci set 'network.lan.ipv6=0'
+uci set 'network.wan.ipv6=0'
+uci set 'dhcp.lan.dhcpv6=disabled'
+uci commit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;tailscale&quot;&gt;Tailscale&lt;/h2&gt;
+
+&lt;p&gt;In theory, this would be a great exit node, allowing you to block adverts whilst on the road and access your home network however because this device is mostly functioning as a router, I don’t think it will work. I’ve followed the basic instructions and configured sysctl but alas all I got was “destination host unreachable” from anything trying to use the exit node. I presume there is something in the firewall or routing which is stopping traffic from flowing unnaturally.&lt;/p&gt;
+
+&lt;p&gt;You could of course set this up as a separate device using debian or whatever within your network and have your existing router set it as the DNS server for its DHCP clients.&lt;/p&gt;
+
+&lt;h2 id=&quot;docker&quot;&gt;Docker&lt;/h2&gt;
+
+&lt;p&gt;If you have problems installing via opkg, you can search the list in the web UI in case the package has been renamed.&lt;/p&gt;
+
+&lt;p&gt;Basically &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;opkg install dockerd luci-app-dockerman&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You can do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ls /etc/init.d&lt;/code&gt; to see a list of services.&lt;/p&gt;
+
+&lt;p&gt;Now you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker pull nginx:stable-alpine&lt;/code&gt; to confirm it is all working.&lt;/p&gt;
+
+&lt;p&gt;Portainer is a great way to see what is happening so you can also do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker run -d --rm --network host -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce:2.18.4&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;nginx&quot;&gt;nginx&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /etc/config/uhttpd&lt;/code&gt; to remove all the defaults and then just attach to 127.0.0.1:81 so it can’t be accessed directly. Probably need to reboot to apply is probably what I did. If you get stuck, you can come back and change it to whatever you like so maybe leave the defaults commented rather than removed.&lt;/p&gt;
+
+&lt;p&gt;You can also edit the hosts file to help you get unstuck if you break docker based DNS later, i.e. add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.1 openwrt.router.zz&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Anyway, then you can make a directory to keep all the config &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /wpinc/nginx/conf.d&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/proxy_params&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;proxy_set_header Host $http_host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/conf.d/default.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	listen 192.168.1.1:80;
+
+    # don't return 404 as that breaks it
+
+    access_log off;
+    error_log /dev/null crit;
+}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/conf.d/openwrt.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	client_max_body_size 50M;
+
+	listen 192.168.1.1:80;
+
+	server_name openwrt.router.zz;
+
+	location / {
+		proxy_pass http://127.0.0.1:81;
+		include proxy_params;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker run -dit --restart always \
+	--name nginx \
+	--network host \
+	-v /wpinc/nginx/proxy_params:/etc/nginx/proxy_params:ro \
+	-v /wpinc/nginx/conf.d:/etc/nginx/conf.d:ro \
+	nginx:stable-alpine
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/nginx.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now if you modify your hosts file to point openwrt.router.zz to 192.168.1.1 then you should find it working.&lt;/p&gt;
+
+&lt;p&gt;If you can’t then you can confirm everything is okay with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netstat -lnp&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker logs nginx&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;pihole&quot;&gt;pihole&lt;/h3&gt;
+
+&lt;p&gt;You might think you need to disable the dnsmasq service however it handles both DHCP and DNS so this ruins everything (see Getting Yourself Unstuck above).&lt;/p&gt;
+
+&lt;p&gt;You need to go to DHCP and DNS &amp;gt; Advanced Settings and set the DNS port to 0 but obviously don’t unless you’re done searching the internet for a little bit. If you get stuck, this port is specific in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/config/dhcp&lt;/code&gt; so you can set it back to 53 if you break docker.&lt;/p&gt;
+
+&lt;p&gt;It is however crucial to tell DHCP to still advertise the IPv4 DNS host so Network &amp;gt; Interfaces &amp;gt; LAN &amp;gt; DHCP Server &amp;gt; Advanced Settings and click on + for DHCP-Options and Use 6, DNS Servers
+i.e. 6,192.168.1.1. Without this, devices which struggle with IPv6 will fail to resolve DNS.&lt;/p&gt;
+
+&lt;p&gt;We can reference the original script https://github.com/pi-hole/docker-pi-hole/blob/master/examples/docker_run.sh however I ran into several issues.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;It could not resolve any DNS queries internally until it was running with host networking, I guess this makes sense because the OpenWRT DNS needed to be disabled in order to free up the port&lt;/li&gt;
+  &lt;li&gt;The UI makes use of Content Security Policy which means you need to decide on the hostname you’re accessing it with first and never change it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/nginx/conf.d/pihole.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	listen 192.168.1.1:80;
+
+	server_name pihole.router.zz;
+
+	location / {
+		proxy_pass http://127.0.0.1:82;
+		include proxy_params;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker restart nginx&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /wpinc/pihole/dnsmasq /wpinc/pihole/pihole&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/pihole.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker run -dit --restart always \
+    --name pihole \
+	--net host \
+	--hostname pihole \
+	-e WEB_PORT=82 \
+    -e TZ=&quot;Europe/London&quot; \
+    -v &quot;/wpinc/pihole/pihole:/etc/pihole&quot; \
+    -v &quot;/wpinc/pihole/dnsmasq:/etc/dnsmasq.d&quot; \
+    -e VIRTUAL_HOST=&quot;pihole.router.zz&quot; \
+    -e PROXY_LOCATION=&quot;pihole.router.zz&quot; \
+    -e DNSMASQ_USER=root \
+	-e DNSMASQ_LISTENING=all \
+    pihole/pihole:latest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/pihole.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You could use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker logs pihole&lt;/code&gt; to see what your initial password is or you could just reset the password with the command line with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker exec -it pihole pihole -a -p&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you screw up and need a full reset, you can stop and remove the container and then empty the two directories before re doing the container.&lt;/p&gt;
+
+&lt;h4 id=&quot;updating-pihole&quot;&gt;Updating pihole&lt;/h4&gt;
+
+&lt;p&gt;As it is a docker container, you need to pull the latest version, stop and remove the container, then re run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/pihole.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;whitelisting-in-pihole&quot;&gt;Whitelisting in pihole&lt;/h4&gt;
+
+&lt;p&gt;I found that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;s.youtube.com&lt;/code&gt; needed adding to the whitelist to make YouTube watch history work properly.&lt;/p&gt;
+
+&lt;h3 id=&quot;unbound&quot;&gt;Unbound&lt;/h3&gt;
+
+&lt;p&gt;Pihole is great and all but if you’re still sending DNS requests over the usual protocols then your ISP and others can still see what you’re doing.&lt;/p&gt;
+
+&lt;p&gt;The answer is to forward pihole to a nice DNS provider using a separate thing which uses DoH or DoT so we’ll use unbound as it is also a docker image pointing at Quad9.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir -p /wpinc/unbound&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now you need to run the mvance/unbound container and extract the default config file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker cp unbound:/opt/unbound/etc/unbound/unbound.conf /wpinc/unbound/unbound.conf&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You mostly need to change the port to 5053 but if you want to change the log from /dev/null to /dev/stdout then you can debug issues if you mess around with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker logs unbound&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/unbound/forward-records.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;forward-zone:
+    # Forward all queries (except those in cache and local zone) to
+    # upstream recursive servers
+    name: &quot;.&quot;
+    # Queries to this forward zone use TLS
+    forward-tls-upstream: yes
+
+    # Quad9
+    forward-addr: 9.9.9.9@853
+    forward-addr: 149.112.112.112@853
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vim /wpinc/unbound.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker run -dit --restart always \
+	--name unbound \
+	--net host \
+	-v /wpinc/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro \
+	-v /wpinc/unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro \
+	mvance/unbound:latest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /wpinc/unbound.sh&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now back in your pihole UI, Settings &amp;gt; DNS. Untick the upstream DNS servers and add your own in to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.1#5053&lt;/code&gt; (yes # not :).&lt;/p&gt;
+
+&lt;p&gt;Finally you can confirm you’re fully secure with the output of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dig +short txt proto.on.quad9.net&lt;/code&gt; should confirm you’re using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dot&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you want to do this on the zimaboard, you will need the dig command from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;opkg install bind-dig&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In PowerShell parlance, this is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Resolve-DnsName -Name proto.on.quad9.net -Type txt&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;pppoe&quot;&gt;PPPoE&lt;/h2&gt;
+
+&lt;p&gt;If you’re lucky enough to have ethernet presenting broadband in your home, like FTTP, then you can remove the ISP router from your setup entirely.&lt;/p&gt;
+
+&lt;p&gt;If you’re lucky your ISP will provide PPPoE connection details https://www.plus.net/help/broadband/broadband-connection-settings/&lt;/p&gt;
+
+&lt;p&gt;Looks like PPPoE is installed by default so you might not need this extra information https://openwrt.org/docs/guide-user/network/wan/wan_interface_protocols&lt;/p&gt;
+
+&lt;p&gt;You can edit the WAN interface to change the type to PPPoE, you’ll have to confirm the change before you can see the username and password fields but I didn’t need to enter any other information other than the username and password as informed by my ISP.&lt;/p&gt;
+
+&lt;h2 id=&quot;upgrading-openwrt&quot;&gt;Upgrading OpenWRT&lt;/h2&gt;
+
+&lt;p&gt;We have added random files in a custom location so we need to make sure these are preserved when a big firmware upgrade happens. You can add more directories to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/sysupgrade.conf&lt;/code&gt; so make sure &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/wpinc&lt;/code&gt; is on the list. It would be nice to include &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/opt/docker&lt;/code&gt; however this is obviously a massive directory and easily recreated with the scripts in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/wpinc&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now make sure you have installed the attended sysupgrade program &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;luci-app-attendedsysupgrade&lt;/code&gt; from the software lists.&lt;/p&gt;
+
+&lt;p&gt;The last bit of preparation is recording all the packages you have installed. &lt;a href=&quot;https://github.com/richb-hanover/OpenWrtScripts/blob/main/opkgscript.sh&quot;&gt;opkgscript&lt;/a&gt; makes it easy, save it to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/wpinc&lt;/code&gt; and run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh opkgscript.sh -v write&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You can download a backup of all config files in the web UI System &amp;gt; Backup / Flash Firmware and confirm that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/wpinc&lt;/code&gt; and the list of installed software is present.&lt;/p&gt;
+
+&lt;p&gt;Finally the fun part. Under System you should see Attended Sysupgrade so you can check for upgrades and follow the prompts.&lt;/p&gt;
+
+&lt;p&gt;I found that docker was using a lot of space so had to break it thoroughly to get my disk space usage down. Unfortunately the attended upgrade service refused to be updated after this point so I guess I’m going in manually.&lt;/p&gt;
+
+&lt;p&gt;Now you need to figure out the latest image using similar instructions as above. The current version is at the bottom of the web UI or in the banner when you log in to the terminal.&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; /tmp
+wget https://downloads.openwrt.org/releases/23.05.4/targets/x86/64/openwrt-23.05.4-x86-64-generic-squashfs-combined-efi.img.gz
+sysupgrade &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt; openwrt-23.05.4-x86-64-generic-squashfs-combined-efi.img.gz
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I had to add –force because the image metadata was missing.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately nothing had changed after the reboot so I tried it uploading the file in the UI and that also accomplished nothing.&lt;/p&gt;
+
+&lt;p&gt;The only way to make some progress was to install the (now deprecated) auc and run that. owut (its replacement) was not available to me. Of course this had the same error as before so I am giving up.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.</summary></entry><entry><title type="html">Self-hosted Git with Forgejo and Tailscale</title><link href="https://willpower232.github.io/computing/self-hosted-git.html" rel="alternate" type="text/html" title="Self-hosted Git with Forgejo and Tailscale" /><published>2023-11-11T00:00:00+00:00</published><updated>2023-11-11T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/self-hosted-git</id><content type="html" xml:base="https://willpower232.github.io/computing/self-hosted-git.html">&lt;p&gt;Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.&lt;/p&gt;
+
+&lt;h3 id=&quot;self-hosted-git&quot;&gt;Self-hosted Git&lt;/h3&gt;
+
+&lt;p&gt;I started accessing self-hosted Git repositories over SSH in a past life but the default UI leaves a lot to the imagination. I’ve had Gitea in the back of my mind for some time now, mostly because of the fun name, but then I also saw Forgejo was a fork of it for &lt;a href=&quot;https://forgejo.org/faq/#why-was-forgejo-created&quot;&gt;open source reasons&lt;/a&gt; so have gone with that for now.&lt;/p&gt;
+
+&lt;p&gt;Forgejo can manage deploy keys and webhooks for packagist so should be capable for most of my use cases, Netlify does not seem to have custom connections outside of their enterprise tier so this server will mostly just be for my public code.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://forgejo.org/docs/latest/admin/installation/#installation-from-binary&quot;&gt;installation instructions&lt;/a&gt; are comprehensive enough and I went with the direct binary association so I wouldn’t be burned by apt updates and I started with nginx and debian as always.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+	# listen...
+	# ssl_certificate...
+	# ssl_certificate_key...
+	# etc etc
+
+	server_name willpoweredinc.software;
+
+	location /.well-known {
+		alias /var/www/html/.well-known;
+	}
+
+	location / {
+		proxy_pass http://127.0.0.1:3000;
+		include proxy_params;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The installation instructions are along the lines of the following once you have &lt;a href=&quot;https://codeberg.org/forgejo/forgejo/releases&quot;&gt;downloaded the right binary&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cp forgejo-1.20.5-0-linux-amd64 /usr/local/bin/forgejo
+
+chmod 755 /usr/local/bin/forgejo
+
+apt install git git-lfs
+
+adduser --system --shell /bin/bash --gecos 'Git Version Control' --group --disabled-password --home /home/git git
+
+mkdir /var/lib/forgejo
+
+chown git:git /var/lib/forgejo &amp;amp;&amp;amp; chmod 750 /var/lib/forgejo
+
+mkdir /etc/forgejo
+
+chown root:git /etc/forgejo &amp;amp;&amp;amp; chmod 770 /etc/forgejo
+
+wget -O /etc/systemd/system/forgejo.service https://codeberg.org/forgejo/forgejo/raw/branch/forgejo/contrib/systemd/forgejo.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A &lt;em&gt;much&lt;/em&gt; abbreviated copy of the systemd file is&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=Forgejo (Beyond coding. We forge.)
+After=syslog.target
+After=network.target
+
+[Service]
+# Uncomment the next line if you have repos with lots of files and get a HTTP 500 error because of that
+# LimitNOFILE=524288:524288
+RestartSec=2s
+Type=simple
+User=git
+Group=git
+WorkingDirectory=/var/lib/forgejo/
+ExecStart=/usr/local/bin/forgejo web --config /etc/forgejo/app.ini
+Restart=always
+Environment=USER=git HOME=/home/git GITEA_WORK_DIR=/var/lib/forgejo
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;At some point you will need to repace &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GITEA_WORK_DIR&lt;/code&gt; with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FORGEJO_WORK_DIR&lt;/code&gt; but you can probably reference the copy of the service from the git repo.&lt;/p&gt;
+
+&lt;p&gt;I left it with the default sqlite database as I knew there would only be me accessing it and this is much simpler. Also I use snapshots of the server from the provider and MySQL can have consistency issues when it is backed up whilst running. Finally it is time to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl enable forgejo &amp;amp;&amp;amp; systemctl start forgejo&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you can visit the website and complete the initial setup. Once that is done, it is time to secure the config file&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl stop forgejo
+
+chmod 750 /etc/forgejo &amp;amp;&amp;amp; chmod 640 /etc/forgejo/app.ini
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I then made the following changes to the app.ini file so it was only me using it&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[openid]
+ENABLE_OPENID_SIGNIN = false
+ENABLE_OPENID_SIGNUP = false
+
+[service]
+DISABLE_REGISTRATION = true
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The next most important thing to deal with is &lt;a href=&quot;https://forgejo.org/docs/next/admin/search-engines-indexation/&quot;&gt;the search engines&lt;/a&gt;. You may be aware that there are an awful lot of web pages to look at in a git repository so the bandwidth usage can ramp up quite quickly which can be a problem if you’re on a lower tier server.&lt;/p&gt;
+
+&lt;p&gt;Basically, you can create the directory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/lib/forgejo/custom/&lt;/code&gt; and a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;robots.txt&lt;/code&gt; file with at least this content as the archives can be particularly heavy downloads.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;User-agent: *
+Disallow: /*/*/archive/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can also take this opportunity to ban the AI bots from accessing your content if you wish.&lt;/p&gt;
+
+&lt;p&gt;Some of the information about forgejo suggests you can run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;forgejo help&lt;/code&gt; to see what is happening however as we customise the paths in the service file, the output will not be of much use to you.&lt;/p&gt;
+
+&lt;h4 id=&quot;customisation&quot;&gt;Customisation&lt;/h4&gt;
+
+&lt;p&gt;You may have changed the name in the initial setup but you can also change the landing page, description, and theme in the config file. I used the theme switcher in my user configuration to try them all out quickly&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[server]
+LANDING_PAGE = explore
+
+[ui]
+DEFAULT_THEME = arc-green # replaced by gitea-dark in version 7 which isn't quite the same
+
+[ui.meta]
+DESCRIPTION = Software what I made
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Referencing the original Gitea documentation, I saw that you can also replace the images used by adding more directories to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;custom&lt;/code&gt; directory mentioned earlier and then adding image files.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/logo.svg&lt;/code&gt; - Used for site icon, app icon&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/logo.png&lt;/code&gt; - Used for Open Graph&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/avatar_default.png&lt;/code&gt; - Used as the default avatar image&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/apple-touch-icon.png&lt;/code&gt; - Used on iOS devices for bookmarks&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/favicon.svg&lt;/code&gt; - Used for favicon&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/img/favicon.png&lt;/code&gt; - Used as fallback for browsers that don’t support SVG favicons&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This should leave the only Forgejo reference in the footer but thats fine by me, I was mostly doing this for the social media previews when sharing links.&lt;/p&gt;
+
+&lt;p&gt;In version 7, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;img&lt;/code&gt; folder got moved into an assets folder so the complete path is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public/assets/img&lt;/code&gt; now.&lt;/p&gt;
+
+&lt;h4 id=&quot;backup&quot;&gt;Backup&lt;/h4&gt;
+
+&lt;p&gt;I already have a daily backup methodology on the server via a shell script so I added the following to include a copy of all Forgejo data&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo -u git forgejo dump --config /etc/forgejo/app.ini -f forgejo-dump.zip
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The default dump file includes a timestamp in the filename but as I was including this zip in another zip, I chose to give it a plainer name.&lt;/p&gt;
+
+&lt;p&gt;I think the dump would have to be restored manually but it is not an encrypted zip file so this would be relatively trivial if I ever needed it.&lt;/p&gt;
+
+&lt;p&gt;Finally, you may want to include &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--quiet&lt;/code&gt; so you don’t ge emails from your cronjob unless they error.&lt;/p&gt;
+
+&lt;h3 id=&quot;ssh&quot;&gt;SSH&lt;/h3&gt;
+
+&lt;p&gt;I prefer using SSH authentication wherever possible to avoid usernames and passwords everywhere and its nicely built in everywhere I need to be but if I’m hosting &lt;em&gt;spicy&lt;/em&gt; repositories, it would be better to not have public SSH at all. This is where Tailscale comes in.&lt;/p&gt;
+
+&lt;p&gt;As always when messing around with SSH configuration &lt;strong&gt;make sure you have a non-SSH console to access the server!&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;In an ideal world, I would have the SSH daemon only listening on the Tailscale network connection so it was impossible to ever connect on the public interfaces but, spoiler alert, I could not figure it out so I just made sure the port was closed on the firewalls.&lt;/p&gt;
+
+&lt;p&gt;I mostly focussed on editing the SSH systemd service so that it had &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Wants&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires&lt;/code&gt; for the Tailscale service but of course technically the service can be up but not connected so it was unfortunately not enough I guess.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl edit ssh
+
+[Unit]
+Wants=tailscaled.service
+
+systemctl edit tailscaled
+
+[Units]
+Before=ssh.service
+
+systemctl daemon-reload
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd-delta&lt;/code&gt; shows all overrides of config files, can delete the overrides if you want (full overrides are in /etc)&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl add-requires ssh.service tailscaled&lt;/code&gt; is a nicer way of doing it and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/systemd/system/ssh.service.requires/tailscaled.service&lt;/code&gt; link is created so should be unlinked if you want to undo it but it does not show up in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd-delta&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Leaving the SSH config back at its original settings, I was able to clone the repositories as I expected substituting the Tailscale IP address for the server domain in the standard &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git clone git@server domain&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;p&gt;Links I tried to follow&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;https://forum.tailscale.com/t/mount-share-only-if-connected-to-tailscale/3027&lt;/li&gt;
+  &lt;li&gt;https://forum.tailscale.com/t/ubuntus-boot-order-for-tailscale-service/2341/7&lt;/li&gt;
+  &lt;li&gt;https://www.2daygeek.com/linux-modifying-existing-systemd-unit-file/&lt;/li&gt;
+  &lt;li&gt;https://stackoverflow.com/questions/49643551/systemd-service-b-to-start-after-another-service-a-only-if-service-a-exists&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;signing-keys&quot;&gt;Signing Keys&lt;/h4&gt;
+
+&lt;p&gt;You can easily upload your SSH keys to Forgejo to allow access to your repositories. Unfortunately they make you do an extra step to verify the SSH keys in order to use them as signing keys which is what I do to avoid worrying about GPG rotation.&lt;/p&gt;
+
+&lt;p&gt;You can expand the verification section which provides a random token and some instructions on the command to run to create a signature to verify the key. As you have hopefully provided a public key to Forgejo, you need to supply the file path to the corresponding public key in your filesystem.&lt;/p&gt;
+
+&lt;p&gt;If it works, you’ll see lots of green padlocks in the list of commits in the UI.&lt;/p&gt;
+
+&lt;h3 id=&quot;fail2ban&quot;&gt;Fail2ban&lt;/h3&gt;
+
+&lt;p&gt;My standard server installation includes fail2ban mostly for SSH however with the port firewalled off and tailscale meaning only I can get at it anyway, it isn’t really doing anything.&lt;/p&gt;
+
+&lt;p&gt;You may be aware that there are lots of pages in a web-accessible git repo so sooner or later any amount of merges or force pushes will create an awful amount of 404s.&lt;/p&gt;
+
+&lt;p&gt;Firstly you need a filter in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/fail2ban/filter.d&lt;/code&gt;, I went with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nginx-404-filter.conf&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Definition]
+failregex = ^&amp;lt;HOST&amp;gt;.*&quot;(GET|POST).*&quot; (404|444) .*$
+ignoreregex =
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally you need to add to (or create) &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/fail2ban/jail.local&lt;/code&gt;. This equates to 10 404s in 10 seconds means a 5 minute ban.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[nginx-404]
+enabled = true
+port = http,https
+filter = nginx-404-filter
+logpath = /var/log/nginx/access.log
+bantime = 300
+findtime = 10
+maxretry = 10
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you open a whole bunch of tabs to a page that doesn’t exist, you should find yourself blocked for a few minutes if you fancy a cuppa. If you’re still on SSH to your server, you can confirm you are blocked with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fail2ban-client status nginx-404&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;pivoting-to-docker&quot;&gt;Pivoting to Docker&lt;/h2&gt;
+
+&lt;p&gt;If you want to move your installation to Docker (mostly to use a tailscale sidecar) then you need to struggle through a few things because the docker image handles things slightly differently and uses none of the same paths.&lt;/p&gt;
+
+&lt;p&gt;You’ll note that the docker installation instructions tell you to mount a volume to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/data&lt;/code&gt;. If you’re moving from a binary then you’ll have to put the contents of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/lib/forgejo&lt;/code&gt; into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/data/gitea&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/forgejo/app.ini&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/data/gitea/conf/app.ini&lt;/code&gt; as well as updating all the paths in the config file to replace every &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/lib/forgejo&lt;/code&gt; with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/data/gitea&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;That should be enough to get it to start and preserve your repositories however the other reason the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/data&lt;/code&gt; mount is generic is because the docker image generates its own SSH keys and preserves them in there. Probably related is the need to remove and re-add all your SSH keys in order to restore access for cloning. You can verify your connection with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh git@your.tailscale.ip.address&lt;/code&gt; to see if its ready to like you.&lt;/p&gt;
+
+&lt;p&gt;As part of debugging, I changed the port in app.ini from 3000 to 80 but of course if you have a passkey then that won’t work because of no HTTPS until you set that up properly.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I’ve been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.</summary></entry><entry><title type="html">Setting up a linux MySQL server</title><link href="https://willpower232.github.io/computing/linux-mysql-server.html" rel="alternate" type="text/html" title="Setting up a linux MySQL server" /><published>2023-05-07T00:00:00+00:00</published><updated>2023-05-07T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/linux-mysql-server</id><content type="html" xml:base="https://willpower232.github.io/computing/linux-mysql-server.html">&lt;p&gt;Following on from &lt;a href=&quot;/computing/setting-up-a-linux-server.html&quot;&gt;Setting up a linux server&lt;/a&gt;, installing a MySQL server has some other steps to make sure the server you’re setting up is secure.&lt;/p&gt;
+
+&lt;p&gt;I delegate a lot of the security to my server providers firewalls (or security group in AWS-speak) so that only other servers I own can reach this server which forces me to use tunnels to manage it.&lt;/p&gt;
+
+&lt;p&gt;If you have set up the same SSH keys on your web server and your database server then you should be able to use jump hosts like this &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh -J wh@yourserver.you.com wh@databaseserver.you.com&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;First step is to install the database server, then start and enable the service so it is always running. It is also worth pointing out that this will install the MySQL 8 equivalent of MariaDB so you may need to tweak the password encryption for your application users.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo apt-get install mariadb-server mariadb-client -y
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thankfully they provide the same script to secure your installation &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo /usr/bin/mysql_secure_installation&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;I went with the following options&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;no root password by default&lt;/li&gt;
+  &lt;li&gt;switch to unix_socket authentication&lt;/li&gt;
+  &lt;li&gt;don’t change root password since it is local only by socket&lt;/li&gt;
+  &lt;li&gt;rm anonymous users&lt;/li&gt;
+  &lt;li&gt;disallow root login remotely&lt;/li&gt;
+  &lt;li&gt;rm test database&lt;/li&gt;
+  &lt;li&gt;reload privilege tables&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can verify this has loosely worked by comparing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mysql&lt;/code&gt; (which won’t let you in) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo mysql&lt;/code&gt; (which will).&lt;/p&gt;
+
+&lt;p&gt;Currently you would need to jump servers to pass through a port to localhost along the lines of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh -L 9999:localhost:3306 -J wh@yourserver.you.com -N wh@databaseserver.you.com&lt;/code&gt; so you could provide remote access to the root user (or a user with all the permissions) for your main server which comes in two parts. You would also need to follow these steps if your websites are hosted on a different server.&lt;/p&gt;
+
+&lt;p&gt;Firstly, now you’re in the mysql cli you can do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;GRANT ALL ON . to 'root'@'yourserver.you.com' IDENTIFIED BY '[password]' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Secondly, you need to get the database server using a public port to expose it to your web server. You can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo vim /etc/mysql/mariadb.conf.d/50-server.cnf&lt;/code&gt; and comment out the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bind-address = 127.0.0.1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After restarting the database server, you should be able to tunnel your local computer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh -L 9999:databaseserver.you.com:3306 -N wh@yourserver.you.com&lt;/code&gt; and then your client of choice can use host 127.0.0.1 and port 9999 with root and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[password]&lt;/code&gt; from earlier.&lt;/p&gt;
+
+&lt;p&gt;Finally, if you need to change the password encryption for a specific user to support, the query is&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ALTER USER '[user]'@'yourserver.you.com' IDENTIFIED WITH mysql_native_password BY '[password]'
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;timezones&quot;&gt;Timezones&lt;/h3&gt;
+
+&lt;p&gt;I have apps that tend to run in UTC but I normally run the servers in my local time so their automatic processes line up to me.&lt;/p&gt;
+
+&lt;p&gt;This is a problem for MySQL which runs in “system” time by default and then struggles with inserts when summer time starts.&lt;/p&gt;
+
+&lt;p&gt;Given you have probably already modified &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;50-server.cnf&lt;/code&gt;, you can add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;default-time-zone = '+00:00'&lt;/code&gt; and restart MySQL to apply.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">Following on from Setting up a linux server, installing a MySQL server has some other steps to make sure the server you’re setting up is secure.</summary></entry><entry><title type="html">Backing up all the things</title><link href="https://willpower232.github.io/computing/backing-up-all-the-things.html" rel="alternate" type="text/html" title="Backing up all the things" /><published>2023-01-21T00:00:00+00:00</published><updated>2023-01-21T00:00:00+00:00</updated><id>https://willpower232.github.io/computing/backing-up-all-the-things</id><content type="html" xml:base="https://willpower232.github.io/computing/backing-up-all-the-things.html">&lt;p&gt;I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here.&lt;/p&gt;
+
+&lt;h2 id=&quot;where&quot;&gt;Where&lt;/h2&gt;
+
+&lt;p&gt;I have a spare computer and a 1TB SSD so that can sit headless somewhere and I can fit everything I need there. I can auth to the git repositories with an SSH key and use the same key for scraping the files off my servers so this computer can have its own key no problem.&lt;/p&gt;
+
+&lt;p&gt;To make it easier, I’ll make a directory in the root of the hard drive called backups so its all in one casual place. To make the final parts easier, I’ll make a subfolder called working so the backed up content is also in its own place and then I can mess around with the scripts between the two.&lt;/p&gt;
+
+&lt;h2 id=&quot;what&quot;&gt;What&lt;/h2&gt;
+
+&lt;p&gt;I’ll start by syncing the content from my servers. Having added the public key to the right place, its an easy rsync. As part of setting up my servers, I keep the websites and configuration in one folder so easy enough to download almost everything in that folder. The secret of course is to add your main server user to each other users group so you have basic read access to everything.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/bash
+
+rsync rvt --links --progress wh@myserver.com:/wpinc /backups/working/myserver/ --exclude=letsencrypt --exclude=tmp --exclude=logs --delete
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Keeping each servers files separate means that when a server is retired, the last copy of the files can be easily archived without disturbing the whole thing.&lt;/p&gt;
+
+&lt;p&gt;If you want, you could also add some call to a reporting service if you wanted to record you had backed up stuff here since the really unique and important stuff is covered now.&lt;/p&gt;
+
+&lt;p&gt;I’ll start with gits and gists folders in the working subfolder. Obviously we need all branches and tags from our various repositories so we can use a mirror when cloning the repositories.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone --mirror git@github.com:username/repo.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It turns out you can also grab gists in a similar way which is very handy.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone --mirror git@gist.github.com:123456789.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now everything is cloned, the next part of the script will simply loop through the folders and update them.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;REPOS=(&quot;gists&quot; &quot;gits&quot;)
+for REPO in &quot;${REPOS[@]}&quot;; do
+	DIRS=($(find /backups/working/$REPO -name *.git -type d))
+	for DIR in &quot;${DIRS[@]}&quot;; do
+		cd &quot;$DIR&quot;
+		pwd
+		git remote update
+	done
+done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3-2-1&quot;&gt;3-2-1&lt;/h3&gt;
+
+&lt;p&gt;So now you have two copies of everything and you could be done but it won’t be super safe unless you have a third copy somewhere completely different and “off site”.&lt;/p&gt;
+
+&lt;p&gt;I’m a big fan of Backblaze for object storage (others are available of course) and their B2 service which offers 10GB free and then is cheaper after that than S3 so seems like a solid place to get started.&lt;/p&gt;
+
+&lt;p&gt;I initially used a program called duplicity and it seemed to be pretty good however the restore method was not obvious or trivial so I ended up using tar and GPG directly and then the b2 cli to sync the resulting files up to my bucket.&lt;/p&gt;
+
+&lt;p&gt;As the backup computer is only responsible for encrypting files, you can make the process easier by only adding your GPG public key to the backup computer. This doesn’t need the passphrase to encrypt objects so makes the automation less complex.&lt;/p&gt;
+
+&lt;p&gt;You can export the public key like this, substituting your key ID &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg --armor --export me@my-encryption-key.com &amp;gt; encryption.asc&lt;/code&gt; and then import it on the backup computer &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg --import encryption.asc&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You will want to edit the imported public key to tell GPG to trust it &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gpg --edit-key me@my-encryption-key.com&lt;/code&gt;, you can apply ultimate trust from there.&lt;/p&gt;
+
+&lt;p&gt;Again I’ll make a dedicated directory for the compressed encrypted files called scratch next to the working directory.&lt;/p&gt;
+
+&lt;p&gt;Now it is just a matter of looping through the working directories and outputting the files to the scratch directory.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DIRS=(&quot;gists&quot; &quot;gits&quot; &quot;server1&quot; &quot;server2&quot;)
+for LOCAL_DIR in &quot;${DIRS[@]}&quot;; do
+	echo &quot;starting $LOCAL_DIR...&quot;
+
+	tar czf - working/${LOCAL_DIR} | gpg -r me@my-encryption-key.com -e &amp;gt; scratch/${LOCAL_DIR}.tar.gz.gpg
+
+	echo &quot;finished $LOCAL_DIR&quot;
+done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can add v into czf if you want more detailed output and if you didn’t have a GPG encryption key, you could use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-e&lt;/code&gt; for a regular passworded encryption. To skip the prompt in this case, you would do &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c --passphrase yourpassword&lt;/code&gt; otherwise you probably have to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;export GPG_TTY=$(tty)&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finally, you can now sync the scratch folder into the cloud using the &lt;a href=&quot;https://github.com/Backblaze/B2_Command_Line_Tool&quot;&gt;b2 cli&lt;/a&gt; which looks like&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;b2 authorize-account abcdefghijkl 012345678901234567890123456789012345678901
+
+b2 sync /backups/scratch/ b2://your-backup-bucket/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Before I forget, you will want to double check the retention settings in the bucket to make sure you only keep backups for as long as you want to. You can also set up a backblaze account in a different region and set up bucket replication so you have multiple copies of your backups in the cloud.&lt;/p&gt;
+
+&lt;p&gt;In my setup, I have each of these parts as separate script files but they could be combined into one process if you wanted.&lt;/p&gt;</content><author><name></name></author><category term="computing" /><category term="linux" /><summary type="html">I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here.</summary></entry></feed>

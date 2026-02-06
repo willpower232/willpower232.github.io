@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Setting up a linux MySQL server" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Following on from Setting up a linux server, installing a MySQL server has some other steps to make sure the server you’re setting up is secure." />
+<meta property="og:description" content="Following on from Setting up a linux server, installing a MySQL server has some other steps to make sure the server you’re setting up is secure." />
+<link rel="canonical" href="https://willpower232.github.io/computing/linux-mysql-server.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/linux-mysql-server.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-05-07T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Setting up a linux MySQL server" />
+<script type="application/ld+json">
+{"description":"Following on from Setting up a linux server, installing a MySQL server has some other steps to make sure the server you’re setting up is secure.","url":"https://willpower232.github.io/computing/linux-mysql-server.html","@type":"BlogPosting","headline":"Setting up a linux MySQL server","dateModified":"2023-05-07T00:00:00+00:00","datePublished":"2023-05-07T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/linux-mysql-server.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Setting up a linux MySQL server
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Setting up a linux MySQL server" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Setting up a linux MySQL server" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Setting up a linux MySQL server</h1>
+	<p class="post-meta">First written<time datetime="2023-05-07T00:00:00+00:00" itemprop="datePublished">
+			2023-05-07
+		</time>~ last updated<time datetime="2025-04-01T00:00:00+00:00" itemprop="dateModified">
+				2025-04-01
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>Following on from <a href="/computing/setting-up-a-linux-server.html">Setting up a linux server</a>, installing a MySQL server has some other steps to make sure the server you’re setting up is secure.</p>
+
+<p>I delegate a lot of the security to my server providers firewalls (or security group in AWS-speak) so that only other servers I own can reach this server which forces me to use tunnels to manage it.</p>
+
+<p>If you have set up the same SSH keys on your web server and your database server then you should be able to use jump hosts like this <code class="language-plaintext highlighter-rouge">ssh -J wh@yourserver.you.com wh@databaseserver.you.com</code>.</p>
+
+<p>First step is to install the database server, then start and enable the service so it is always running. It is also worth pointing out that this will install the MySQL 8 equivalent of MariaDB so you may need to tweak the password encryption for your application users.</p>
+
+<pre><code>sudo apt-get install mariadb-server mariadb-client -y
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+</code></pre>
+
+<p>Thankfully they provide the same script to secure your installation <code class="language-plaintext highlighter-rouge">sudo /usr/bin/mysql_secure_installation</code></p>
+
+<p>I went with the following options</p>
+
+<ul>
+  <li>no root password by default</li>
+  <li>switch to unix_socket authentication</li>
+  <li>don’t change root password since it is local only by socket</li>
+  <li>rm anonymous users</li>
+  <li>disallow root login remotely</li>
+  <li>rm test database</li>
+  <li>reload privilege tables</li>
+</ul>
+
+<p>You can verify this has loosely worked by comparing <code class="language-plaintext highlighter-rouge">mysql</code> (which won’t let you in) and <code class="language-plaintext highlighter-rouge">sudo mysql</code> (which will).</p>
+
+<p>Currently you would need to jump servers to pass through a port to localhost along the lines of <code class="language-plaintext highlighter-rouge">ssh -L 9999:localhost:3306 -J wh@yourserver.you.com -N wh@databaseserver.you.com</code> so you could provide remote access to the root user (or a user with all the permissions) for your main server which comes in two parts. You would also need to follow these steps if your websites are hosted on a different server.</p>
+
+<p>Firstly, now you’re in the mysql cli you can do</p>
+
+<pre><code>GRANT ALL ON . to 'root'@'yourserver.you.com' IDENTIFIED BY '[password]' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+</code></pre>
+
+<p>Secondly, you need to get the database server using a public port to expose it to your web server. You can <code class="language-plaintext highlighter-rouge">sudo vim /etc/mysql/mariadb.conf.d/50-server.cnf</code> and comment out the <code class="language-plaintext highlighter-rouge">bind-address = 127.0.0.1</code>.</p>
+
+<p>After restarting the database server, you should be able to tunnel your local computer <code class="language-plaintext highlighter-rouge">ssh -L 9999:databaseserver.you.com:3306 -N wh@yourserver.you.com</code> and then your client of choice can use host 127.0.0.1 and port 9999 with root and <code class="language-plaintext highlighter-rouge">[password]</code> from earlier.</p>
+
+<p>Finally, if you need to change the password encryption for a specific user to support, the query is</p>
+
+<pre><code>ALTER USER '[user]'@'yourserver.you.com' IDENTIFIED WITH mysql_native_password BY '[password]'
+</code></pre>
+
+<h3 id="timezones">Timezones</h3>
+
+<p>I have apps that tend to run in UTC but I normally run the servers in my local time so their automatic processes line up to me.</p>
+
+<p>This is a problem for MySQL which runs in “system” time by default and then struggles with inserts when summer time starts.</p>
+
+<p>Given you have probably already modified <code class="language-plaintext highlighter-rouge">50-server.cnf</code>, you can add <code class="language-plaintext highlighter-rouge">default-time-zone = '+00:00'</code> and restart MySQL to apply.</p>
+
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Backing up all the things" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here." />
+<meta property="og:description" content="I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here." />
+<link rel="canonical" href="https://willpower232.github.io/computing/backing-up-all-the-things.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/backing-up-all-the-things.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-01-21T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Backing up all the things" />
+<script type="application/ld+json">
+{"description":"I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here.","url":"https://willpower232.github.io/computing/backing-up-all-the-things.html","@type":"BlogPosting","headline":"Backing up all the things","dateModified":"2023-01-21T00:00:00+00:00","datePublished":"2023-01-21T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/backing-up-all-the-things.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Backing up all the things
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Backing up all the things" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Backing up all the things" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Backing up all the things</h1>
+	<p class="post-meta"><time datetime="2023-01-21T00:00:00+00:00" itemprop="datePublished">
+			2023-01-21
+		</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>I am a big fan of the Microsoft OneDrive that comes with the office subscription I have for all my personal files and photos and there are any number of options for mirroring the content out of the cloud onto a big drive but I also have a whole bunch of text files in code repositories and littered across a server or two which also need backing up so that is what I’m going to talk about here.</p>
+
+<h2 id="where">Where</h2>
+
+<p>I have a spare computer and a 1TB SSD so that can sit headless somewhere and I can fit everything I need there. I can auth to the git repositories with an SSH key and use the same key for scraping the files off my servers so this computer can have its own key no problem.</p>
+
+<p>To make it easier, I’ll make a directory in the root of the hard drive called backups so its all in one casual place. To make the final parts easier, I’ll make a subfolder called working so the backed up content is also in its own place and then I can mess around with the scripts between the two.</p>
+
+<h2 id="what">What</h2>
+
+<p>I’ll start by syncing the content from my servers. Having added the public key to the right place, its an easy rsync. As part of setting up my servers, I keep the websites and configuration in one folder so easy enough to download almost everything in that folder. The secret of course is to add your main server user to each other users group so you have basic read access to everything.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/bash
+
+rsync rvt --links --progress wh@myserver.com:/wpinc /backups/working/myserver/ --exclude=letsencrypt --exclude=tmp --exclude=logs --delete
+</code></pre></div></div>
+
+<p>Keeping each servers files separate means that when a server is retired, the last copy of the files can be easily archived without disturbing the whole thing.</p>
+
+<p>If you want, you could also add some call to a reporting service if you wanted to record you had backed up stuff here since the really unique and important stuff is covered now.</p>
+
+<p>I’ll start with gits and gists folders in the working subfolder. Obviously we need all branches and tags from our various repositories so we can use a mirror when cloning the repositories.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone --mirror git@github.com:username/repo.git
+</code></pre></div></div>
+
+<p>It turns out you can also grab gists in a similar way which is very handy.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone --mirror git@gist.github.com:123456789.git
+</code></pre></div></div>
+
+<p>Now everything is cloned, the next part of the script will simply loop through the folders and update them.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>REPOS=("gists" "gits")
+for REPO in "${REPOS[@]}"; do
+	DIRS=($(find /backups/working/$REPO -name *.git -type d))
+	for DIR in "${DIRS[@]}"; do
+		cd "$DIR"
+		pwd
+		git remote update
+	done
+done
+</code></pre></div></div>
+
+<h3 id="3-2-1">3-2-1</h3>
+
+<p>So now you have two copies of everything and you could be done but it won’t be super safe unless you have a third copy somewhere completely different and “off site”.</p>
+
+<p>I’m a big fan of Backblaze for object storage (others are available of course) and their B2 service which offers 10GB free and then is cheaper after that than S3 so seems like a solid place to get started.</p>
+
+<p>I initially used a program called duplicity and it seemed to be pretty good however the restore method was not obvious or trivial so I ended up using tar and GPG directly and then the b2 cli to sync the resulting files up to my bucket.</p>
+
+<p>As the backup computer is only responsible for encrypting files, you can make the process easier by only adding your GPG public key to the backup computer. This doesn’t need the passphrase to encrypt objects so makes the automation less complex.</p>
+
+<p>You can export the public key like this, substituting your key ID <code class="language-plaintext highlighter-rouge">gpg --armor --export me@my-encryption-key.com &gt; encryption.asc</code> and then import it on the backup computer <code class="language-plaintext highlighter-rouge">gpg --import encryption.asc</code>.</p>
+
+<p>You will want to edit the imported public key to tell GPG to trust it <code class="language-plaintext highlighter-rouge">gpg --edit-key me@my-encryption-key.com</code>, you can apply ultimate trust from there.</p>
+
+<p>Again I’ll make a dedicated directory for the compressed encrypted files called scratch next to the working directory.</p>
+
+<p>Now it is just a matter of looping through the working directories and outputting the files to the scratch directory.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DIRS=("gists" "gits" "server1" "server2")
+for LOCAL_DIR in "${DIRS[@]}"; do
+	echo "starting $LOCAL_DIR..."
+
+	tar czf - working/${LOCAL_DIR} | gpg -r me@my-encryption-key.com -e &gt; scratch/${LOCAL_DIR}.tar.gz.gpg
+
+	echo "finished $LOCAL_DIR"
+done
+</code></pre></div></div>
+
+<p>You can add v into czf if you want more detailed output and if you didn’t have a GPG encryption key, you could use <code class="language-plaintext highlighter-rouge">-c</code> instead of <code class="language-plaintext highlighter-rouge">-e</code> for a regular passworded encryption. To skip the prompt in this case, you would do <code class="language-plaintext highlighter-rouge">-c --passphrase yourpassword</code> otherwise you probably have to <code class="language-plaintext highlighter-rouge">export GPG_TTY=$(tty)</code>.</p>
+
+<p>Finally, you can now sync the scratch folder into the cloud using the <a href="https://github.com/Backblaze/B2_Command_Line_Tool" target="_blank" rel="noopener noreferrer">b2 cli</a> which looks like</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>b2 authorize-account abcdefghijkl 012345678901234567890123456789012345678901
+
+b2 sync /backups/scratch/ b2://your-backup-bucket/
+</code></pre></div></div>
+
+<p>Before I forget, you will want to double check the retention settings in the bucket to make sure you only keep backups for as long as you want to. You can also set up a backblaze account in a different region and set up bucket replication so you have multiple copies of your backups in the cloud.</p>
+
+<p>In my setup, I have each of these parts as separate script files but they could be combined into one process if you wanted.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

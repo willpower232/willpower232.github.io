@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="OpenWrt and Tailscale" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I am trying out Tailscale as a way of securely accessing computers and servers I use without learning the ins and outs of WireGuard." />
+<meta property="og:description" content="I am trying out Tailscale as a way of securely accessing computers and servers I use without learning the ins and outs of WireGuard." />
+<link rel="canonical" href="https://willpower232.github.io/computing/openwrt-and-tailscale.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/openwrt-and-tailscale.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-08-13T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="OpenWrt and Tailscale" />
+<script type="application/ld+json">
+{"description":"I am trying out Tailscale as a way of securely accessing computers and servers I use without learning the ins and outs of WireGuard.","url":"https://willpower232.github.io/computing/openwrt-and-tailscale.html","@type":"BlogPosting","headline":"OpenWrt and Tailscale","dateModified":"2022-08-13T00:00:00+00:00","datePublished":"2022-08-13T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/openwrt-and-tailscale.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		OpenWrt and Tailscale
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="OpenWrt and Tailscale" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="OpenWrt and Tailscale" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">OpenWrt and Tailscale</h1>
+	<p class="post-meta"><time datetime="2022-08-13T00:00:00+00:00" itemprop="datePublished">
+			2022-08-13
+		</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>I am trying out <a href="https://tailscale.com/" target="_blank" rel="noopener noreferrer">Tailscale</a> as a way of securely accessing computers and servers I use without learning the ins and outs of <a href="https://www.wireguard.com/" target="_blank" rel="noopener noreferrer">WireGuard</a>.</p>
+
+<p>I also have a <a href="https://www.gl-inet.com/products/gl-ar750s/" target="_blank" rel="noopener noreferrer">GL-AR750S</a> which I picked up as part of finding ways to improve wireless coverage in my house. This happens to run OpenWrt so should be able to do cool things on it.</p>
+
+<p>I hasten to add that I don’t really know what I’m doing and I still need to learn how Tailscale DNS works so I’ll probably update this later.</p>
+
+<p>Unfortunately logging in to LuCi and going to the page where you can add additional software doesn’t offer Tailscale as an option and trying to use opkg (the package manager) via SSH doesn’t help either.</p>
+
+<p>The <a href="https://openwrt.org/packages/pkgdata/tailscale" target="_blank" rel="noopener noreferrer">opkg page for Tailscale</a> suggests it can only be installed on OpenWrt 21 but it seems we’re currently using OpenWrt 19 which is probably to blame.</p>
+
+<p>This leaves us with two options, either we try and install manually or we update the device.</p>
+
+<p>The most recent stock firmware seems to be OpenWrt 19 but thankfully <a href="https://openwrt.org/toh/gl.inet/gl-ar750s" target="_blank" rel="noopener noreferrer">OpenWrt provides compatible firmware</a> with the updated version which is nice and you can upload it into LuCi although you’ll lose the nice UI. Apparently this is the NOR and NAND version of the device so lets go with that.</p>
+
+<p>Unfortunately that broke it which is mildly annoying but there is a NOR-only version we can try as well but how to do that whilst it is essentially bricked?</p>
+
+<p>Powering the device whilst holding down the reset button and only having one ethernet cable connected puts it in U-boot mode where, with static IP address 192.168.1.2, you can upload the other firmware (to 192.168.1.1). Apparently if you break U-boot, you can also update that at 192.168.1.1/uboot.html which also might be necessary if the upload page has <em>two</em> upload fields.</p>
+
+<p>Unfortunately the NOR-only leaves you without the NAND bit and only 10MB of usable space so whilst usable, doesn’t leave a lot of room for experimenting. There might be a way of mounting the NAND but I am definitely not knowledgeable enough for that.</p>
+
+<p>Fortunately the stock firmware comes in U-boot version so getting back to stock is trouble free so we’ll go for the manual install after all.</p>
+
+<p>Meanwhile in SSH on your device, Tailscale <a href="https://pkgs.tailscale.com/stable/#static" target="_blank" rel="noopener noreferrer">offers compiled downloads</a> but you may need to check your architecture with <code class="language-plaintext highlighter-rouge">uname -m</code>, I need the mips version. You can <code class="language-plaintext highlighter-rouge">wget</code> the correct download and then expand the tar file with <code class="language-plaintext highlighter-rouge">tar x -zvf</code> (that separate <code class="language-plaintext highlighter-rouge">x</code> was necessary for the busybox I had so whatever).</p>
+
+<p>You can now verify it will work by trying to execute <code class="language-plaintext highlighter-rouge">tailscale version</code>, if it doesn’t, you’ll need to install some dependencies with opkg (probably ca-bundle and kmod-tun).</p>
+
+<p>I stumbled upon <a href="https://github.com/adyanth/openwrt-tailscale-enabler" target="_blank" rel="noopener noreferrer">adyanth/openwrt-tailscale-enabler</a> which provides a complete example but you might want to just reference their files rather than use their provided downloads just in case.</p>
+
+<p>Basically move <code class="language-plaintext highlighter-rouge">tailscale</code> and <code class="language-plaintext highlighter-rouge">tailscaled</code> into <code class="language-plaintext highlighter-rouge">/usr/bin</code> so they’re on PATH and then create the service file at <code class="language-plaintext highlighter-rouge">/etc/init.d/tailscale</code> (don’t forget to make it executable with <code class="language-plaintext highlighter-rouge">chmod +x</code>)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/bin/sh /etc/rc.common
+
+# Copyright 2020 Google LLC.
+# SPDX-License-Identifier: Apache-2.0
+
+USE_PROCD=1
+START=99
+STOP=1
+
+start_service() {
+  procd_open_instance
+  procd_set_param command /usr/bin/tailscaled
+
+  # Set the port to listen on for incoming VPN packets.
+  # Remote nodes will automatically be informed about the new port number,
+  # but you might want to configure this in order to set external firewall
+  # settings.
+  procd_append_param command --port 41641
+
+  # OpenWRT /var is a symlink to /tmp, so write persistent state elsewhere.
+  procd_append_param command --state /etc/config/tailscaled.state
+
+  procd_set_param respawn
+  procd_set_param stdout 1
+  procd_set_param stderr 1
+
+  procd_close_instance
+}
+
+stop_service() {
+  /usr/bin/tailscaled --cleanup
+}
+</code></pre></div></div>
+
+<p>You should now be able to start the service with <code class="language-plaintext highlighter-rouge">/etc/init.d/tailscale start</code> and <code class="language-plaintext highlighter-rouge">tailscale up</code> to authenticate. You might want to add on <code class="language-plaintext highlighter-rouge">--accept-dns=false</code> because you probably don’t want to confuse the routers own DNS (right?)</p>
+
+<p>Finally enable the service after reboot with <code class="language-plaintext highlighter-rouge">/etc/init.d/tailscale enable</code> and you’re done.</p>
+
+<h3 id="dns">DNS</h3>
+
+<p>I’d love to try using this as DNS over my Tailscale network for adblocking on the go so I’ll figure that out next but it probably starts with something along the lines of <code class="language-plaintext highlighter-rouge">tailscale up --advertise-routes=192.168.1.0/24</code>. OpenWrt has a package called luci-app-adblock which seems to do the trick. Shame it isn’t pihole but I don’t have an alternative suitable low power device at the minute.</p>
+
+<h3 id="more-reading">More Reading</h3>
+
+<p><a href="https://yomis.blog/tailscale-openwrt/" target="_blank" rel="noopener noreferrer">https://yomis.blog/tailscale-openwrt/</a></p>
+
+<p><a href="https://willangley.org/how-i-set-up-tailscale-on-my-wifi-router/" target="_blank" rel="noopener noreferrer">https://willangley.org/how-i-set-up-tailscale-on-my-wifi-router/</a></p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

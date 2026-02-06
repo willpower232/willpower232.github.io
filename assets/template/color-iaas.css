@@ -1,0 +1,26 @@
+:root {
+	/* core colours */
+	--page-background:#b51716;
+	--content-background:white;
+	--side-background:#500a08;
+	--side-color:#ffb600;
+
+	/* link default colour */
+	--link-color:var(--side-background);
+
+	/* link activated colour */
+	--link-active:var(--side-background);
+
+	/* link activated text colour when background active */
+	--link-background-active-text:var(--side-color);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--content-background:#444;
+		--content-color:white;
+		--link-color:var(--side-color);
+		--link-active:var(--side-color);
+		--link-background-active-text:var(--side-background);
+	}
+}
