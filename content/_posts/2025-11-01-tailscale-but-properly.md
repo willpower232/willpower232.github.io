@@ -4,7 +4,7 @@ title: Using Tailscale Properly
 description:
 category: computing
 tags: linux
-modified_date: 2025-12-12
+modified_date: 2026-07-17
 ---
 
 I've written a couple of times about using [Tailscale](https://tailscale.com/) but not really documented how I'm using it. I'm also definitely using it "wrong" so I'll try to atone for that now.
@@ -89,3 +89,7 @@ I was briefly worried that I'd have to add some access control but that doesn't 
 Tailscale would love you to use Tailscale SSH to access your devices and I'm sure its great but I already have SSH keys everywhere for using with git and one device which has selectively public access so I can't really rely on it.
 
 Either way, you can totally block public SSH access with your cloud server provider and connect using your tailscale IP address or subdomains as you would any other server. I do have one place with a static IP address so I do keep it slightly open but basically don't have to worry about fail2ban any more.
+
+## Prologue
+
+I was checking the wider internet connection from one of my containers which is networked behind a `whatever-ts` container with a very simple `docker compose exec whatever curl https://ipecho.net/plain` but unfortunately the container was not able to resolve the DNS address until I added `dns: 8.8.8.8` to the `whatever-ts` part of the docker-compose.yml.
