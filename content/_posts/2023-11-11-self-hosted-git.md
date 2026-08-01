@@ -4,7 +4,7 @@ title: Self-hosted Git with Forgejo and Tailscale
 description:
 category: computing
 tags: linux
-modified_date: 2026-01-10
+modified_date: 2026-08-01
 ---
 
 Whilst I have enjoyed using Bitbucket since before GitHub offered free private repositories, neither service has been 100% flawless and I've been getting further in messing around with SSH so it makes sense to try my hand at hosting the repositories I have myself.
@@ -108,14 +108,9 @@ DISABLE_REGISTRATION = true
 
 The next most important thing to deal with is [the search engines](https://forgejo.org/docs/next/admin/search-engines-indexation/). You may be aware that there are an awful lot of web pages to look at in a git repository so the bandwidth usage can ramp up quite quickly which can be a problem if you're on a lower tier server.
 
-Basically, you can create the directory `/var/lib/forgejo/custom/` and a `robots.txt` file with at least this content as the archives can be particularly heavy downloads.
+The `/var/lib/forgejo/custom/` moved to a `public` folder at some point so thats a thing. They also provide [a default robots.txt](https://codeberg.org/forgejo/forgejo/src/commit/0cecdcd982b822c49c0ad3287b820a297b779ace/routers/web/misc/misc.go#L61) so you don't have to add your own but you can use this as a starting point. At the very least you want to `Disallow: /*/*/archive/` as these can be particularly heavy downloads even on small servers.
 
-```
-User-agent: *
-Disallow: /*/*/archive/
-```
-
-You can also take this opportunity to ban the AI bots from accessing your content if you wish.
+One reason to have a custom robots.txt is to ban the AI bots from accessing your content if you wish.
 
 Some of the information about forgejo suggests you can run `forgejo help` to see what is happening however as we customise the paths in the service file, the output will not be of much use to you.
 
@@ -146,6 +141,21 @@ Referencing the original Gitea documentation, I saw that you can also replace th
 This should leave the only Forgejo reference in the footer but thats fine by me, I was mostly doing this for the social media previews when sharing links.
 
 In version 7, the `img` folder got moved into an assets folder so the complete path is `public/assets/img` now.
+
+One thing about gitea-dark is that it uses a lot of CSS variables which means you can update the base colours with a file at `templates/custom/header.tmpl` with something like
+
+```
+<style>
+:root {
+	--color-primary: oklch(0.6268 0.2325 303.9) !important;
+	--color-primary-hover: oklch(0.7 0.1875 303.9) !important;
+	--color-primary-active: oklch(0.5706 0.2837 303.9) !important;
+	--color-accent: var(--color-primary) !important;
+}
+</style>
+```
+
+Hat tip to [Maxim Lucas](https://blog.maximlucas.dev/posts/2025-08-28-theming-forgejo/)
 
 #### Backup
 
