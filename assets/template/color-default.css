@@ -1,0 +1,16 @@
+:root {
+	/* core colours */
+	--page-background:#8f8f8f;
+	--content-background:white;
+	--side-background:#444;
+	--side-color:white;
+
+	/* link default colour */
+	--link-color:#00e; /* default blue */
+
+	/* link activated colour */
+	--link-active:#007; /* half default blue */
+
+	/* link activated text colour when background active */
+	--link-background-active-text:var(--side-color);
+}

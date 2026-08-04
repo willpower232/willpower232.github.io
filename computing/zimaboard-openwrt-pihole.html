@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Zimaboard OpenWRT with Pihole" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it." />
+<meta property="og:description" content="Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it." />
+<link rel="canonical" href="https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-12-03T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Zimaboard OpenWRT with Pihole" />
+<script type="application/ld+json">
+{"description":"Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.","url":"https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html","@type":"BlogPosting","headline":"Zimaboard OpenWRT with Pihole","dateModified":"2023-12-03T00:00:00+00:00","datePublished":"2023-12-03T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/zimaboard-openwrt-pihole.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Zimaboard OpenWRT with Pihole
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Zimaboard OpenWRT with Pihole" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Zimaboard OpenWRT with Pihole" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Zimaboard OpenWRT with Pihole</h1>
+	<p class="post-meta">First written<time datetime="2023-12-03T00:00:00+00:00" itemprop="datePublished">
+			2023-12-03
+		</time>~ last updated<time datetime="2024-10-01T00:00:00+00:00" itemprop="dateModified">
+				2024-10-01
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>Zimaboard was an easy choice for me, x86 and two ethernet jacks means lots of potential for a router use case, nevermind all the other bits that come with it.</p>
+
+<p>I had a little play with CasaOS and it seemed quite capable but I spend a lot of time messing around with linux and docker elsewhere so I was more comfortable removing it and setting something up from scratch.</p>
+
+<p>When I eventually got round to this project, I found that my Zimaboard would restart every few minutes with the existing CasaOS on it, not sure if there is some hibernation or power problem as hinted by Reddit or if I just left it in a weird state. The problem did not occur after installing OpenWRT so was not hardware related.</p>
+
+<p>Conveniently, I had recently received an email from them with instructions for both <a href="https://icewhale.community/t/diy-your-own-cool-openwrt-router-based-on-zimaboard/73" target="_blank" rel="noopener noreferrer">OpenWRT</a> and <a href="https://icewhale.community/t/build-a-powerful-home-router-with-zimaboard-and-pfsense/74" target="_blank" rel="noopener noreferrer">pfSense</a> so I’m largely following their OpenWRT instructions to begin with.</p>
+
+<h2 id="openwrt">OpenWRT</h2>
+
+<p>The Zimaboard has the existing network plugged in on the power jack side as per their instructions, I have a keyboard and my ventoy stick connected. Bashing the F keys (F11 I think) got me to the boot menu where I can boot into Ventoy UEFI and whatever environment I happen to have.</p>
+
+<p><code class="language-plaintext highlighter-rouge">lsblk</code> identified /dev/mmcblk0 as the small eMMC onboard storage, I have downloaded the generic-squashfs-combined-efi file from the <a href="https://downloads.openwrt.org/releases/23.05.2/targets/x86/64/" target="_blank" rel="noopener noreferrer">most recent release of OpenWRT</a> and, extracted the gz to leave an img file with <code class="language-plaintext highlighter-rouge">gzip -d openwrt-whatever.gz</code> so just needs a quick dd and a reboot (don’t forget to remove your USB stick).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dd if=openwrt-22.03.4-x86-64-generic-squashfs-combined-efi.img of=/dev/mmcblk0 bs=1M status=progress
+</code></pre></div></div>
+
+<p>Now if you plug your computer into the network on the display port side, you should get a local IP address and go to 192.168.1.1 in your browser, you should be able to log in with no password. You can also SSH <code class="language-plaintext highlighter-rouge">root@192.168.1.1</code> with no password if you prefer to set up that way. If you find out the IP address given to the Zimaboard by your existing router, you can confirm that the web UI cannot be accessed.</p>
+
+<p>Obviously the first step is setting yourself a good password.</p>
+
+<h3 id="getting-yourself-unstuck">Getting Yourself Unstuck</h3>
+
+<p>If you break things to the point you can’t get an IP, you can’t connect remotely so you need to have a screen and keyboard plugged in to the Zimaboard and during the boot you will see a message pop up about pressing F and Enter to get into a failsafe mode where you can undo whatever it is that you did.</p>
+
+<h3 id="disk-size">Disk Size</h3>
+
+<p>Some prerequisites</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>opkg update
+
+opkg install parted lsblk fdisk losetup resize2fs
+</code></pre></div></div>
+
+<p>I did <code class="language-plaintext highlighter-rouge">parted</code> and <code class="language-plaintext highlighter-rouge">print</code> to fix some awareness of the size mismatch and see how small the partitions were.</p>
+
+<p>Now confirm the current setup and see that you’re not using very much.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lsblk -o PATH,SIZE,PARTUUID
+</code></pre></div></div>
+
+<p>You will also see that some partition UUID is crucial in <code class="language-plaintext highlighter-rouge">cat /boot/grub/grub.cfg</code>, we will come back for this later so write down what you see (or open another terminal).</p>
+
+<p>Now <code class="language-plaintext highlighter-rouge">fdisk /dev/mmcblk0</code> is the quickest way to replace the second partition with a much bigger one.</p>
+
+<p><code class="language-plaintext highlighter-rouge">p</code> to confirm current values (remember start and end for partition 2)</p>
+
+<p><code class="language-plaintext highlighter-rouge">d</code> and <code class="language-plaintext highlighter-rouge">2</code> to delete second partition from the table (not remove any files)</p>
+
+<p><code class="language-plaintext highlighter-rouge">n</code> for new partition</p>
+
+<p><code class="language-plaintext highlighter-rouge">2</code> for new second partition</p>
+
+<p>now enter the old start value for partition 2 and just press enter to confirm the default last sector (i.e. the whole remaining disk)</p>
+
+<p><code class="language-plaintext highlighter-rouge">n</code> to not remove the signature</p>
+
+<p><code class="language-plaintext highlighter-rouge">w</code> to write the changes and quit</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">lsblk</code> command from earlier should confirm that the unique identifier has changed so update <code class="language-plaintext highlighter-rouge">/boot/grub/grub.cfg</code> with the new identifier.</p>
+
+<p>If you reboot now, your system should still work but the writeable filesystem has not been extended to the full size of the partition so you need one last bit which I believe evaluates as <code class="language-plaintext highlighter-rouge">resize2fs -f /dev/loop0</code> but the full script is along the lines of</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BOOT="$(sed -n -e "\|\s/boot\s.*$|{s///p;q}" /etc/mtab)"
+PART="${BOOT##*[^0-9]}"
+DISK="${BOOT%${PART}}"
+ROOT="${DISK}$((PART+1))"
+LOOP="$(losetup -n -l | sed -n -e "\|\s.*\s${ROOT#/dev}\s.*$|{s///p;q}")"
+resize2fs -f ${LOOP}
+</code></pre></div></div>
+
+<p><a href="https://forum.openwrt.org/t/howto-resizing-root-partition-on-x86-march-2023-edition/153398" target="_blank" rel="noopener noreferrer">Reference</a></p>
+
+<h3 id="dhcp-configuration">DHCP Configuration</h3>
+
+<p>It is not immediately obvious but you can configure the DHCP settings with Network &gt; Interfaces and then Edit LAN.</p>
+
+<p>You can set the interfaces IP address and netmask and it will start offering DHCP from there.</p>
+
+<p>You can further customise the limits on the DHCP Server tab.</p>
+
+<p>e.g.</p>
+<ul>
+  <li>IPv4 address: 10.0.0.1</li>
+  <li>IPv4 netmask: 255.255.0.0</li>
+  <li>DHCP Server Start: 10.0.1.1 (should be a whole IP address instead of a number as this is more predictable)</li>
+</ul>
+
+<p>Obviously be careful about breaking your nginx IP addresses and you probably need to reboot when changing these.</p>
+
+<p>Don’t forget there is a save button on the modal window and a save button on the interfaces page. If you find yourself in failsafe mode, you can edit <code class="language-plaintext highlighter-rouge">/etc/config/network</code> to undo whatever you just did.</p>
+
+<p>Finally, some of my devices struggled with IPv6 and also using pihole was trickier when you couldn’t easily identify the devices getting blocked. The quick solution is to disable odhcpd but apparently you can also try this but I don’t think I needed to.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uci set 'network.lan.ipv6=0'
+uci set 'network.wan.ipv6=0'
+uci set 'dhcp.lan.dhcpv6=disabled'
+uci commit
+</code></pre></div></div>
+
+<h2 id="tailscale">Tailscale</h2>
+
+<p>In theory, this would be a great exit node, allowing you to block adverts whilst on the road and access your home network however because this device is mostly functioning as a router, I don’t think it will work. I’ve followed the basic instructions and configured sysctl but alas all I got was “destination host unreachable” from anything trying to use the exit node. I presume there is something in the firewall or routing which is stopping traffic from flowing unnaturally.</p>
+
+<p>You could of course set this up as a separate device using debian or whatever within your network and have your existing router set it as the DNS server for its DHCP clients.</p>
+
+<h2 id="docker">Docker</h2>
+
+<p>If you have problems installing via opkg, you can search the list in the web UI in case the package has been renamed.</p>
+
+<p>Basically <code class="language-plaintext highlighter-rouge">opkg install dockerd luci-app-dockerman</code></p>
+
+<p>You can do <code class="language-plaintext highlighter-rouge">ls /etc/init.d</code> to see a list of services.</p>
+
+<p>Now you can <code class="language-plaintext highlighter-rouge">docker pull nginx:stable-alpine</code> to confirm it is all working.</p>
+
+<p>Portainer is a great way to see what is happening so you can also do <code class="language-plaintext highlighter-rouge">docker run -d --rm --network host -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce:2.18.4</code></p>
+
+<h3 id="nginx">nginx</h3>
+
+<p><code class="language-plaintext highlighter-rouge">vim /etc/config/uhttpd</code> to remove all the defaults and then just attach to 127.0.0.1:81 so it can’t be accessed directly. Probably need to reboot to apply is probably what I did. If you get stuck, you can come back and change it to whatever you like so maybe leave the defaults commented rather than removed.</p>
+
+<p>You can also edit the hosts file to help you get unstuck if you break docker based DNS later, i.e. add <code class="language-plaintext highlighter-rouge">192.168.1.1 openwrt.router.zz</code>.</p>
+
+<p>Anyway, then you can make a directory to keep all the config <code class="language-plaintext highlighter-rouge">mkdir -p /wpinc/nginx/conf.d</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/nginx/proxy_params</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>proxy_set_header Host $http_host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/nginx/conf.d/default.conf</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server {
+	listen 192.168.1.1:80;
+
+    # don't return 404 as that breaks it
+
+    access_log off;
+    error_log /dev/null crit;
+}
+
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/nginx/conf.d/openwrt.conf</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server {
+	client_max_body_size 50M;
+
+	listen 192.168.1.1:80;
+
+	server_name openwrt.router.zz;
+
+	location / {
+		proxy_pass http://127.0.0.1:81;
+		include proxy_params;
+	}
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/nginx.sh</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run -dit --restart always \
+	--name nginx \
+	--network host \
+	-v /wpinc/nginx/proxy_params:/etc/nginx/proxy_params:ro \
+	-v /wpinc/nginx/conf.d:/etc/nginx/conf.d:ro \
+	nginx:stable-alpine
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">sh /wpinc/nginx.sh</code></p>
+
+<p>Now if you modify your hosts file to point openwrt.router.zz to 192.168.1.1 then you should find it working.</p>
+
+<p>If you can’t then you can confirm everything is okay with <code class="language-plaintext highlighter-rouge">netstat -lnp</code> and <code class="language-plaintext highlighter-rouge">docker logs nginx</code>.</p>
+
+<h3 id="pihole">pihole</h3>
+
+<p>You might think you need to disable the dnsmasq service however it handles both DHCP and DNS so this ruins everything (see Getting Yourself Unstuck above).</p>
+
+<p>You need to go to DHCP and DNS &gt; Advanced Settings and set the DNS port to 0 but obviously don’t unless you’re done searching the internet for a little bit. If you get stuck, this port is specific in <code class="language-plaintext highlighter-rouge">/etc/config/dhcp</code> so you can set it back to 53 if you break docker.</p>
+
+<p>It is however crucial to tell DHCP to still advertise the IPv4 DNS host so Network &gt; Interfaces &gt; LAN &gt; DHCP Server &gt; Advanced Settings and click on + for DHCP-Options and Use 6, DNS Servers
+i.e. 6,192.168.1.1. Without this, devices which struggle with IPv6 will fail to resolve DNS.</p>
+
+<p>We can reference the original script https://github.com/pi-hole/docker-pi-hole/blob/master/examples/docker_run.sh however I ran into several issues.</p>
+
+<ul>
+  <li>It could not resolve any DNS queries internally until it was running with host networking, I guess this makes sense because the OpenWRT DNS needed to be disabled in order to free up the port</li>
+  <li>The UI makes use of Content Security Policy which means you need to decide on the hostname you’re accessing it with first and never change it.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/nginx/conf.d/pihole.conf</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server {
+	listen 192.168.1.1:80;
+
+	server_name pihole.router.zz;
+
+	location / {
+		proxy_pass http://127.0.0.1:82;
+		include proxy_params;
+	}
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">docker restart nginx</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">mkdir -p /wpinc/pihole/dnsmasq /wpinc/pihole/pihole</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/pihole.sh</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run -dit --restart always \
+    --name pihole \
+	--net host \
+	--hostname pihole \
+	-e WEB_PORT=82 \
+    -e TZ="Europe/London" \
+    -v "/wpinc/pihole/pihole:/etc/pihole" \
+    -v "/wpinc/pihole/dnsmasq:/etc/dnsmasq.d" \
+    -e VIRTUAL_HOST="pihole.router.zz" \
+    -e PROXY_LOCATION="pihole.router.zz" \
+    -e DNSMASQ_USER=root \
+	-e DNSMASQ_LISTENING=all \
+    pihole/pihole:latest
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">sh /wpinc/pihole.sh</code></p>
+
+<p>You could use <code class="language-plaintext highlighter-rouge">docker logs pihole</code> to see what your initial password is or you could just reset the password with the command line with <code class="language-plaintext highlighter-rouge">docker exec -it pihole pihole -a -p</code>.</p>
+
+<p>If you screw up and need a full reset, you can stop and remove the container and then empty the two directories before re doing the container.</p>
+
+<h4 id="updating-pihole">Updating pihole</h4>
+
+<p>As it is a docker container, you need to pull the latest version, stop and remove the container, then re run <code class="language-plaintext highlighter-rouge">sh /wpinc/pihole.sh</code></p>
+
+<h4 id="whitelisting-in-pihole">Whitelisting in pihole</h4>
+
+<p>I found that <code class="language-plaintext highlighter-rouge">s.youtube.com</code> needed adding to the whitelist to make YouTube watch history work properly.</p>
+
+<h3 id="unbound">Unbound</h3>
+
+<p>Pihole is great and all but if you’re still sending DNS requests over the usual protocols then your ISP and others can still see what you’re doing.</p>
+
+<p>The answer is to forward pihole to a nice DNS provider using a separate thing which uses DoH or DoT so we’ll use unbound as it is also a docker image pointing at Quad9.</p>
+
+<p><code class="language-plaintext highlighter-rouge">mkdir -p /wpinc/unbound</code></p>
+
+<p>Now you need to run the mvance/unbound container and extract the default config file <code class="language-plaintext highlighter-rouge">docker cp unbound:/opt/unbound/etc/unbound/unbound.conf /wpinc/unbound/unbound.conf</code>.</p>
+
+<p>You mostly need to change the port to 5053 but if you want to change the log from /dev/null to /dev/stdout then you can debug issues if you mess around with <code class="language-plaintext highlighter-rouge">docker logs unbound</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/unbound/forward-records.conf</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>forward-zone:
+    # Forward all queries (except those in cache and local zone) to
+    # upstream recursive servers
+    name: "."
+    # Queries to this forward zone use TLS
+    forward-tls-upstream: yes
+
+    # Quad9
+    forward-addr: 9.9.9.9@853
+    forward-addr: 149.112.112.112@853
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">vim /wpinc/unbound.sh</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run -dit --restart always \
+	--name unbound \
+	--net host \
+	-v /wpinc/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro \
+	-v /wpinc/unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro \
+	mvance/unbound:latest
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">sh /wpinc/unbound.sh</code></p>
+
+<p>Now back in your pihole UI, Settings &gt; DNS. Untick the upstream DNS servers and add your own in to <code class="language-plaintext highlighter-rouge">192.168.1.1#5053</code> (yes # not :).</p>
+
+<p>Finally you can confirm you’re fully secure with the output of <code class="language-plaintext highlighter-rouge">dig +short txt proto.on.quad9.net</code> should confirm you’re using <code class="language-plaintext highlighter-rouge">dot</code>.</p>
+
+<p>If you want to do this on the zimaboard, you will need the dig command from <code class="language-plaintext highlighter-rouge">opkg install bind-dig</code>.</p>
+
+<p>In PowerShell parlance, this is <code class="language-plaintext highlighter-rouge">Resolve-DnsName -Name proto.on.quad9.net -Type txt</code></p>
+
+<h2 id="pppoe">PPPoE</h2>
+
+<p>If you’re lucky enough to have ethernet presenting broadband in your home, like FTTP, then you can remove the ISP router from your setup entirely.</p>
+
+<p>If you’re lucky your ISP will provide PPPoE connection details https://www.plus.net/help/broadband/broadband-connection-settings/</p>
+
+<p>Looks like PPPoE is installed by default so you might not need this extra information https://openwrt.org/docs/guide-user/network/wan/wan_interface_protocols</p>
+
+<p>You can edit the WAN interface to change the type to PPPoE, you’ll have to confirm the change before you can see the username and password fields but I didn’t need to enter any other information other than the username and password as informed by my ISP.</p>
+
+<h2 id="upgrading-openwrt">Upgrading OpenWRT</h2>
+
+<p>We have added random files in a custom location so we need to make sure these are preserved when a big firmware upgrade happens. You can add more directories to <code class="language-plaintext highlighter-rouge">/etc/sysupgrade.conf</code> so make sure <code class="language-plaintext highlighter-rouge">/wpinc</code> is on the list. It would be nice to include <code class="language-plaintext highlighter-rouge">/opt/docker</code> however this is obviously a massive directory and easily recreated with the scripts in <code class="language-plaintext highlighter-rouge">/wpinc</code>.</p>
+
+<p>Now make sure you have installed the attended sysupgrade program <code class="language-plaintext highlighter-rouge">luci-app-attendedsysupgrade</code> from the software lists.</p>
+
+<p>The last bit of preparation is recording all the packages you have installed. <a href="https://github.com/richb-hanover/OpenWrtScripts/blob/main/opkgscript.sh" target="_blank" rel="noopener noreferrer">opkgscript</a> makes it easy, save it to <code class="language-plaintext highlighter-rouge">/wpinc</code> and run <code class="language-plaintext highlighter-rouge">sh opkgscript.sh -v write</code>.</p>
+
+<p>You can download a backup of all config files in the web UI System &gt; Backup / Flash Firmware and confirm that <code class="language-plaintext highlighter-rouge">/wpinc</code> and the list of installed software is present.</p>
+
+<p>Finally the fun part. Under System you should see Attended Sysupgrade so you can check for upgrades and follow the prompts.</p>
+
+<p>I found that docker was using a lot of space so had to break it thoroughly to get my disk space usage down. Unfortunately the attended upgrade service refused to be updated after this point so I guess I’m going in manually.</p>
+
+<p>Now you need to figure out the latest image using similar instructions as above. The current version is at the bottom of the web UI or in the banner when you log in to the terminal.</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /tmp
+wget https://downloads.openwrt.org/releases/23.05.4/targets/x86/64/openwrt-23.05.4-x86-64-generic-squashfs-combined-efi.img.gz
+sysupgrade <span class="nt">-v</span> openwrt-23.05.4-x86-64-generic-squashfs-combined-efi.img.gz
+</code></pre></div></div>
+
+<p>I had to add –force because the image metadata was missing.</p>
+
+<p>Unfortunately nothing had changed after the reboot so I tried it uploading the file in the UI and that also accomplished nothing.</p>
+
+<p>The only way to make some progress was to install the (now deprecated) auc and run that. owut (its replacement) was not available to me. Of course this had the same error as before so I am giving up.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

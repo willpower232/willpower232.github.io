@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Configuring nginx to work only on tailscale" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Background" />
+<meta property="og:description" content="Background" />
+<link rel="canonical" href="https://willpower232.github.io/computing/nginx-and-tailscale.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/nginx-and-tailscale.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-02-23T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Configuring nginx to work only on tailscale" />
+<script type="application/ld+json">
+{"description":"Background","url":"https://willpower232.github.io/computing/nginx-and-tailscale.html","@type":"BlogPosting","headline":"Configuring nginx to work only on tailscale","dateModified":"2025-02-23T00:00:00+00:00","datePublished":"2025-02-23T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/nginx-and-tailscale.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Configuring nginx to work only on tailscale
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Configuring nginx to work only on tailscale" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Configuring nginx to work only on tailscale" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Configuring nginx to work only on tailscale</h1>
+	<p class="post-meta">First written<time datetime="2025-02-23T00:00:00+00:00" itemprop="datePublished">
+			2025-02-23
+		</time>~ last updated<time datetime="2026-01-25T00:00:00+00:00" itemprop="dateModified">
+				2026-01-25
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<h2 id="background">Background</h2>
+
+<p>My <a href="/computing/linux-laptop-as-a-security-camera.html">laptop as a camera project</a> relies on using slack for a quick and dirty way of sharing the pictures and video it takes however <a href="https://api.slack.com/changelog/2024-04-a-better-way-to-upload-files-is-here-to-stay" target="_blank" rel="noopener noreferrer">Slack have decided to get rid of the simple endpoint</a> in favour of two to make a presumably less server intensive way of doing things.</p>
+
+<p>Given Slacks overall hatred of people having free accounts, I thought I would come up with something to replace the process which happened to match the Slack API to make it easier.</p>
+
+<p>Also with both server and camera/laptop on my tailscale network I wanted to make use of the more direct way of the camera transferring the files to my code.</p>
+
+<h2 id="problem">Problem</h2>
+
+<p>Adding a new vhost in nginx that only listens on the tailscale IP is just as easy as you might think however I had a bad feeling and went for a server reboot to see what would happen and indeed, the tailscale IP was not ready by the time nginx was so nginx refused to start.</p>
+
+<p>Frustratingly this took a while to find any information on so here I am documenting it.</p>
+
+<p>As I am using debian and there is systemd involved, I needed to have a look at the service file <code class="language-plaintext highlighter-rouge">/etc/systemd/system/multi-user.target.wants/nginx.service</code> and in my case the <code class="language-plaintext highlighter-rouge">After</code> line was already <code class="language-plaintext highlighter-rouge">After=network-online.target remote-fs.target nss-lookup.target</code>, the <code class="language-plaintext highlighter-rouge">-online</code> part of <code class="language-plaintext highlighter-rouge">network-online</code> being regularly crucial.</p>
+
+<p>I added <code class="language-plaintext highlighter-rouge">tailscaled.service</code> to the end of the <code class="language-plaintext highlighter-rouge">After</code> line and ran <code class="language-plaintext highlighter-rouge">systemctl daemon-reload</code> as I think you’re supposed to do.</p>
+
+<h2 id="problem-2">Problem 2</h2>
+
+<p>Rebooting the server did not change anything and after a little more digging, now I was in the right place, it turns out that <a href="https://github.com/tailscale/tailscale/issues/11504" target="_blank" rel="noopener noreferrer">the service is telling systemd it is ready before the IP address is available</a>.</p>
+
+<p>I went with <code class="language-plaintext highlighter-rouge">mkdir -p /etc/systemd/system/tailscaled.service.d/</code> and <code class="language-plaintext highlighter-rouge">vim /etc/systemd/system/tailscaled.service.d/override.conf</code> with one of the suggestions</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Service]
+ExecStartPost=timeout 60s bash -c 'until tailscale status --peers=false; do sleep 1; done'
+</code></pre></div></div>
+
+<p>One more <code class="language-plaintext highlighter-rouge">systemctl daemon-reload</code> and a reboot proved that the problem was now resolved.</p>
+
+<h2 id="problem-3">Problem 3</h2>
+
+<p>You didn’t think that would be the end of it did you? Unfortunately in spite of all the above, subsequent updates removed the modifications so instead I changed <code class="language-plaintext highlighter-rouge">/etc/crontab</code> to include <code class="language-plaintext highlighter-rouge">@reboot root sleep 15 &amp;&amp; systemctl start nginx</code> to act as a super fallback.</p>
+
+<h2 id="the-actual-solution">The Actual Solution</h2>
+
+<p>Unfortunately 15 seconds wasn’t always the right amount of time so a tip of my hat goes to Bernat for getting in touch, digging a little deeper and providing their solution.</p>
+
+<p>I’m guessing that ExecStartPost isn’t delaying the next part of systemd but one can of course delay nginx from starting. Similar to before, <code class="language-plaintext highlighter-rouge">mkdir -p /etc/systemd/system/nginx.service.d/</code> and <code class="language-plaintext highlighter-rouge">vim /etc/systemd/system/nginx.service.d/override.conf</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Service]
+ExecStartPre=
+ExecStartPre=timeout 60s bash -c 'until tailscale status --peers=false; do sleep 1; done'
+ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
+</code></pre></div></div>
+
+<p>I also took the liberty of removing the tailscale override.conf I added before the next <code class="language-plaintext highlighter-rouge">systemctl daemon-reload</code>.</p>
+
+<p>By way of explanation, the empty ExecStartPre prevents any previous one applying, we included the official ExecStartPre as the third one (note the <code class="language-plaintext highlighter-rouge">-t</code> to indicate nginx is testing the config before trying to start). You’ll recognise the second ExecStartPre from before.</p>
+
+<h2 id="more-reading">More Reading</h2>
+
+<ul>
+  <li><a href="https://www.reddit.com/r/Tailscale/comments/ubk9mo/systemd_how_do_get_something_to_run_if_tailscale/" target="_blank" rel="noopener noreferrer">Convenient reddit thread providing all the answers</a></li>
+  <li><a href="https://www.ispmanager.com/docs/ispmanager-business/if-nginx-does-not-start-after-rebooting-the-server" target="_blank" rel="noopener noreferrer">Random help article about making sure nginx waits for the network</a></li>
+</ul>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

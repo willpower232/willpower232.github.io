@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Setting up a linux server" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I normally handle almost all of the setup work on the server with Ansible, you can see my general notes on github." />
+<meta property="og:description" content="I normally handle almost all of the setup work on the server with Ansible, you can see my general notes on github." />
+<link rel="canonical" href="https://willpower232.github.io/computing/setting-up-a-linux-server.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/setting-up-a-linux-server.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-01-14T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Setting up a linux server" />
+<script type="application/ld+json">
+{"description":"I normally handle almost all of the setup work on the server with Ansible, you can see my general notes on github.","url":"https://willpower232.github.io/computing/setting-up-a-linux-server.html","@type":"BlogPosting","headline":"Setting up a linux server","dateModified":"2023-01-14T00:00:00+00:00","datePublished":"2023-01-14T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/setting-up-a-linux-server.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Setting up a linux server
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Setting up a linux server" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Setting up a linux server" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Setting up a linux server</h1>
+	<p class="post-meta">First written<time datetime="2023-01-14T00:00:00+00:00" itemprop="datePublished">
+			2023-01-14
+		</time>~ last updated<time datetime="2026-02-06T00:00:00+00:00" itemprop="dateModified">
+				2026-02-06
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>I normally handle almost all of the setup work on the server with <a href="https://www.ansible.com/" target="_blank" rel="noopener noreferrer">Ansible</a>, you can see my general notes <a href="https://github.com/willpower232/howiuseansibletomanageservers" target="_blank" rel="noopener noreferrer">on github</a>.</p>
+
+<p>This means I can manage state manually via a git repository without being super strict and rigid (i.e. not <a href="https://www.chef.io/" target="_blank" rel="noopener noreferrer">Chef</a>) and also control using SSH without having to host any other components.</p>
+
+<p>Some initial manual setup is required to create a new user and lock down SSH access before I can involve my Ansible repository so after I create the server I need to</p>
+
+<ol>
+	<li>if the root user is given to me with a password then change that password (not really relevant any more as both AWS and DigitalOcean default to SSH keys)</li>
+	<li>
+		create a user for me to use
+
+		<pre><code>mkdir /home/wh &amp;&amp; useradd wh --shell /bin/bash &amp;&amp; passwd wh &amp;&amp; chown -R wh:wh /home/wh &amp;&amp; adduser wh sudo
+</code></pre>
+	</li>
+	<li>
+		import my base bashrc config (and then uncomment some bits at the end)
+
+		<pre><code>mv /etc/bash.bashrc /etc/bash.bashrc.old &amp;&amp; curl -LSs https://b.w232.co &gt; /etc/bash.bashrc
+</code></pre>
+
+		no seriously, edit the file to change the commented out bits at the end
+	</li>
+	<li>
+	tweak SSH server config
+		<ol>
+			<li>comment out `PermitRootLogin` to prevent root login (or just set it to no if that is easier)</li>
+			<li>
+				force key authentication for sudo users
+
+				<pre><code>Match Group sudo
+	PasswordAuthentication no
+</code></pre>
+			</li>
+			<li>don't forget to import the SSH keys before you finish otherwise you're now cut off (also chmod 700 the .ssh folder and 400 the authorized_keys file)</li>
+		</ol>
+	</li>
+	<li>
+		finally set the timezone and name and reboot
+
+		<pre><code>hostnamectl set-hostname yourserver.you.com &amp;&amp; ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime &amp;&amp; shutdown -r now
+</code></pre>
+	</li>
+	<li>also if you aren't using a script, you should definitely `sudo apt update &amp;&amp; sudo apt upgrade -y` before getting too much more done. You probably also want to install and configure apticron and logwatch.</li>
+</ol>
+
+<p>I’d be paranoid and check the SSH login one more time (and trying out <code class="language-plaintext highlighter-rouge">sudo -i</code>) before proceeding.</p>
+
+<p>Now you have a nice stable base server to do what you want. I’d either run my ansible script to install all the various components for websites or just <code class="language-plaintext highlighter-rouge">apt install mariadb-server</code> or whatever.</p>
+
+<p>I normally find that I run the setup server script so rarely that it needs a few updates as Ansible evolves and changes over time but also there are some complicated bits I haven’t figured out how to automate (yet).</p>
+
+<p>The most important change is to the Logwatch config which <a href="/computing/customising-logwatch.html">I’ve documented here already</a>.</p>
+
+<p>Finally there is the somewhat thorny issue of how to send emails from your server. I’ve previously installed Postfix, configured to listen locally only but now I am looking as msmtp and SendGrid. I’m mostly drawn to <code class="language-plaintext highlighter-rouge">~/.msmtprc</code> for easy per user configuration.</p>
+
+<p>If you’re using DigitalOcean and didn’t click the checkbox for monitoring when creating the droplet then you will need to manually install their Metrics Agent to get All The Graphs in the UI.</p>
+
+<p>Past me decided to install resolvconf and I’ve seen that this breaks DigitalOcean droplets, you can confirm that <code class="language-plaintext highlighter-rouge">ping duckduckgo.com</code> does not work. Fortunately you can still reference <code class="language-plaintext highlighter-rouge">/etc/netplan/50-cloud-init.yaml</code> to find out what the nameservers should be and then edit <code class="language-plaintext highlighter-rouge">/etc/resolvconf/resolv.conf.d/tail</code> to include both the default nameservers and something perhaps more reliable.</p>
+
+<pre><code>nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver whatever.something.etc.etc
+nameserver whatever.something.etc.etc
+</code></pre>
+
+<h3 id="smtp-providers">SMTP Providers</h3>
+
+<p>I am looking to send about 150 emails per month in total across 4 servers so setting up subdomains is important. I’m not averse to paying but most providers don’t care at this scale so it pays to have a rummage around the pricing pages and find where each providers tolerance is.</p>
+
+<p>I first started trying to use SendGrid, I don’t think they have a free tier any more but they also have a ludicrously complicated interface and its really hard to actually just send emails.</p>
+
+<p>I had a go with Postmark and they have a lovely interface, it is really easy to separate your servers and track their usage. They have a free tier of 100 emails per month so I hit this quite quickly and then you’re paying £15 a month which is a bit much paying 12p or so per email for something which doesn’t really matter.</p>
+
+<p>Elastic Email is a good option, they allow unlimited emails for free to the account holders email which works for some use cases but I had a little variety in the receiving addresses so didn’t work out for me. They also include an unsubscribe link on transaction email messages which is annoying. They don’t support plus addressing so you can’t cheese your way around it either.</p>
+
+<p>Brevo has more of a marketing focus, like mailchimp, but they do allow 300 emails per day for free which escapes the Postmark limitation. You can create server-specific passwords for SMTP but they do get you using a “master password” by default which is a little sketchy. Unfortunately they insist on including a tracking pixel which converts all plain text emails to HTML and so you can kiss goodbye to any email formatting you had hoped to include.</p>
+
+<p>Scaleway also offers 300 emails per day however they have apparently decided to do everything AWS does but worse, I will proceed to help you more than Scaleway wants to. Referencing <a href="https://www.scaleway.com/en/docs/transactional-email/how-to/generate-api-keys-for-tem-with-iam/" target="_blank" rel="noopener noreferrer">these docs</a>, you can add an IAM Application per server to limit the API keys AND create one policy assigned to a group which covers all your applications, thanks Craig for the heads up about groups. The policy needs the aptly named TransactionalEmailEmailSmtpCreate permission. Then you need the project UUID (copied from the name) and the secret key you can only see once and the host and port details from those docs. If you can tolerate this garbage attempt at a permission system then this might be the one for you.</p>
+
+<p>Whichever one you try and use, you can use <code class="language-plaintext highlighter-rouge">msmtp</code> to route mail sent by your server through your provider of choice, you can also install <code class="language-plaintext highlighter-rouge">msmtp-mta</code> to fake the usual email commands. The caveat is that there must be a <code class="language-plaintext highlighter-rouge">.msmtprc</code> file at the users home directory. Most of your mail can be sent by root so you need a <code class="language-plaintext highlighter-rouge">/root/.msmtprc</code> which looks a little like this</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>account default
+host smtp.whatever.com
+port 587
+tls on
+from root@yourserver.com
+auth on
+user username-from-your-provider
+password password-from-your-provider
+#logfile ~/.msmtp.log
+aliases /etc/aliases
+</code></pre></div></div>
+
+<p>You can even control logging at this point to help debug connections to your provider of choice. This also means you should specify a default from and to in your <code class="language-plaintext highlighter-rouge">/etc/crontab</code> to ensure any output from the cron jobs makes its way to you.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MAILFROM=cron@yourserver.com
+MAILTO=you@whereever.com
+</code></pre></div></div>
+
+<p>I usually add one alias to <code class="language-plaintext highlighter-rouge">/etc/aliases</code> to complete the loop <code class="language-plaintext highlighter-rouge">root: you@whereever.com</code> so that any email to root is actually received by me. No idea if <code class="language-plaintext highlighter-rouge">newaliases</code> is required but fun to run anyway I guess.</p>
+
+<p>You can test msmtprc yourself with something like <code class="language-plaintext highlighter-rouge">echo "this is a testing email" | mail -s "testing this email" you@you.com</code></p>
+
+<p>References:</p>
+<ul>
+  <li>https://dt.iki.fi/msmtp</li>
+  <li>https://wiki.archlinux.org/title/Msmtp</li>
+</ul>
+
+<h2 id="apache">Apache</h2>
+
+<p>I am primarily an nginx user but I am responsible for a couple of WordPress’s so I forward nginx to apache so my dear associates can use .htaccess to their hearts content.</p>
+
+<p>The default configuration of apache appears to have the mpm_event module enabled which is fine but might be configured a little higher than you need. I halfed the numbers to see what that would do and the worse thing that happened was apache started complaining that <code class="language-plaintext highlighter-rouge">MaxRequestWorkers</code> was not a multiple of <code class="language-plaintext highlighter-rouge">ThreadsPerChild</code> so I just took a couple more off.</p>
+
+<h2 id="logrotate">logrotate</h2>
+
+<p>Shout out to <code class="language-plaintext highlighter-rouge">/var/lib/logrotate/status</code> for listing every log file it has ever rotated and the last time it got rotated, handy for confirming you’re rotating the files you think you are (or if something went horribly wrong in your configuration at some point and one stopped getting rotated).</p>
+
+<h2 id="tailscale">tailscale</h2>
+
+<p>If I am adding tailscale then I like to <a href="https://gist.github.com/willpower232/7ea6f3e0b016a98a4d776d10108d388a" target="_blank" rel="noopener noreferrer">create hosts file entries for each machine using hostctl</a> to stand in for reverse DNS for my tailscale devices so that the logwatch email is more useful.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

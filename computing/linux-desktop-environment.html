@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Linux Desktop Environment" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="how I set up a linux development computer" />
+<meta property="og:description" content="how I set up a linux development computer" />
+<link rel="canonical" href="https://willpower232.github.io/computing/linux-desktop-environment.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/linux-desktop-environment.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Linux Desktop Environment" />
+<script type="application/ld+json">
+{"description":"how I set up a linux development computer","url":"https://willpower232.github.io/computing/linux-desktop-environment.html","@type":"BlogPosting","headline":"Linux Desktop Environment","dateModified":"2020-11-27T00:00:00+00:00","datePublished":"2020-11-27T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/linux-desktop-environment.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Linux Desktop Environment
+	
+</title>
+
+
+	<meta itemprop="description" name="description" content="how I set up a linux development computer" />
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Linux Desktop Environment" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+	<meta property="og:description" content="how I set up a linux development computer" />
+
+
+<meta name="twitter:title" content="Linux Desktop Environment" />
+
+	<meta name="twitter:description" content="how I set up a linux development computer" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Linux Desktop Environment</h1>
+	<p class="post-meta">First written<time datetime="2020-11-27T00:00:00+00:00" itemprop="datePublished">
+			2020-11-27
+		</time>~ last updated<time datetime="2026-01-25T00:00:00+00:00" itemprop="dateModified">
+				2026-01-25
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>Linux for first party terminal/docker/server like experience. Whilst mac OS has a great terminal, it uses a virtual machine for docker and that is just annoying. Windows is just…not great for how I want to develop.</p>
+
+<p>I’ve always used Ubuntu/Debian based so I am more comfortable there. Zorin OS is based on Ubuntu with simpler theming than most other distributions and very polished.</p>
+
+<p>The only thing that has irked me about Zorin OS so far is that somehow suspend on screen lock got enabled and neither of my computers recovered properly so definitely check that before progressing too far. I think I found it under Privacy and Screen in the settings</p>
+
+<h3 id="cosmetics">Cosmetics</h3>
+
+<p>Set dark theme, layout, and highlight colour and clear pinned apps from whatever taskbar you have now.</p>
+
+<p>In Ubuntu, I found that I was missing the main font for logging in with Microsoft so thankfully there is a way of getting Segoe in your life from https://github.com/mrbvrz/segoe-ui-linux. Basically once you’ve followed their installer you can</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir -p ~/.config/fontconfig
+vim ~/.config/fontconfig/fonts.conf
+</code></pre></div></div>
+
+<p>with this content</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;
+&lt;fontconfig&gt;
+  &lt;match target="pattern"&gt;
+    &lt;test qual="any" name="family"&gt;&lt;string&gt;Segoe UI Webfont&lt;/string&gt;&lt;/test&gt;
+    &lt;edit name="family" mode="assign" binding="same"&gt;&lt;string&gt;Segoe UI&lt;/string&gt;&lt;/edit&gt;
+  &lt;/match&gt;
+&lt;/fontconfig&gt;
+</code></pre></div></div>
+
+<p>then <code class="language-plaintext highlighter-rouge">fc-cache -fv; fc-match "Segoe UI Webfont"</code> to check. Should return <code class="language-plaintext highlighter-rouge">segoeui.ttf: "Segoe UI" "Regular"</code>. Probably have to restart almost everything to apply fully so just endure the serif for a little bit longer I’d say.</p>
+
+<h3 id="terminal">Terminal</h3>
+
+<p>You probably want to install the apt packages from below here.</p>
+
+<p>install bashrc files (don’t forget to uncomment generic bits in /etc/bash.bashrc)</p>
+<ul>
+  <li><a href="https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f" target="_blank" rel="noopener noreferrer">https://gist.github.com/willpower232/dd46da09ced0273fffc523eaf602186f</a></li>
+  <li>
+<a href="https://github.com/cykerway/complete-alias" target="_blank" rel="noopener noreferrer">https://github.com/cykerway/complete-alias</a>
+(copy the file as ~/.bash_completion)</li>
+</ul>
+
+<p>Add the git-aware-prompt bash plugin</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir ~/.bash
+cd ~/.bash
+git clone https://github.com/jimeh/git-aware-prompt.git
+</code></pre></div></div>
+
+<p>Finally, add the following files without <code class="language-plaintext highlighter-rouge">.bash</code> to the completions folder
+(which you can find with <code class="language-plaintext highlighter-rouge">pkg-config --variable=completionsdir bash-completion</code>)</p>
+
+<ul>
+  <li><a href="https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash" target="_blank" rel="noopener noreferrer">https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash</a></li>
+  <li><a href="https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash" target="_blank" rel="noopener noreferrer">https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash</a></li>
+</ul>
+
+<p>If you want a windows-like hostname then you can do something like this and reboot. Don’t forget to update the hosts file though.
+<code class="language-plaintext highlighter-rouge">sudo hostnamectl set-hostname DESKTOP-$(head /dev/urandom | tr -dc A-Z0-9 | head -c 7)</code></p>
+
+<h3 id="software">Software</h3>
+
+<p>Zorin OS should have flatpak installed and set up, can check with <code class="language-plaintext highlighter-rouge">sudo flatpak remote-list</code> then if you can’t see flathub <code class="language-plaintext highlighter-rouge">sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo</code>. Ubuntu doesn’t have flatpak or the default software centre so you need to <code class="language-plaintext highlighter-rouge">sudo apt install flatpak</code> AND <code class="language-plaintext highlighter-rouge">sudo apt install gnome-software --install-suggests</code> and then just don’t open the default app centre.</p>
+
+<p>Remove unwanted apps from software centre (worth checking the ones you leave which could be super old like Remmina which is much newer in flatpak form). You should use the app list to check if any things you don’t want are installed via apt, (i.e. libreoffice). Unfortunately, you will also need to manually remove libreoffice-common via apt in your terminal.</p>
+
+<p>now software centre can install flatpak apps</p>
+<ul>
+  <li>flameshot</li>
+  <li>peek</li>
+  <li>vlc</li>
+  <li>~filezilla~ apparently the flatpak version is <a href="https://github.com/flathub/org.filezillaproject.Filezilla/issues/103" target="_blank" rel="noopener noreferrer">effectively abandoned</a> and I haven’t used it in ages so</li>
+  <li>remmina</li>
+  <li>slack</li>
+  <li>ONLYOFFICE desktop editors</li>
+  <li>~postman~ bruno is better as it keeps your data on your computer</li>
+  <li>fastmail (I used to use geary or thunderbird whichever looked slightly nicer at the time but the native app is much nicer)</li>
+  <li>gnome web (for safari-related debugging)</li>
+  <li>break timer</li>
+  <li>chromium</li>
+  <li>~opera~ I’m using a firefox fork instead, currently floorp</li>
+  <li>Antares SQL</li>
+</ul>
+
+<p>if you have a microphone or fancy speakers</p>
+<ul>
+  <li>PulseAudio Volume Control</li>
+</ul>
+
+<p>(Don’t forget to turn off auto gain in Slack if you’re adjusting it with PulseAudio)</p>
+
+<p>and regular apps</p>
+<ul>
+  <li>gimp (don’t forget to set color icons in preferences and also turn off toolbox grouping)</li>
+</ul>
+
+<p>It looks like I don’t have any snap apps at the minute (apart from slack which refused to stay logged in). Opera struggles with widevine for some reason so I ended up using Chromium for netflix etc.</p>
+
+<p>In Thunderbird, you can hide the local folders with the Folder Pane Header which can be toggled under View &gt; Folders &gt; Folder Pane Header. The Folder Pane Header can hide itself once you’ve shown it and hidden the local folders.</p>
+
+<p>Configure firefox for maximum privacy, nice theme, and extensions. I do like to open local HTML files sometimes and I needed to install Flatseal to give flatpak Firefox permission to my home directory.</p>
+
+<p>Configure chrome for maximum privacy, dark theme, and extensions (password managers and don’t close with last tab)</p>
+<ul>
+  <li>right-click the address bar and choose ‘Always show full URLs’. If you don’t see that option, go to chrome://flags/#omnibox-context-menu-show-full-urls and set the highlighted flag to ‘Enabled’.</li>
+</ul>
+
+<p>~Configure opera for some privacy, I usually use opera for background media and email so its definitely worth checking widevine/netflix if thats what you want (<a href="https://www.reddit.com/r/operabrowser/wiki/opera/linux_widevine_config" target="_blank" rel="noopener noreferrer">this is useful</a>). I did experience initial loading problems with snap opera but regular opera did not have working widevine initially. For whatever reason, “Show Full URL” is a setting and not on the right-click menu.~ Floorp can b adapted similarly to opera to remove all the rando toolbars and make it look slightly nice.</p>
+
+<p>Instead of Hardware Indicator Sensors I started using <a href="https://extensions.gnome.org/extension/120/system-monitor/" target="_blank" rel="noopener noreferrer">this particular system monitor</a> which is a bit more interesting and less buggy in my experience. Unfortunately it seems to not be updated any more however there is a <a href="https://extensions.gnome.org/extension/3010/system-monitor-next/" target="_blank" rel="noopener noreferrer">new fork</a> which works nicely. Don’t forget to <code class="language-plaintext highlighter-rouge">sudo apt install gir1.2-gtop-2.0 gir1.2-nm-1.0 gir1.2-clutter-1.0</code> and maybe <code class="language-plaintext highlighter-rouge">sudo apt-get install lm-sensors &amp;&amp; sudo service kmod start &amp;&amp; sudo sensors-detect</code> although it doesn’t seem I have many sensors available to me which is odd. If the plugin isn’t changing when you update the preferences, just lock and unlock and that should be enough to apply your latest preferences. Also don’t forget <code class="language-plaintext highlighter-rouge">sudo apt install htop</code> for some backup in looking at your systems status.</p>
+
+<p>I have started using <a href="https://extensions.gnome.org/extension/4679/burn-my-windows/" target="_blank" rel="noopener noreferrer">Burn My Windows</a> to make things a little more snazzy. If you find that the computer sleeping the monitors re arranges your windows (or worse, crashes the whole computer) you can use <a href="https://extensions.gnome.org/extension/1414/unblank/" target="_blank" rel="noopener noreferrer">unblank</a> to keep the screens awake at all times to make using the computer easier.</p>
+
+<p>If you’re really into gnome extensions, this <a href="https://flathub.org/apps/details/com.mattjakeman.ExtensionManager" target="_blank" rel="noopener noreferrer">extension manager</a> would be a good install.</p>
+
+<p>Finally there is <a href="https://www.moderncsv.com" target="_blank" rel="noopener noreferrer">Modern CSV</a> which is ridiculously efficient at editing CSV files, much better than ONLYOFFICE at this.</p>
+
+<h4 id="development-stuff">Development Stuff</h4>
+
+<p><code class="language-plaintext highlighter-rouge">sudo add-apt-repository ppa:ondrej/php</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">sudo add-apt-repository ppa:git-core/ppa</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">sudo apt update &amp;&amp; sudo apt upgrade -y &amp;&amp; sudo apt install -y gnupg vim curl git make gcc net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client ttf-mscorefonts-installer dconf-editor icedtea-netx</code></p>
+
+<p>Install your php versions of choice, i.e. <code class="language-plaintext highlighter-rouge">sudo apt install -y php7.4-cli</code> or <code class="language-plaintext highlighter-rouge">sudo apt install -y php8.0-cli</code>. Actually you probably want to install both to validate everything you do and then choose the one you want to use with <code class="language-plaintext highlighter-rouge">sudo update-alternatives --config php</code>.</p>
+
+<p>probably reboot and apt autoremove</p>
+
+<p>If you’re dual booting with Windows, you’ll need to set the registry key <code class="language-plaintext highlighter-rouge">HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation\RealTimeIsUniversal</code> as a DWORD to 1 and disable the Windows Time Service (<a href="https://help.ubuntu.com/community/UbuntuTime#Make_Windows_use_UTC" target="_blank" rel="noopener noreferrer">Windows just really likes local time</a>)</p>
+
+<h4 id="password-manager">Password Manager</h4>
+
+<p>Install pass password manager with terminal, do ctrl x + e to do a lot of commands then this</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo apt install -y build-essential xz-utils unzip git tree;
+wget https://git.zx2c4.com/password-store/snapshot/password-store-1.7.4.tar.xz;
+tar xf password-store-1.7.4.tar.xz;
+cd password-store-1.7.4;
+sudo make install;
+cd ../;
+wget https://github.com/palortoff/pass-extension-tail/archive/v1.2.0.zip;
+unzip v1.2.0.zip;
+cd pass-extension-tail-1.2.0;
+sudo make install;
+cd ../;
+rm -rf pass-extension-tail-1.2.0/ password-store-1.7.4* v1.2.0.zip;
+</code></pre></div></div>
+
+<p>These may install to <code class="language-plaintext highlighter-rouge">/usr/lib/password-store/extensions</code> so make sure the completions are in the folder you found earlier.</p>
+
+<h4 id="heidisql-and-windows-support">HeidiSQL (and Windows support)</h4>
+
+<p>install zorin-windows-app-support (with apt) or via the software store.</p>
+
+<p>Here it is manually if you want it from winehq.org</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget -nc https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/Release.key
+sudo apt-key add Release.key
+echo "deb http://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbu
+ntu_18.04 ./" | sudo tee /etc/apt/sources.list.d/wine-obs.list
+wget -nc https://dl.winehq.org/wine-builds/winehq.key
+sudo apt-key add winehq.key
+sudo apt-add-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ bionic main'
+plz apt update &amp;&amp; plz apt upgrade -y
+plz apt install winehq-stable
+</code></pre></div></div>
+
+<p>I’d normally just download the portable version of HeidiSQL and create a shortcut in <code class="language-plaintext highlighter-rouge">~/.local/share/applications/heidisql.desktop</code> then bung an image in <code class="language-plaintext highlighter-rouge">~/.local/share/icons</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Desktop Entry]
+Type=Application
+Terminal=false
+Name=HeidiSQL
+Exec=sh -c "cd ~/Downloads/heidisqlportable/; wine start heidisql.exe"
+StartupWMClass=heidisql.exe
+Icon=heidisql
+StartupNotify=true
+</code></pre></div></div>
+
+<p>If you haven’t salvaged an old portable install of it, you should definitely open the preferences and</p>
+
+<ol>
+  <li>make sure <code class="language-plaintext highlighter-rouge">Allow multiple application instances</code> is <strong>checked</strong>
+</li>
+  <li>make sure <code class="language-plaintext highlighter-rouge">Automatically reconnect to previously opened sessions on startup</code> is cleared</li>
+  <li>make sure <code class="language-plaintext highlighter-rouge">Restore last used database on startup</code> is cleared</li>
+  <li>don’t change the Style Theme from Windows (unless it is less crashy these days)</li>
+  <li>don’t change the Icon pack from Icons8 (unless blah blah)</li>
+  <li>set the Editor font to Cousine if the letter spacing is way off</li>
+  <li>make sure <code class="language-plaintext highlighter-rouge">Remember filters, sorting and column selection across sessions</code> is cleared</li>
+  <li>make sure <code class="language-plaintext highlighter-rouge">Reopen previously used SQL files and unsaved content in tabs</code> is cleared</li>
+  <li>reduce the query history days to say 1 or 2, it is handy after all</li>
+</ol>
+
+<p>Clearing those checkboxes means that if you have a bad time, Heidi won’t repeat the chaos when it gets reopened.</p>
+
+<h3 id="final-bits">Final bits</h3>
+
+<p>If you’re having trouble generating passwords after crudely importing your <code class="language-plaintext highlighter-rouge">.gnupg</code>, make sure there isn’t a hidden character in the .gpg-id file.</p>
+
+<p>If you’d like to set yourself a garbage password because this system isn’t online much, you can do <code class="language-plaintext highlighter-rouge">sudo passwd &lt;username&gt;</code> to bypass the block on garbage passwords. Don’t forget to change the keychain password to match though (good luck reading black text on a dark background).</p>
+
+<p>Install other local <code class="language-plaintext highlighter-rouge">bin</code>s</p>
+
+<p>run dconf-editor and blank out workspace shortcuts to release ctrl alt shift p, if the keyboard shortcut settings won’t let you add that shortcut, you can add it directly in dconf
+<code class="language-plaintext highlighter-rouge">org.gnome.desktop.wm.keybindings</code></p>
+
+<p>also disable <code class="language-plaintext highlighter-rouge">switch-input-source</code> and <code class="language-plaintext highlighter-rouge">switch-input-source-backwards</code></p>
+
+<p>also whilst you’re in there
+<code class="language-plaintext highlighter-rouge">org.gnome.desktop.wm.preferences.num-workspaces</code> to 1
+<code class="language-plaintext highlighter-rouge">org.gnome.mutter.dynamic-workspaces</code> to off
+<code class="language-plaintext highlighter-rouge">org.gnome.desktop.interface.gtk-enable-primary-paste</code> to off</p>
+
+<p>If you happen to have a big background to span across all your monitors, you might have to set <code class="language-plaintext highlighter-rouge">org.gnome.desktop.background</code> to <code class="language-plaintext highlighter-rouge">spanned</code>.</p>
+
+<p>need to reboot to apply</p>
+
+<p>In order for the workspaces setting to work I also ended up in Settings &gt; Multitasking, switching it to “fixed number of workspaces” and “workspaces on all displays”.</p>
+
+<p>clear all printscreen keyboard shortcuts with backspace and set keyboard shortcuts</p>
+<ul>
+  <li>Home folder - super + e</li>
+  <li>Hide window - ctrl + alt + zero</li>
+  <li>Flameshot (flatpak run org.flameshot.Flameshot gui) - print</li>
+  <li>passmenu –no-username - ctrl + alt + p</li>
+  <li>passmenu –type - ctrl + alt + shift + p</li>
+</ul>
+
+<p>Don’t forget that if you don’t have a print key, you could borrow the windows print screen shortcut or just Ctrl Alt Shift S even.</p>
+
+<p>Being a portrait screen fan, Flameshot sometimes struggles with the mismatched resolutions and monitor locations so I leave Ctrl Alt Shift R as screen record and then swap back to screenshot for basic ones until Flameshot sorts its life out. Unfortunately the built in Ubuntu screenshot tool insists on making files so I end up doing <code class="language-plaintext highlighter-rouge">mv ~/Pictures/Screenshots ~/Pictures/Screenshots.old &amp;&amp; ln -s /dev/null ~/Pictures/Screenshots</code>.</p>
+
+<p>You will need to specify the full path to passmenu if it isn’t in the regular $PATH and you might have to set the keys for passmenu in dconf-editor if the UI won’t let you.</p>
+
+<p>install <a href="https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository" target="_blank" rel="noopener noreferrer">docker for ubuntu</a> (but I’d probably use <code class="language-plaintext highlighter-rouge">/usr/share/keyrings</code> as that directory actually exists) and then make sure you have <code class="language-plaintext highlighter-rouge">apt remove docker-compose-plugin</code> if you like managing your own binary for that purpose.</p>
+
+<p><code class="language-plaintext highlighter-rouge">sudo usermod -aG docker wp</code></p>
+
+<p>install aws cli from the <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" target="_blank" rel="noopener noreferrer">official instructions</a>.</p>
+
+<p>VS Code has some weird instructions nowadays which are a little too complicated for my liking. You just need the <code class="language-plaintext highlighter-rouge">asc</code> with <code class="language-plaintext highlighter-rouge">sudo curl -fsSL https://packages.microsoft.com/keys/microsoft.asc -o /usr/share/keyrings/microsoft.asc</code> and then you can add in <code class="language-plaintext highlighter-rouge">/etc/apt/sources.list.d/vscode.sources</code> as follows</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64,arm64,armhf
+Signed-By: /usr/share/keyrings/microsoft.asc
+</code></pre></div></div>
+
+<p>(It looks like their apt output doesn’t behave the same way as the OG version so you have to use this newer syntax but at least you don’t have to convert the asc to gpg unnecessarily.)</p>
+
+<p>Then you can <code class="language-plaintext highlighter-rouge">apt update</code> and <code class="language-plaintext highlighter-rouge">apt install code</code>. If you can import the previous profile then you can probably skip the below but if you do import the profile, don’t forget to expand the extensions section so it actually installs the extensions you had.</p>
+
+<p>In the old days I had to</p>
+<ul>
+  <li>manually install https://github.com/IronLu233/vscode-color-exchange</li>
+  <li>add globalStorage and History to <code class="language-plaintext highlighter-rouge">.config/Code/User/syncLocalSettings.json</code> under  <code class="language-plaintext highlighter-rouge">ignoreUploadFolders</code>
+</li>
+  <li>using the customise layout button I like to put quick input in the centre and justify the panel alignment which isn’t in the preferences json for some reason</li>
+</ul>
+
+<p>Don’t forget you probably have to <a href="https://code.visualstudio.com/docs/setup/linux#_visual-studio-code-is-unable-to-watch-for-file-changes-in-this-large-workspace-error-enospc" target="_blank" rel="noopener noreferrer">increase this magic number</a>.</p>
+
+<p>don’t forget about your vim preferences and gitconfig</p>
+<ul>
+  <li><a href="https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc" target="_blank" rel="noopener noreferrer">https://gist.github.com/willpower232/5184fa16ea469461d108219523fc1bcc</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[core]
+	autocrlf = input
+	fileMode = false
+	editor = vim
+	untrackedCache = true
+[user]
+	name = Your Name
+	signingkey = ~/.ssh/id_ed25519.pub
+[commit]
+	gpgsign = true
+[gpg]
+	format = ssh
+[init]
+	defaultBranch = main
+[push]
+	default = simple
+	autoSetupRemote = true
+[pull]
+	rebase = false
+[alias]
+	unpushed = log --branches --not --remotes --no-walk --decorate --oneline
+	# https://egghead.io/lessons/git-make-my-git-log-look-pretty-and-readable
+	kraken = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit --branches
+
+[includeIf "hasconfig:remote.*.url:git@github.com:personalname/**"]
+	path = .gitconfig-personal
+
+[includeIf "hasconfig:remote.*.url:git@github.com:organisationname/**"]
+	path = .gitconfig-work
+[includeIf "hasconfig:remote.*.url:git@github.com:OrganisationName/**"]
+	path = .gitconfig-work
+</code></pre></div></div>
+
+<p>and then in .gitconfig-whatever you just have your email address</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[user]
+	email = me@home.com
+</code></pre></div></div>
+
+<p>The break timer application should be set up with “a mix of short breaks and long breaks” so you can do the 20 second break every 20 minutes (to relax your eyes by looking at something 20 feet away) and a 4 minute break every hour so you remember to get up and make a drink.</p>
+
+<p>Finally, Zorin comes with a service called touchegg installed and running by default. If you don’t have a touchscreen or trackpad directly connected you can probably disable it to save some memory.</p>
+
+<h3 id="future-things-to-remember">Future Things To Remember</h3>
+
+<p>Every so often Docker likes to bring up the minimum api version which is a great way of reminding you that you’re using some super old docker containers or tools.</p>
+
+<p>Obviously it would be nice to update but sometimes (cough portainer) it takes a couple of weeks for a docker-based tool to get updated and it takes a few minutes for people to fill Github issues with wild ideas like downgrading docker itself and locking the apt version.</p>
+
+<p>The best answer is to create (or update) <code class="language-plaintext highlighter-rouge">/etc/docker/daemon.json</code> and add <code class="language-plaintext highlighter-rouge">"min-api-version": "1.24"</code> or whatever version was the most recent minimum.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

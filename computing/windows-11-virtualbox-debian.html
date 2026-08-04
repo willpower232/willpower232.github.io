@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Windows 11 with Virtualbox and Debian" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I’m not a big fan of basing my windows account on my microsoft account so I used oobe\bypassnro to make an admin account named after the friendly name for the laptop and then a regular account for my every day use." />
+<meta property="og:description" content="I’m not a big fan of basing my windows account on my microsoft account so I used oobe\bypassnro to make an admin account named after the friendly name for the laptop and then a regular account for my every day use." />
+<link rel="canonical" href="https://willpower232.github.io/computing/windows-11-virtualbox-debian.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/windows-11-virtualbox-debian.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-03-12T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Windows 11 with Virtualbox and Debian" />
+<script type="application/ld+json">
+{"description":"I’m not a big fan of basing my windows account on my microsoft account so I used oobe\\bypassnro to make an admin account named after the friendly name for the laptop and then a regular account for my every day use.","url":"https://willpower232.github.io/computing/windows-11-virtualbox-debian.html","@type":"BlogPosting","headline":"Windows 11 with Virtualbox and Debian","dateModified":"2024-03-12T00:00:00+00:00","datePublished":"2024-03-12T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/windows-11-virtualbox-debian.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Windows 11 with Virtualbox and Debian
+	
+</title>
+
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Windows 11 with Virtualbox and Debian" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+
+<meta name="twitter:title" content="Windows 11 with Virtualbox and Debian" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Windows 11 with Virtualbox and Debian</h1>
+	<p class="post-meta">First written<time datetime="2024-03-12T00:00:00+00:00" itemprop="datePublished">
+			2024-03-12
+		</time>~ last updated<time datetime="2024-03-17T00:00:00+00:00" itemprop="dateModified">
+				2024-03-17
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>I’m not a big fan of basing my windows account on my microsoft account so I used <code class="language-plaintext highlighter-rouge">oobe\bypassnro</code> to make an admin account named after the friendly name for the laptop and then a regular account for my every day use.</p>
+
+<p>After clearing out the pre installed garbage and installing tailscale, I found I needed to give the regular account write access to the <code class="language-plaintext highlighter-rouge">C:\Program Files\Tailscale</code> in order to maintain the tailscale connection.</p>
+
+<p>One of my favourite things to do is install sublime text, run it as administator and open the hosts file <code class="language-plaintext highlighter-rouge">C:\Windows\System32\drivers\etc\hosts</code> so there is quick access to it in the future. My VM didn’t seem to use the hosts hosts file but its even easier to edit the local hosts file.</p>
+
+<p>Installing the latest virtualbox and preparing a VM with half the CPU and half the RAM, I grabbed the latest debian ISO and installed it to the VM with the MATE desktop environment but I’m sure there is probably a better choice.</p>
+
+<p>If you install no desktop environment then you could do something like <code class="language-plaintext highlighter-rouge">apt install xserver-xorg lightdm gnome-tweaks gnome-core --no-install-recommends &amp;&amp; apt install vim sudo gnupg chromium</code>.</p>
+
+<p>Now you might think I’m roughly ready to follow my usual linux desktop setup however OG debian makes it a little harder to get going so you need to follow the steps in order.</p>
+
+<p>Now you’re logged in as the user you created (<code class="language-plaintext highlighter-rouge">wh</code> for me) but you don’t have sudo access which means the only way to get into the root user is <code class="language-plaintext highlighter-rouge">su</code>. Unfortunately they don’t like you doing <code class="language-plaintext highlighter-rouge">su</code> without a user so you have to remember to <code class="language-plaintext highlighter-rouge">su -</code> instead otherwise the <code class="language-plaintext highlighter-rouge">PATH</code> will be incomplete and it is slightly more annoying as <code class="language-plaintext highlighter-rouge">usermod</code> and <code class="language-plaintext highlighter-rouge">reboot</code> won’t be easily available.</p>
+
+<p>If this annoys you then you can do  <code class="language-plaintext highlighter-rouge">export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"</code> so you can easily call the missing commands but really you want to just do <code class="language-plaintext highlighter-rouge">su -</code>. Have a read of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=918754 but if you are really confused and want to see which package is responsible for a specific command you can use <code class="language-plaintext highlighter-rouge">dpkg -S &lt;command&gt;</code>.</p>
+
+<p>Anyway, you need to <code class="language-plaintext highlighter-rouge">su -</code> and then you can <code class="language-plaintext highlighter-rouge">usermod -aG sudo wh</code>. With a reboot or logout/login, you can now sudo and have a better time.</p>
+
+<p>The next step is to install the virtualbox addons for clipboard sharing, mounted drives, and screen resolution fixes, but there are some pre requisites <code class="language-plaintext highlighter-rouge">apt install linux-headers-amd64 gcc make perl --no-install-recommends</code>.</p>
+
+<p>Now you can <code class="language-plaintext highlighter-rouge">Insert Guest Additions CD Image</code> from the Devices menu. If you open a terminal in the mounted CD folder and <code class="language-plaintext highlighter-rouge">sh VBoxLinuxAdditions.run</code> or some variant to run that particular binary. One reboot later (just in case) and you should be off to the races.</p>
+
+<p>If you’re planning to mount a shared folder from the host then you probably need to <code class="language-plaintext highlighter-rouge">usermod -aG vboxsf wh</code>.</p>
+
+<p>Debian doesn’t necessarily have immediate access to the usual ways of adding apt repos so its a bit more manual. Git comes from an ubuntu repo so you have to pick the nearest LTS ubuntu version name so it sort of matches.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt install apt-transport-https ca-certificates curl software-properties-common;
+
+wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg;
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" &gt; /etc/apt/sources.list.d/php.list;
+
+wget -O /etc/apt/trusted.gpg.d/docker.asc https://download.docker.com/linux/debian/gpg
+echo "deb https://download.docker.com/linux/debian $(lsb_release -sc) stable" &gt; /etc/apt/sources.list.d/docker.list;
+
+gpg --recv-keys --keyserver keyserver.ubuntu.com A1715D88E1DF1F24;
+gpg --export A1715D88E1DF1F24 &gt; /etc/apt/trusted.gpg.d/git.gpg;
+gpg --delete-key A1715D88E1DF1F24;
+echo "deb http://ppa.launchpad.net/git-core/ppa/ubuntu jammy main" &gt; /etc/apt/sources.list.d/git.list;
+</code></pre></div></div>
+
+<p>Verify <code class="language-plaintext highlighter-rouge">apt update</code> works before continuing to install the main packages.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt install -y vim git net-tools fonts-firacode dnsutils feh whois pinentry-gnome3 ttf-ancient-fonts zip unzip xclip ssh-client docker-ce
+</code></pre></div></div>
+
+<p>Installed <code class="language-plaintext highlighter-rouge">docker-ce</code> means you get <code class="language-plaintext highlighter-rouge">docker-compose-plugin</code> but I prefer to run it separately so remember to remove it later if that is your jam. Don’t forget to add yourself to the docker group and reboot before you wonder why docker is not working.</p>
+
+<p>Now you should be able to start installing bits and pieces from the other article. The completions directory is still to <code class="language-plaintext highlighter-rouge">/usr/share/bash-completion/completions</code> as before, just no pkg-config to reveal that information to you unless you install it.</p>
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->

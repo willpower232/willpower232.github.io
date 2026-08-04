@@ -1,0 +1,6 @@
+/* https://gomakethings.com/showing-your-colors/ */
+html {
+	--🏳️‍🌈: linear-gradient(to right, #ffafc7 10%, #73d7ee 10% 20%, #613915 20% 30%, #000000 30% 40%, #e50000 40% 50%, #ff8d00 50% 60%, #ffee00 60% 70%, #028121 70% 80%, #004cff 80% 90%, #760088 90%);
+	border-block-start: 0.5em solid;
+	border-image: var(--🏳️‍🌈) 1;
+}
