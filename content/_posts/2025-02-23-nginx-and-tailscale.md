@@ -59,6 +59,10 @@ I also took the liberty of removing the tailscale override.conf I added before t
 
 By way of explanation, the empty ExecStartPre prevents any previous one applying, we included the official ExecStartPre as the third one (note the `-t` to indicate nginx is testing the config before trying to start). You'll recognise the second ExecStartPre from before.
 
+### Update for newer nginx
+
+ExecStartPre is no longer part of the service file so the patch becomes only the timeout line as there is no need to unset the previous one or include one which is not there.
+
 ## More Reading
 
 - [Convenient reddit thread providing all the answers](https://www.reddit.com/r/Tailscale/comments/ubk9mo/systemd_how_do_get_something_to_run_if_tailscale/)
