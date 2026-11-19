@@ -1,0 +1,19 @@
+header {
+    outline:1px solid red;
+    outline-offset:-1px;
+}
+
+nav {
+    outline:1px solid blueviolet;
+    outline-offset:-1px;
+}
+
+main {
+    outline:1px solid chartreuse;
+    outline-offset:-1px;
+}
+
+footer {
+    outline:1px solid darkgoldenrod;
+    outline-offset:-1px;
+}

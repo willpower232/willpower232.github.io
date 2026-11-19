@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en-GB"><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Customising Logwatch" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="getting the most out of Logwatch" />
+<meta property="og:description" content="getting the most out of Logwatch" />
+<link rel="canonical" href="https://willpower232.github.io/computing/customising-logwatch.html" />
+<meta property="og:url" content="https://willpower232.github.io/computing/customising-logwatch.html" />
+<meta property="og:site_name" content="Blogumentation willpower232" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-03T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Customising Logwatch" />
+<script type="application/ld+json">
+{"description":"getting the most out of Logwatch","url":"https://willpower232.github.io/computing/customising-logwatch.html","@type":"BlogPosting","headline":"Customising Logwatch","dateModified":"2021-01-03T00:00:00+00:00","datePublished":"2021-01-03T00:00:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://willpower232.github.io/computing/customising-logwatch.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<title>
+	
+		Customising Logwatch
+	
+</title>
+
+
+	<meta itemprop="description" name="description" content="getting the most out of Logwatch" />
+
+
+<meta property="og:locale" content="en_GB" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Customising Logwatch" />
+<meta property="og:site_name" content="Blogumentation | willpower232" />
+
+	<meta property="og:description" content="getting the most out of Logwatch" />
+
+
+<meta name="twitter:title" content="Customising Logwatch" />
+
+	<meta name="twitter:description" content="getting the most out of Logwatch" />
+
+<meta name="twitter:site" content="@willpower232" />
+<meta name="twitter:card" content="summary" />
+
+<meta name="fediverse:creator" content="@willpower232@php.social" />
+
+<link rel="stylesheet" href="/assets/main.css" />
+
+<link rel="icon" href="/favicon.png" />
+
+<meta name="pinterest" content="nopin" />
+<body><header>
+	<hgroup>
+		<h2>Blogumentation</h2>
+		<p>helping future me remember cool things</p>
+	</hgroup>
+	<nav>
+		<menu>
+			<li><a href="/">Home</a></li>
+			<!-- <li><a href="#">Projects</a></li> -->
+		</menu>
+	</nav>
+</header>
+
+    
+
+    
+
+    
+        <nav>
+            <h3>Tags in computing</h3>
+            <menu>
+                
+                    <li><a href="/aws/">aws</a></li>
+                
+                    <li><a href="/gaming/">gaming</a></li>
+                
+                    <li><a href="/linux/">linux</a></li>
+                
+                    <li><a href="/server-config/">server-config</a></li>
+                
+                    <li><a href="/software-choices/">software-choices</a></li>
+                
+            </menu>
+        </nav>
+    
+
+    <main>
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+	<h1 itemprop="name headline">Customising Logwatch</h1>
+	<p class="post-meta">First written<time datetime="2021-01-03T00:00:00+00:00" itemprop="datePublished">
+			2021-01-03
+		</time>~ last updated<time datetime="2025-02-26T00:00:00+00:00" itemprop="dateModified">
+				2025-02-26
+			</time></p>
+
+	<div class="post-content" itemprop="articleBody">
+		<p>Running your own server, connected to the internet 24/7 and ready to do anything anyone tells it to, is not a small thing as you will need to pay attention to it to ensure it is doing exactly what you asked it to and nothing else.</p>
+
+<p>Here are some better written posts on this topic.</p>
+
+<p><a href="https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial" target="_blank" rel="noopener noreferrer">https://utcc.utoronto.ca/~cks/space/blog/sysadmin/RunningServersNotTrivial</a>
+<a href="https://bitfieldconsulting.com/blog/looking-for-trouble" target="_blank" rel="noopener noreferrer">https://bitfieldconsulting.com/blog/looking-for-trouble</a></p>
+
+<p>For the casual tinkerer, there are a few ways of keeping half an eye on your server to make sure it is still there an answering requests. One of my favourites is Logwatch, it emails you daily with events from important log files of things installed on the server. One little trap is that you may need to install <code class="language-plaintext highlighter-rouge">rsyslog</code> in order to make it possible for the Logwatch scripts to see everything.</p>
+
+<p>Whilst this information can be very useful, the built in levels of definition are a little too verbose in some areas (depending on your threat model/paranoia) and also good at being detected as spam by google (thanks to the resolved hostnames of malicious servers).</p>
+
+<p>My solution is to set the detail to high and then update the scripts to make the output more relevant to what I can actually care about and not spam-worthy.</p>
+
+<p>The perl scripts are all kept in <code class="language-plaintext highlighter-rouge">/usr/share/logwatch/scripts/services</code>, I make the following changes:</p>
+
+<h3 id="fail2ban">fail2ban</h3>
+<ul>
+  <li>comment out <code class="language-plaintext highlighter-rouge">my $totalSort</code> and <code class="language-plaintext highlighter-rouge">if ($Detail &gt;= 5) {</code> to closing if</li>
+  <li>comment out <code class="language-plaintext highlighter-rouge">fail2ban hosts found</code> section</li>
+</ul>
+
+<p>The individual banned IP addresses are unlikely to be of much relevance to you and are likely to upset spam filters. This change shows the totals banned/unbanned for each jail.</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%ServicesBans</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">printf</span><span class="p">("</span><span class="se">\n</span><span class="s2">Banned services with Fail2Ban:                             Bans:Unbans</span><span class="se">\n</span><span class="p">");</span>
+    <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$service</span> <span class="p">(</span><span class="nb">sort</span> <span class="p">{</span><span class="nv">$a</span> <span class="ow">cmp</span> <span class="nv">$b</span><span class="p">}</span> <span class="nb">keys</span> <span class="nv">%ServicesBans</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">printf</span><span class="p">("</span><span class="s2">   %-55s [%3d:%-3d]</span><span class="se">\n</span><span class="p">",</span> <span class="p">"</span><span class="si">$service</span><span class="s2">:</span><span class="p">",</span>
+               <span class="nv">$ServicesBans</span><span class="p">{</span><span class="nv">$service</span><span class="p">}{'</span><span class="s1">(all)</span><span class="p">'}{'</span><span class="s1">Ban</span><span class="p">'},</span>
+               <span class="nv">$ServicesBans</span><span class="p">{</span><span class="nv">$service</span><span class="p">}{'</span><span class="s1">(all)</span><span class="p">'}{'</span><span class="s1">Unban</span><span class="p">'});</span>
+        <span class="nb">delete</span> <span class="nv">$ServicesBans</span><span class="p">{</span><span class="nv">$service</span><span class="p">}{'</span><span class="s1">(all)</span><span class="p">'};</span>
+        <span class="c1">#my $totalSort = TotalCountOrder(%{$ServicesBans{$service}}, \&amp;SortIP);</span>
+        <span class="c1">#if ($Detail &gt;= 5) {</span>
+        <span class="c1">#    foreach my $ip (sort $totalSort keys %{$ServicesBans{$service}}) {</span>
+        <span class="c1">#        my $name = LookupIP($ip);</span>
+        <span class="c1">#        printf("      %-53s %3d:%-3d\n",</span>
+        <span class="c1">#               $name,</span>
+        <span class="c1">#               $ServicesBans{$service}{$ip}{'Ban'},</span>
+        <span class="c1">#               $ServicesBans{$service}{$ip}{'Unban'});</span>
+        <span class="c1">#        if (($Detail &gt;= 10) and ($ServicesBans{$service}{$ip}{'Failures'}&gt;0)) {</span>
+        <span class="c1">#            print "      Failed ";</span>
+        <span class="c1">#            foreach my $fails (@{$ServicesBans{$service}{$ip}{'Failures'}}) {</span>
+        <span class="c1">#                print " $fails";</span>
+        <span class="c1">#            }</span>
+        <span class="c1">#            print " times";</span>
+        <span class="c1">#            printf("\n     %d Duplicate Ban attempts", $ServicesBans{$service}{$ip}{'AlreadyInTheList'}) ;</span>
+        <span class="c1">#            printf("\n     %d ReBans due to rules reinitilizations", $ServicesBans{$service}{$ip}{'ReBan'}) ;</span>
+        <span class="c1">#            print "\n";</span>
+        <span class="c1">#        }</span>
+        <span class="c1">#    }</span>
+        <span class="c1">#}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">#if (keys %ServicesFound and $Detail&gt;5) {</span>
+<span class="c1">#    printf("\nFail2Ban hosts found:\n");</span>
+<span class="c1">#    foreach my $service (sort {$a cmp $b} keys %ServicesFound) {</span>
+<span class="c1">#        print("    $service:\n");</span>
+<span class="c1">#        foreach my $ip (sort {$a cmp $b} keys %{$ServicesFound{$service}}) {</span>
+<span class="c1">#            printf("       %-15s (%3d Times)\n", "$ip",</span>
+<span class="c1">#                   $ServicesFound{$service}{$ip});</span>
+<span class="c1">#        }</span>
+<span class="c1">#    }</span>
+<span class="c1">#}</span>
+</code></pre></div></div>
+
+<h3 id="http">http</h3>
+<ul>
+  <li>comment out ROBOT listing, leave just the total</li>
+</ul>
+
+<p>Robots can have random URLs which upset spam filters.</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%robots</span> <span class="ow">and</span> <span class="p">(</span><span class="nv">$detail</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">))</span> <span class="p">{</span>
+   <span class="k">print</span> <span class="p">"</span><span class="se">\n</span><span class="s2">A total of </span><span class="p">"</span><span class="o">.</span><span class="nb">scalar</span><span class="p">(</span><span class="nb">keys</span> <span class="nv">%robots</span><span class="p">)</span><span class="o">.</span><span class="p">"</span><span class="s2"> ROBOTS were logged </span><span class="se">\n</span><span class="p">";</span>
+<span class="c1">#   foreach my $i (keys %robots) {</span>
+<span class="c1">#      if ($detail &gt; 9) {</span>
+<span class="c1">#         print "   $i $robots{$i} Time(s) \n";</span>
+<span class="c1">#      }</span>
+<span class="c1">#   }</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="pam_unix">pam_unix</h3>
+<ul>
+  <li>change the Authentication Failures regex to exclude IPs</li>
+</ul>
+
+<p>For the lines that mention <code class="language-plaintext highlighter-rouge">authentication failure</code>, remove the final <code class="language-plaintext highlighter-rouge">($1)</code> or <code class="language-plaintext highlighter-rouge">($2)</code> which represents the IP address. This allows the rows to be grouped nicer as you don’t necessarily care about the IP addresses.</p>
+
+<h3 id="sshd">sshd</h3>
+<ul>
+  <li>comment out the NoIdent bit</li>
+  <li>and BadLogins</li>
+  <li>and IllegalUsers</li>
+  <li>and DisconnectReceived (cen edit to show count instead)</li>
+  <li>and UnmatchedEntries</li>
+</ul>
+
+<p>More random IP addresses that can upset spam filters.</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%NoIdent</span><span class="p">)</span> <span class="p">{</span>
+   <span class="c1">#   print "\nDidn't receive an ident from these IPs:\n";</span>
+   <span class="c1">#   foreach my $ThisOne (sort {$a cmp $b} keys %NoIdent) {</span>
+   <span class="c1">#      print "   $ThisOne: " . timesplural($NoIdent{$ThisOne});</span>
+   <span class="c1">#   }</span>
+   <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Probably not interested in individual lines for the failed secure connection negotiations. Thankfully it wants to give us a summary with a few well placed comment characters.</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%NegotiationFailed</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">print</span> <span class="p">"</span><span class="se">\n</span><span class="s2">Negotiation failed:</span><span class="se">\n</span><span class="p">";</span>
+   <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$Reason</span> <span class="p">(</span><span class="nb">sort</span> <span class="p">{</span><span class="nv">$a</span> <span class="ow">cmp</span> <span class="nv">$b</span><span class="p">}</span> <span class="nb">keys</span> <span class="nv">%NegotiationFailed</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">my</span> <span class="nv">$Total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="k">print</span> <span class="p">"</span><span class="s2">   </span><span class="si">$Reason</span><span class="p">";</span>
+      <span class="c1">#      if ( $Detail &gt; 0 ) {</span>
+      <span class="c1">#         print "\n";</span>
+      <span class="c1">#      }</span>
+      <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$Host</span> <span class="p">(</span><span class="nb">sort</span> <span class="p">{</span><span class="nv">$a</span> <span class="ow">cmp</span> <span class="nv">$b</span><span class="p">}</span> <span class="nb">keys</span> <span class="nv">%</span><span class="p">{</span><span class="nv">$NegotiationFailed</span><span class="p">{</span><span class="nv">$Reason</span><span class="p">}})</span> <span class="p">{</span>
+        <span class="k">my</span> <span class="nv">$HostTotal</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$Offer</span> <span class="p">(</span><span class="nb">sort</span> <span class="p">{</span><span class="nv">$a</span> <span class="ow">cmp</span> <span class="nv">$b</span><span class="p">}</span> <span class="nb">keys</span> <span class="nv">%</span><span class="p">{</span><span class="nv">$NegotiationFailed</span><span class="p">{</span><span class="nv">$Reason</span><span class="p">}{</span><span class="nv">$Host</span><span class="p">}})</span> <span class="p">{</span>
+           <span class="nv">$HostTotal</span> <span class="o">+=</span> <span class="nv">$NegotiationFailed</span><span class="p">{</span><span class="nv">$Reason</span><span class="p">}{</span><span class="nv">$Host</span><span class="p">}{</span><span class="nv">$Offer</span><span class="p">};</span>
+        <span class="p">}</span>
+        <span class="nv">$Total</span> <span class="o">+=</span> <span class="nv">$HostTotal</span><span class="p">;</span>
+        <span class="c1">#        if ( $Detail &gt; 0 ) {</span>
+        <span class="c1">#           print "      $Host: " . timesplural($HostTotal);</span>
+        <span class="c1">#        }</span>
+        <span class="c1">#        if ( $Detail &gt; 5 ) {</span>
+        <span class="c1">#           foreach my $Offer (sort {$a cmp $b} keys %{$NegotiationFailed{$Reason}{$Host}}) {</span>
+        <span class="c1">#                 my $tot = $NegotiationFailed{$Reason}{$Host}{$Offer};</span>
+        <span class="c1">#                 print "        $Offer: " . timesplural($tot);</span>
+        <span class="c1">#           }</span>
+        <span class="c1">#        }</span>
+      <span class="p">}</span>
+      <span class="c1">#      if ( $Detail == 0 ) {</span>
+         <span class="k">print</span> <span class="p">"</span><span class="s2">: </span><span class="p">"</span> <span class="o">.</span> <span class="nv">timesplural</span><span class="p">(</span><span class="nv">$Total</span><span class="p">);</span>
+         <span class="c1">#      }</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>If your SSH is open to the world, you’re going to have bad logins, no need to obsess over it if fail2ban has you covered.</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%BadLogins</span><span class="p">)</span> <span class="p">{</span>
+<span class="c1">#   print "\nFailed logins from:\n";</span>
+<span class="c1">#   foreach my $ip (sort SortIP keys %BadLogins) {</span>
+<span class="c1">#     my $name = LookupIP($ip);</span>
+<span class="c1">#     my $totcount = 0;</span>
+<span class="c1">#     foreach my $user (keys %{$BadLogins{$ip}}) {</span>
+<span class="c1">#         $totcount += $BadLogins{$ip}{$user};</span>
+<span class="c1">#      }</span>
+<span class="c1">#      print "   $name: ". timesplural($totcount);</span>
+<span class="c1">#      if ($Detail &gt;= 5) {</span>
+<span class="c1">#         my $sort = CountOrder(%{$BadLogins{$ip}});</span>
+<span class="c1">#         foreach my $user (sort $sort keys %{$BadLogins{$ip}}) {</span>
+<span class="c1">#            my $val = $BadLogins{$ip}{$user};</span>
+<span class="c1">#            print "      $user: " . timesplural($val);</span>
+<span class="c1">#         }</span>
+<span class="c1">#      }</span>
+<span class="c1">#   }</span>
+<span class="p">}</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%IllegalUsers</span><span class="p">)</span> <span class="p">{</span>
+<span class="c1">#   print "\nIllegal users from:\n";</span>
+<span class="c1">#   foreach my $ip (sort SortIP keys %IllegalUsers) {</span>
+<span class="c1">#      my $name = LookupIP($ip);</span>
+<span class="c1">#      my $totcount = 0;</span>
+<span class="c1">#      foreach my $user (keys %{$IllegalUsers{$ip}}) {</span>
+<span class="c1">#         $totcount += $IllegalUsers{$ip}{$user};</span>
+<span class="c1">#      }</span>
+<span class="c1">#      print "   $name: " . timesplural($totcount);</span>
+<span class="c1">#      if ($Detail &gt;= 5) {</span>
+<span class="c1">#         my $sort = CountOrder(%{$IllegalUsers{$ip}});</span>
+<span class="c1">#         foreach my $user (sort $sort keys %{$IllegalUsers{$ip}}) {</span>
+<span class="c1">#            my $val = $IllegalUsers{$ip}{$user};</span>
+<span class="c1">#            print "      $user: " . timesplural($val);</span>
+<span class="c1">#         }</span>
+<span class="c1">#      }</span>
+<span class="c1">#   }</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Disconnects are useful but the detail not that much</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="nb">keys</span> <span class="nv">%DisconnectReceived</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">print</span> <span class="p">"</span><span class="se">\n</span><span class="s2">Received disconnect:</span><span class="se">\n</span><span class="p">";</span>
+   <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$Reason</span> <span class="p">(</span><span class="nb">sort</span> <span class="p">{</span><span class="nv">$a</span> <span class="ow">cmp</span> <span class="nv">$b</span><span class="p">}</span> <span class="nb">keys</span> <span class="nv">%DisconnectReceived</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">my</span> <span class="nv">$Total</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="k">print</span> <span class="p">"</span><span class="s2">   </span><span class="si">$Reason</span><span class="p">";</span>
+      <span class="k">foreach</span> <span class="k">my</span> <span class="nv">$Host</span> <span class="p">(</span><span class="nb">sort</span> <span class="p">{</span><span class="nv">$a</span> <span class="ow">cmp</span> <span class="nv">$b</span><span class="p">}</span> <span class="nb">keys</span> <span class="nv">%</span><span class="p">{</span><span class="nv">$DisconnectReceived</span><span class="p">{</span><span class="nv">$Reason</span><span class="p">}})</span> <span class="p">{</span>
+         <span class="nv">$Total</span> <span class="o">+=</span> <span class="nv">$DisconnectReceived</span><span class="p">{</span><span class="nv">$Reason</span><span class="p">}{</span><span class="nv">$Host</span><span class="p">};</span>
+<span class="c1">#        if( $Detail &gt; 0 ) {</span>
+<span class="c1">#            print "\n      $Host : $DisconnectReceived{$Reason}{$Host} Time(s)";</span>
+<span class="c1">#        }</span>
+      <span class="p">}</span>
+<span class="c1">#      if( $Detail &gt; 0 ) {</span>
+<span class="c1">#         print "\n";</span>
+<span class="c1">#      } else {</span>
+         <span class="k">print</span> <span class="p">"</span><span class="s2"> : </span><span class="p">"</span> <span class="o">.</span> <span class="nv">timesplural</span><span class="p">(</span><span class="nv">$Total</span><span class="p">);</span>
+<span class="c1">#      }</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>If Logwatch doesn’t know how to process them, why are we bothered?</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#if (keys %OtherList) {</span>
+<span class="c1">#   print "\n**Unmatched Entries**\n";</span>
+<span class="c1">#   print "$_ : " . timesplural($OtherList{$_}) foreach sort keys %OtherList;</span>
+<span class="c1">#}</span>
+</code></pre></div></div>
+
+<h3 id="zz-disk_space">zz-disk_space</h3>
+
+<p>On servers with smaller disks, it is possible for your partitions to run out of inodes so that is definitely worth keeping an eye on by adding this extra call to <code class="language-plaintext highlighter-rouge">df</code>.</p>
+
+<div class="language-perl highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#Only show disk space "df" by default -mgt</span>
+<span class="nv">DiskSpace</span><span class="p">()</span> <span class="k">if</span> <span class="p">((</span><span class="nv">$ENV</span><span class="p">{</span><span class="nv">PRINTING</span><span class="p">}</span> <span class="ow">eq</span> <span class="p">'</span><span class="s1">y</span><span class="p">')</span> <span class="ow">or</span> <span class="nv">$Detail</span><span class="p">);</span>
+
+<span class="nb">system</span><span class="p">("</span><span class="s2">df -il -x tmpfs -x devtmpfs</span><span class="p">");</span>
+<span class="k">print</span> <span class="p">"</span><span class="se">\n</span><span class="p">";</span>
+
+<span class="k">if</span> <span class="p">(</span> <span class="nv">$show_disk_usage</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">{</span> <span class="nv">DiskUsage</span><span class="p">();</span> <span class="p">};</span> <span class="c1">#Turn on in zz-disk_space.conf</span>
+</code></pre></div></div>
+
+<p>You can also make other changes in this area if your use of mountable disks is a bit more exciting.</p>
+
+<p>If you are using docker on your server, then alongside the mentions of <code class="language-plaintext highlighter-rouge">-x tmpfs</code> you will probably want to add <code class="language-plaintext highlighter-rouge">-x overlay</code> as well.</p>
+
+
+	</div>
+</article>
+
+    </main><footer>
+	© William Hall<br>
+	<a href="mailto:will@willpoweredinc.net">will@willpoweredinc.net</a>
+</footer>
+
+<aside>
+	<div>
+		<a href="https://willpower232.com" target="_blank" rel="noopener noreferrer">
+			<svg><use xlink:href="/assets/template/footlink.svg#icon-face"></use></svg>
+		</a>
+	</div>
+</aside>
+</body>
+
+<script src="/assets/template/fixremotesvgs.js"></script>
+<script src="/assets/template/shareorcopy.js"></script>
+
+<!--
+needless to say, the reverse dutch classic
+overarm was now out of the question
+-->
